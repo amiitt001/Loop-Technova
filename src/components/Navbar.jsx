@@ -58,7 +58,7 @@ const Navbar = () => {
                             }}>
                                 <span className="text-neon-cyan">TECH</span>NOVA
                             </span>
-                            <span className="desktop-only" style={{
+                            <span style={{
                                 fontSize: '0.6rem',
                                 color: 'var(--text-dim)',
                                 textTransform: 'uppercase',
