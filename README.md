@@ -12,33 +12,45 @@ This project features a modern, dark-themed UI with neon aesthetics, advanced an
     - Animated "Particles" Hero section.
     - "Credibility Strip" with live counters.
     - "About System" HUD layout.
-- **Team Section**: detailed profile cards with hover reveals and social links.
-- **Events Timeline**: Showcase of past and upcoming hackathons/workshops.
-- **Leaderboard**: Gamified ranking system for club members.
+- **Team Section**: Detailed profile cards with hover reveals and social links.
+- **Events & Registration**: 
+    - Real-time event timeline.
+    - **Instant Registration**: Public users can register for open events instantly.
+- **Join Us (Membership)**: 
+    - Detailed application form (Branch, Year, GitHub, etc.).
+    - Automated status tracking.
+- **Leaderboard**: Gamified ranking system for club contestants.
 - **Chatbot**: Built-in rule-based assistant to guide visitors.
 
 ### Admin Panel (Secure)
-- **Dashboard**: Real-time overview of members, events, and registrations.
+- **Dashboard**: Real-time overview of members, events, and stats.
 - **Authentication**: Firebase-powered secure login for admins only.
-- **Management**: Dedicated interfaces to add/edit members and events.
-- **Access**: Located at `/admin`.
+- **Live Event Management**: 
+    - Create/Edit events.
+    - **View Registrations**: Real-time list of registered students with export options.
+- **Membership Applications**: 
+    - **Real-time Review**: Approve/Reject applications instantly.
+    - View detailed applicant profiles (GitHub, Branch, College).
+- **Team & Contestants**: Manage internal team members and leaderboard scores.
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 19, Vite
 - **Styling**: Vanilla CSS (Custom Variables), Framer Motion (Animations), Lucide React (Icons)
-- **Backend / Auth**: Firebase (Authentication, Firestore)
+- **Backend / Services**: 
+    - **Firebase Authentication**: Admin security.
+    - **Firebase Firestore**: Real-time NoSQL database.
 - **Routing**: React Router DOM v7
 
 ## 📂 Project Structure
 
 ```bash
 src/
-├── components/     # Reusable UI components (Navbar, Cards, Chatbot)
+├── components/     # Reusable UI components (Navbar, Cards, Chatbot, Modals)
 ├── contexts/       # Global state (AuthContext)
 ├── layouts/        # Layout wrappers (AdminLayout)
-├── pages/          # Route pages (Home, Team, Dashboard)
-│   └── admin/      # Secure admin views
+├── pages/          # Route pages (Home, Team, Dashboard, Join)
+│   └── admin/      # Secure admin views (Applications, Registrations, Events)
 ├── assets/         # Static assets
 └── firebase.js     # Firebase configuration
 ```
@@ -62,7 +74,10 @@ src/
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      // ... other keys
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.firebasestorage.app",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
     };
     ```
 
