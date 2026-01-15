@@ -287,6 +287,13 @@ const Home = () => {
         .glow-text {
           text-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
         }
+
+        @media (max-width: 768px) {
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
       `}</style>
     </>
   );

@@ -6,14 +6,14 @@
   --bg-dark: #050505;
   --bg-card: #0a0a0a;
   --bg-card-hover: #111111;
-  
+
   --neon-cyan: #00f3ff;
   --neon-violet: #bd00ff;
   --neon-green: #00ff9d;
-  
+
   --text-main: #e0e0e0;
   --text-dim: #94a3b8;
-  
+
   --border-dim: rgba(255, 255, 255, 0.1);
   --border-neon: rgba(0, 243, 255, 0.3);
 
@@ -44,7 +44,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   color: #fff;
   text-transform: uppercase;
@@ -57,8 +62,15 @@ a {
 }
 
 /* Utilities */
-.text-neon-cyan { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
-.text-neon-violet { color: var(--neon-violet); text-shadow: 0 0 10px rgba(189, 0, 255, 0.5); }
+.text-neon-cyan {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+}
+
+.text-neon-violet {
+  color: var(--neon-violet);
+  text-shadow: 0 0 10px rgba(189, 0, 255, 0.5);
+}
 
 .container {
   max-width: 1200px;
@@ -68,14 +80,29 @@ a {
 
 /* Animations */
 @keyframes glow-pulse {
-  0% { box-shadow: 0 0 5px var(--neon-cyan); }
-  50% { box-shadow: 0 0 20px var(--neon-cyan); }
-  100% { box-shadow: 0 0 5px var(--neon-cyan); }
+  0% {
+    box-shadow: 0 0 5px var(--neon-cyan);
+  }
+
+  50% {
+    box-shadow: 0 0 20px var(--neon-cyan);
+  }
+
+  100% {
+    box-shadow: 0 0 5px var(--neon-cyan);
+  }
 }
 
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -86,13 +113,67 @@ a {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--bg-dark);
 }
+
 ::-webkit-scrollbar-thumb {
   background: #333;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--neon-cyan);
+}
+
+/* Responsive Utilities */
+@media (max-width: 768px) {
+  :root {
+    --spacing-lg: 2rem;
+    --spacing-md: 1.5rem;
+  }
+
+  h1 {
+    font-size: 2.5rem !important;
+  }
+
+  h2 {
+    font-size: 2rem !important;
+  }
+
+  p {
+    font-size: 0.95rem;
+  }
+
+  .container {
+    padding: 0 1rem;
+    width: 100%;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: block !important;
+  }
+
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
+/* Enhancing base components for fluidity */
+img {
+  max-width: 100%;
+  height: auto;
 }
