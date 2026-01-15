@@ -39,3 +39,4 @@ coverage
 firebase.json
 DATABASE_SCHEMA.md
 .firebase/
+service-account.json
