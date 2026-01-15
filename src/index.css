@@ -1,6 +1,11 @@
 /* Global Design System - Technova */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700;900&display=swap');
 
+/* Tailwind base (kept before custom utilities so utilities can layer on top) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Colors */
   --bg-dark: #050505;
@@ -116,6 +121,15 @@ a {
 
 ::-webkit-scrollbar-track {
   background: var(--bg-dark);
+}
+
+/* Utility: hide scrollbar but keep scroll functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 ::-webkit-scrollbar-thumb {
