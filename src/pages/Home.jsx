@@ -116,7 +116,7 @@ const Home = () => {
                 <motion.span key={i} variants={letterItem}>{char === ' ' ? '\u00A0' : char}</motion.span>
               ))}
               <br />
-              <span className="text-neon-cyan glow-text" style={{ display: 'inline-block' }}>
+              <span className="text-neon-cyan glow-text glitch" data-text="THE FUTURE" style={{ display: 'inline-block' }}>
                 {Array.from("THE FUTURE").map((char, i) => (
                   <motion.span key={i} variants={letterItem} style={{ display: 'inline-block' }}>{char === ' ' ? '\u00A0' : char}</motion.span>
                 ))}

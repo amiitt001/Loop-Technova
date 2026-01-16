@@ -1,10 +1,91 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { Github, Linkedin, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
 // FeaturedCarousel removed for mobile stacked scroller implementation
+
+const HomeTeamCard = ({ member, index }) => {
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    const rotateX = useTransform(y, [-100, 100], [10, -10]);
+    const rotateY = useTransform(x, [-100, 100], [-10, 10]);
+
+    const handleMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        x.set(e.clientX - centerX);
+        y.set(e.clientY - centerY);
+
+        // Spotlight Logic
+        e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+        e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+    };
+
+    const handleMouseLeave = () => {
+        x.set(0);
+        y.set(0);
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.04 }}
+            style={{
+                width: '200px',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-dim)',
+                borderRadius: '16px',
+                padding: '2rem 1rem',
+                textAlign: 'center',
+                position: 'relative',
+                overflow: 'hidden',
+                perspective: 1000,
+                rotateX,
+                rotateY,
+                cursor: 'pointer'
+            }}
+            className="spotlight-card"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+        >
+            <div style={{
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                background: '#111',
+                border: `2px solid ${member.color}`,
+                margin: '0 auto 1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                color: member.color,
+                overflow: 'hidden',
+                pointerEvents: 'none' // Let hover pass through
+            }}>
+                {member.img ? (
+                    <img src={member.img} alt={member.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                    <span style={{ fontSize: '2rem' }}>{member.name.charAt(0)}</span>
+                )}
+            </div>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', pointerEvents: 'none' }}>{member.name}</h3>
+            <p style={{ fontSize: '0.85rem', color: member.color, marginBottom: '1rem', pointerEvents: 'none' }}>{member.role}</p>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', pointerEvents: 'none' }}>
+                <Github size={16} color="var(--text-dim)" />
+                <Linkedin size={16} color="var(--text-dim)" />
+            </div>
+        </motion.div>
+    );
+};
 
 const HomeTeam = () => {
     const [teamPreview, setTeamPreview] = useState([]);
@@ -185,52 +266,7 @@ const HomeTeam = () => {
                         {!loading && teamPreview.length === 0 && <p style={{ color: '#71717a' }}>Loading core team...</p>}
 
                         {teamPreview.map((member, i) => (
-                            <motion.div
-                                key={member.id}
-                                initial={{ opacity: 0, y: 30 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.04 }}
-                                whileHover={{ y: -10 }}
-                                style={{
-                                    width: '200px',
-                                    background: 'var(--bg-card)',
-                                    border: '1px solid var(--border-dim)',
-                                    borderRadius: '16px',
-                                    padding: '2rem 1rem',
-                                    textAlign: 'center',
-                                    position: 'relative',
-                                    overflow: 'hidden'
-                                }}
-                            >
-                                <div style={{
-                                    width: '120px',
-                                    height: '120px',
-                                    borderRadius: '50%',
-                                    background: '#111',
-                                    border: `2px solid ${member.color}`,
-                                    margin: '0 auto 1.5rem',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '1.5rem',
-                                    fontWeight: 'bold',
-                                    color: member.color,
-                                    overflow: 'hidden'
-                                }}>
-                                    {member.img ? (
-                                        <img src={member.img} alt={member.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    ) : (
-                                        <span style={{ fontSize: '2rem' }}>{member.name.charAt(0)}</span>
-                                    )}
-                                </div>
-                                <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>{member.name}</h3>
-                                <p style={{ fontSize: '0.85rem', color: member.color, marginBottom: '1rem' }}>{member.role}</p>
-
-                                <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-                                    <Github size={16} color="var(--text-dim)" style={{ cursor: 'pointer' }} />
-                                    <Linkedin size={16} color="var(--text-dim)" style={{ cursor: 'pointer' }} />
-                                </div>
-                            </motion.div>
+                            <HomeTeamCard key={member.id} member={member} index={i} />
                         ))}
                     </div>
                 )}
