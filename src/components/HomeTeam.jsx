@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Github, Linkedin, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, orderBy, limit } from 'firebase/firestore';
-import FeaturedCarousel from './FeaturedCarousel';
+// FeaturedCarousel removed for mobile stacked scroller implementation
 
 const HomeTeam = () => {
     const [teamPreview, setTeamPreview] = useState([]);
@@ -69,7 +69,7 @@ const HomeTeam = () => {
 
     // Detect mobile (small screens) to switch layout and animations
     useEffect(() => {
-        const mq = window.matchMedia('(max-width: 640px)');
+        const mq = window.matchMedia('(max-width: 768px)');
         const onChange = (e) => setIsMobile(e.matches);
         setIsMobile(mq.matches);
         if (mq.addEventListener) mq.addEventListener('change', onChange);
@@ -80,15 +80,96 @@ const HomeTeam = () => {
         };
     }, []);
 
+    // Mobile stacked scroller logic (IntersectionObserver + scroll lock)
+    const scrollerRef = useRef(null);
+    const [activeIndex, setActiveIndex] = useState(0);
+    useEffect(() => {
+        if (!isMobile) return;
+        const scroller = scrollerRef.current;
+        if (!scroller) return;
+
+        let lockTimer = null;
+        const lockBody = () => {
+            document.body.style.overflow = 'hidden';
+            if (lockTimer) clearTimeout(lockTimer);
+            lockTimer = setTimeout(() => { document.body.style.overflow = ''; }, 420);
+        };
+
+        const items = scroller.querySelectorAll('.stack-item');
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const idx = Number(entry.target.dataset.index);
+                    setActiveIndex(idx);
+                }
+            });
+        }, { root: scroller, threshold: [0.5] });
+
+        items.forEach(it => io.observe(it));
+
+        let scrollTimer = null;
+        const onScroll = () => {
+            lockBody();
+            if (scrollTimer) clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(() => { document.body.style.overflow = ''; }, 450);
+        };
+
+        scroller.addEventListener('scroll', onScroll, { passive: true });
+
+        return () => {
+            items.forEach(it => io.unobserve(it));
+            io.disconnect();
+            scroller.removeEventListener('scroll', onScroll);
+            if (lockTimer) clearTimeout(lockTimer);
+            document.body.style.overflow = '';
+        };
+    }, [isMobile, featuredMembers]);
+
     return (
         <div style={{ padding: '6rem 0', background: 'linear-gradient(180deg, var(--bg-dark) 0%, #050505 100%)' }}>
             <div className="container" style={{ textAlign: 'center' }}>
                 <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>CORE <span style={{ color: 'var(--text-dim)' }}>TEAM</span></h2>
 
-                {/* Featured carousel on mobile only; keep desktop cards as the canonical preview */}
+                {/* Mobile stacked scroller: one focused card at a time */}
                 {isMobile && featuredMembers.length > 0 && (
-                    <div style={{ margin: '1rem 0' }}>
-                        <FeaturedCarousel members={featuredMembers} mobileOnly={false} />
+                    <div>
+                        <div className="stack-scroller hide-scrollbar" ref={scrollerRef}>
+                            {featuredMembers.map((member, idx) => (
+                                <section key={member.id} className={`stack-item ${idx === activeIndex ? 'active' : ''}`} data-index={idx}>
+                                    <div className="stack-card" style={{ borderColor: member.color }}>
+                                        <div className="stack-avatar" style={{ borderColor: member.color }}>
+                                            {member.img ? (
+                                                <img src={member.img} alt={member.name} />
+                                            ) : (
+                                                <span>{member.name.charAt(0)}</span>
+                                            )}
+                                        </div>
+                                        <div className="stack-meta">
+                                            <h3>{member.name}</h3>
+                                            <p style={{ color: member.color }}>{member.role}</p>
+                                        </div>
+                                        <div className="stack-links">
+                                            <Github size={20} color="var(--text-dim)" />
+                                            <Linkedin size={20} color="var(--text-dim)" />
+                                        </div>
+                                    </div>
+                                </section>
+                            ))}
+                        </div>
+
+                        <div className="stack-dots" aria-hidden>
+                            {featuredMembers.map((_, i) => (
+                                <button
+                                    key={i}
+                                    className={`dot ${i === activeIndex ? 'dot-active' : ''}`}
+                                    onClick={() => {
+                                        const scroller = scrollerRef.current;
+                                        const target = scroller.querySelector(`.stack-item[data-index="${i}"]`);
+                                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }}
+                                />
+                            ))}
+                        </div>
                     </div>
                 )}
 

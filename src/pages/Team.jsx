@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Github, Linkedin, Twitter, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { db } from '../firebase';
@@ -30,6 +30,9 @@ const itemVariants = {
 const Team = () => {
   const [teamGroups, setTeamGroups] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const scrollerRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     setLoading(true);
@@ -43,15 +46,6 @@ const Team = () => {
       }));
 
       // Group by role
-      const heads = allMembers.filter(m => m.role === 'Head' || m.role === 'President' || m.role === 'Vice President'); // Adjust based on exact role strings used in Admin
-      // In AdminMembers we saw "Head/Coordinator/Member" suggested.
-      // Let's broaden 'Head' to include President/VP if they exist, or just filter by 'Head'.
-      // Actually, let's look at the hardcoded data: 'President', 'Vice President', 'Head'. 
-      // Admin prompt suggests "Head/Coordinator/Member".
-      // Let's assume 'Head' covers the leadership for now, or users input 'President' manually.
-      // To be safe, let's group anything NOT Coordinator/Member as Leadership/Head?
-      // Or just explicit match.
-
       const leadership = allMembers.filter(m => ['Head', 'President', 'Vice President'].includes(m.role));
       const coordinators = allMembers.filter(m => m.role === 'Coordinator');
       const members = allMembers.filter(m => m.role === 'Member');
@@ -71,6 +65,64 @@ const Team = () => {
     return () => unsubscribe();
   }, []);
 
+  // detect mobile for Team page (<=768px)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const onChange = (e) => setIsMobile(e.matches);
+    setIsMobile(mq.matches);
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else mq.addListener(onChange);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', onChange);
+      else mq.removeListener(onChange);
+    };
+  }, []);
+
+  // Mobile stacked scroller logic
+  useEffect(() => {
+    if (!isMobile) return;
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    let lockTimer = null;
+    const lockBody = () => {
+      document.body.style.overflow = 'hidden';
+      if (lockTimer) clearTimeout(lockTimer);
+      lockTimer = setTimeout(() => { document.body.style.overflow = ''; }, 420);
+    };
+
+    const items = scroller.querySelectorAll('.stack-item');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const idx = Number(entry.target.dataset.index);
+          setActiveIndex(idx);
+        }
+      });
+    }, { root: scroller, threshold: [0.5] });
+
+    items.forEach(it => io.observe(it));
+
+    let scrollTimer = null;
+    const onScroll = () => {
+      lockBody();
+      if (scrollTimer) clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { document.body.style.overflow = ''; }, 450);
+    };
+
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      items.forEach(it => io.unobserve(it));
+      io.disconnect();
+      scroller.removeEventListener('scroll', onScroll);
+      if (lockTimer) clearTimeout(lockTimer);
+      document.body.style.overflow = '';
+    };
+  }, [isMobile, teamGroups]);
+
+
+
   return (
     <div className="container" style={{ padding: '8rem 0 4rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="animate-fade-in">
@@ -83,35 +135,82 @@ const Team = () => {
         <p style={{ textAlign: 'center', color: '#71717a' }}>No team members found.</p>
       )}
 
-      {teamGroups.map((group, groupIndex) => (
-        <div key={group.role} style={{ marginBottom: '5rem' }}>
-          <h2 style={{
-            textAlign: 'center',
-            marginBottom: '2rem',
-            color: 'var(--neon-violet)',
-            fontSize: group.role === 'Head' ? '2rem' : '1.5rem',
-            position: 'relative',
-            display: 'inline-block',
-            left: '50%',
-            transform: 'translateX(-50%)'
-          }}>
-            {group.role === 'Head' ? 'Leadership' : group.role + 's'}
-            <span style={{ position: 'absolute', bottom: '-10px', left: '0', width: '100%', height: '2px', background: 'var(--neon-violet)', opacity: 0.5 }}></span>
-          </h2>
+    
+      {isMobile && !loading ? (
+        <div>
+          {(() => {
+            const flat = teamGroups.reduce((acc, g) => acc.concat(g.members), []);
+            return (
+              <>
+                <div className="stack-scroller hide-scrollbar" ref={scrollerRef}>
+                  {flat.map((member, idx) => (
+                    <section key={member.id || idx} className={`stack-item ${idx === activeIndex ? 'active' : ''}`} data-index={idx}>
+                      <div className="stack-card" style={{ borderColor: member.color || 'var(--neon-cyan)' }}>
+                        <div className="stack-avatar" style={{ borderColor: member.color || 'var(--neon-cyan)' }}>
+                          {member.img ? <img src={member.img} alt={member.name} /> : <span>{member.name.charAt(0)}</span>}
+                        </div>
+                        <div className="stack-meta">
+                          <h3>{member.name}</h3>
+                          <p style={{ color: member.color || 'var(--text-dim)' }}>{member.role}</p>
+                        </div>
+                        <div className="stack-links">
+                          {member.social?.github && <Github size={20} color="var(--text-dim)" />}
+                          {member.social?.linkedin && <Linkedin size={20} color="var(--text-dim)" />}
+                          {member.social?.twitter && <Twitter size={20} color="var(--text-dim)" />}
+                        </div>
+                      </div>
+                    </section>
+                  ))}
+                </div>
 
-          <motion.div
-            className="team-grid"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-          >
-            {group.members.map((member, i) => (
-              <TeamCard key={member.id || i} member={member} width={group.width} />
-            ))}
-          </motion.div>
+                <div className="stack-dots" aria-hidden>
+                  {flat.map((_, i) => (
+                    <button
+                      key={i}
+                      className={`dot ${i === activeIndex ? 'dot-active' : ''}`}
+                      onClick={() => {
+                        const scroller = scrollerRef.current;
+                        const target = scroller.querySelector(`.stack-item[data-index="${i}"]`);
+                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            );
+          })()}
         </div>
-      ))}
+      ) : (
+        teamGroups.map((group, groupIndex) => (
+          <div key={group.role} style={{ marginBottom: '5rem' }}>
+            <h2 style={{
+              textAlign: 'center',
+              marginBottom: '2rem',
+              color: 'var(--neon-violet)',
+              fontSize: group.role === 'Head' ? '2rem' : '1.5rem',
+              position: 'relative',
+              display: 'inline-block',
+              left: '50%',
+              transform: 'translateX(-50%)'
+            }}>
+              {group.role === 'Head' ? 'Leadership' : group.role + 's'}
+              <span style={{ position: 'absolute', bottom: '-10px', left: '0', width: '100%', height: '2px', background: 'var(--neon-violet)', opacity: 0.5 }}></span>
+            </h2>
+
+            <motion.div
+              className="team-grid"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+            >
+              {group.members.map((member, i) => (
+                <TeamCard key={member.id || i} member={member} width={group.width} />
+              ))}
+            </motion.div>
+          </div>
+        ))
+      )}
 
       <style>{`
         .team-grid {
