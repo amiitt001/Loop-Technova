@@ -48,37 +48,22 @@ const AdminCreateMember = () => {
     };
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div className="max-w-3xl mx-auto">
             <button
                 onClick={() => navigate('/admin/members')}
-                style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#a1a1aa',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '2rem',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem'
-                }}>
+                className="bg-transparent border-none text-zinc-400 flex items-center gap-2 mb-8 cursor-pointer text-sm hover:text-white transition-colors"
+            >
                 <ArrowLeft size={18} /> Back to Members
             </button>
 
-            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem', color: '#fff' }}>Add New Member</h1>
+            <h1 className="text-3xl font-bold mb-8 text-white">Add New Member</h1>
 
-            <form onSubmit={handleSubmit} style={{
-                background: '#18181b',
-                border: '1px solid #27272a',
-                borderRadius: '12px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem'
-            }}>
+            <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8 flex flex-col gap-6">
                 {/* Name */}
-                <div className="form-group">
-                    <label style={labelStyle}><User size={14} /> Full Name</label>
+                <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                        <User size={14} /> Full Name
+                    </label>
                     <input
                         type="text"
                         name="name"
@@ -86,120 +71,94 @@ const AdminCreateMember = () => {
                         onChange={handleChange}
                         required
                         placeholder="e.g. John Doe"
-                        style={inputStyle}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-cyan)] transition-colors"
                     />
                 </div>
 
                 {/* Details Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Role */}
-                    <div className="form-group">
-                        <label style={labelStyle}><Shield size={14} /> Role</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Shield size={14} /> Role
+                        </label>
                         <select
                             name="role"
                             value={formData.role}
                             onChange={handleChange}
-                            style={inputStyle}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-cyan)] transition-colors"
                         >
                             <option value="Head">Head</option>
                             <option value="Coordinator">Coordinator</option>
                             <option value="Member">Member</option>
                         </select>
                     </div>
-
-
                 </div>
 
-
-
                 {/* Profile Image */}
-                <div className="form-group">
-                    <label style={labelStyle}><Camera size={14} /> Profile Photo URL (Optional)</label>
+                <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                        <Camera size={14} /> Profile Photo URL (Optional)
+                    </label>
                     <input
                         type="text"
                         name="img"
                         value={formData.img}
                         onChange={handleChange}
                         placeholder="e.g. https://example.com/photo.jpg"
-                        style={inputStyle}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-cyan)] transition-colors"
                     />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* LinkedIn */}
-                    <div className="form-group">
-                        <label style={labelStyle}><Linkedin size={14} /> LinkedIn URL (Optional)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Linkedin size={14} /> LinkedIn URL (Optional)
+                        </label>
                         <input
                             type="text"
                             name="linkedin"
                             value={formData.linkedin}
                             onChange={handleChange}
                             placeholder="e.g. https://linkedin.com/in/johndoe"
-                            style={inputStyle}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-cyan)] transition-colors"
                         />
                     </div>
 
                     {/* GitHub */}
-                    <div className="form-group">
-                        <label style={labelStyle}><Github size={14} /> GitHub URL (Optional)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Github size={14} /> GitHub URL (Optional)
+                        </label>
                         <input
                             type="text"
                             name="github"
                             value={formData.github}
                             onChange={handleChange}
                             placeholder="e.g. https://github.com/johndoe"
-                            style={inputStyle}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-cyan)] transition-colors"
                         />
                     </div>
                 </div>
 
-                <div style={{ paddingTop: '1rem', borderTop: '1px solid #27272a', display: 'flex', justifyContent: 'flex-end' }}>
+                <div className="pt-6 border-t border-zinc-800 flex justify-end">
                     <button
                         type="submit"
                         disabled={loading}
-                        style={{
-                            background: 'var(--neon-cyan)',
-                            color: '#000',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '0.8rem 2rem',
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            opacity: loading ? 0.7 : 1
-                        }}
+                        className={`
+                            bg-[var(--neon-cyan)] text-black border-none rounded-lg py-3 px-8 text-base font-bold cursor-pointer flex items-center gap-2
+                            ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[var(--neon-cyan)]/80'}
+                            transition-all
+                        `}
                     >
                         <Save size={18} />
                         {loading ? 'Adding...' : 'Add Member'}
                     </button>
                 </div>
-            </form >
-        </div >
+            </form>
+        </div>
     );
-};
-
-const labelStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    marginBottom: '0.5rem',
-    color: '#a1a1aa',
-    fontSize: '0.9rem'
-};
-
-const inputStyle = {
-    width: '100%',
-    background: '#09090b',
-    border: '1px solid #27272a',
-    borderRadius: '8px',
-    padding: '0.8rem 1rem',
-    color: '#fff',
-    outline: 'none',
-    fontSize: '0.95rem'
 };
 
 export default AdminCreateMember;

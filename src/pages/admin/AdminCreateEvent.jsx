@@ -44,37 +44,20 @@ const AdminCreateEvent = () => {
     };
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div className="max-w-3xl mx-auto">
             <button
                 onClick={() => navigate('/admin/events')}
-                style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#a1a1aa',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    marginBottom: '2rem',
-                    cursor: 'pointer',
-                    fontSize: '0.9rem'
-                }}>
+                className="bg-transparent border-none text-zinc-400 flex items-center gap-2 mb-8 cursor-pointer text-sm hover:text-white transition-colors"
+            >
                 <ArrowLeft size={18} /> Back to Events
             </button>
 
-            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '2rem', color: '#fff' }}>Create New Event</h1>
+            <h1 className="text-3xl font-bold mb-8 text-white">Create New Event</h1>
 
-            <form onSubmit={handleSubmit} style={{
-                background: '#18181b',
-                border: '1px solid #27272a',
-                borderRadius: '12px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '1.5rem'
-            }}>
+            <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8 flex flex-col gap-6">
                 {/* Title */}
-                <div className="form-group">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: '#a1a1aa', fontSize: '0.9rem' }}>Event Title</label>
+                <div className="flex flex-col gap-2">
+                    <label className="text-zinc-400 text-sm">Event Title</label>
                     <input
                         type="text"
                         name="title"
@@ -82,42 +65,47 @@ const AdminCreateEvent = () => {
                         onChange={handleChange}
                         required
                         placeholder="e.g. AI Workshop 2026"
-                        style={inputStyle}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-violet)] transition-colors"
                     />
                 </div>
 
                 {/* Details Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Date */}
-                    <div className="form-group">
-                        <label style={labelStyle}><Calendar size={14} /> Date</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Calendar size={14} /> Date
+                        </label>
                         <input
                             type="date"
                             name="date"
                             value={formData.date}
                             onChange={handleChange}
                             required
-                            style={inputStyle}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-violet)] transition-colors"
                         />
                     </div>
 
                     {/* Time */}
-                    <div className="form-group">
-                        <label style={labelStyle}><Clock size={14} /> Time</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Clock size={14} /> Time
+                        </label>
                         <input
                             type="time"
                             name="time"
                             value={formData.time}
                             onChange={handleChange}
                             required
-                            style={inputStyle}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-violet)] transition-colors"
                         />
                     </div>
 
                     {/* Location */}
-                    <div className="form-group">
-                        <label style={labelStyle}><MapPin size={14} /> Venue / Location</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <MapPin size={14} /> Venue / Location
+                        </label>
                         <input
                             type="text"
                             name="location"
@@ -125,18 +113,18 @@ const AdminCreateEvent = () => {
                             onChange={handleChange}
                             required
                             placeholder="e.g. Main Auditorium"
-                            style={inputStyle}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-violet)] transition-colors"
                         />
                     </div>
 
                     {/* Status */}
-                    <div className="form-group">
-                        <label style={labelStyle}>Status</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-zinc-400 text-sm">Status</label>
                         <select
                             name="status"
                             value={formData.status}
                             onChange={handleChange}
-                            style={inputStyle}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-violet)] transition-colors"
                         >
                             <option value="Upcoming">Upcoming</option>
                             <option value="Active">Active (Live)</option>
@@ -146,62 +134,59 @@ const AdminCreateEvent = () => {
                 </div>
 
                 {/* Speaker */}
-                <div className="form-group">
-                    <label style={labelStyle}><User size={14} /> Speaker (Optional)</label>
+                <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                        <User size={14} /> Speaker (Optional)
+                    </label>
                     <input
                         type="text"
                         name="speaker"
                         value={formData.speaker}
                         onChange={handleChange}
                         placeholder="e.g. Dr. Jane Doe"
-                        style={inputStyle}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-violet)] transition-colors"
                     />
                 </div>
 
                 {/* Description */}
-                <div className="form-group">
-                    <label style={labelStyle}><FileText size={14} /> Description</label>
+                <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                        <FileText size={14} /> Description
+                    </label>
                     <textarea
                         name="description"
                         value={formData.description}
                         onChange={handleChange}
                         rows="4"
                         placeholder="Project detailed agenda, prerequisites, etc."
-                        style={{ ...inputStyle, resize: 'vertical' }}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-violet)] transition-colors resize-y"
                     />
                 </div>
 
                 {/* Registration Link (External) */}
-                <div className="form-group">
-                    <label style={labelStyle}><Globe size={14} /> External Registration Link (Optional)</label>
+                <div className="flex flex-col gap-2">
+                    <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                        <Globe size={14} /> External Registration Link (Optional)
+                    </label>
                     <input
                         type="url"
                         name="registrationLink"
                         value={formData.registrationLink}
                         onChange={handleChange}
                         placeholder="https://..."
-                        style={inputStyle}
+                        className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white outline-none focus:border-[var(--neon-violet)] transition-colors"
                     />
                 </div>
 
-                <div style={{ paddingTop: '1rem', borderTop: '1px solid #27272a', display: 'flex', justifyContent: 'flex-end' }}>
+                <div className="pt-6 border-t border-zinc-800 flex justify-end">
                     <button
                         type="submit"
                         disabled={loading}
-                        style={{
-                            background: 'var(--neon-cyan)',
-                            color: '#000',
-                            border: 'none',
-                            borderRadius: '8px',
-                            padding: '0.8rem 2rem',
-                            fontSize: '1rem',
-                            fontWeight: 'bold',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            opacity: loading ? 0.7 : 1
-                        }}
+                        className={`
+                            bg-[var(--neon-violet)] text-white border-none rounded-lg py-3 px-8 text-base font-bold cursor-pointer flex items-center gap-2
+                            ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[var(--neon-violet)]/80'}
+                            transition-all
+                        `}
                     >
                         <Save size={18} />
                         {loading ? 'Creating...' : 'Create Event'}
@@ -210,26 +195,6 @@ const AdminCreateEvent = () => {
             </form>
         </div>
     );
-};
-
-const labelStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    marginBottom: '0.5rem',
-    color: '#a1a1aa',
-    fontSize: '0.9rem'
-};
-
-const inputStyle = {
-    width: '100%',
-    background: '#09090b',
-    border: '1px solid #27272a',
-    borderRadius: '8px',
-    padding: '0.8rem 1rem',
-    color: '#fff',
-    outline: 'none',
-    fontSize: '0.95rem'
 };
 
 export default AdminCreateEvent;

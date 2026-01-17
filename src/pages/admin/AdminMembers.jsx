@@ -76,87 +76,64 @@ const AdminMembers = () => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Members</h1>
-                    {loading && <RefreshCw className="spin" size={20} color="var(--neon-cyan)" />}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-2xl md:text-3xl font-bold">Members</h1>
+                    {loading && <RefreshCw className="animate-spin text-[var(--neon-cyan)]" size={20} />}
                 </div>
                 <button
                     onClick={() => navigate('/admin/members/new')}
-                    style={{
-                        background: 'var(--neon-cyan)',
-                        color: '#000',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '0.6rem 1.2rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        cursor: 'pointer',
-                        fontWeight: '600'
-                    }}>
+                    className="bg-[var(--neon-cyan)] text-black hover:bg-[var(--neon-cyan)]/80 transition-colors border-none rounded-lg py-2.5 px-4 flex items-center justify-center gap-2 cursor-pointer font-semibold w-full md:w-auto"
+                >
                     <Plus size={18} /> Add Member
                 </button>
             </div>
 
             {/* Search Bar */}
-            <div style={{ marginBottom: '2rem', position: 'relative', maxWidth: '400px' }}>
-                <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#71717a' }} />
+            <div className="mb-6 relative max-w-md">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" />
                 <input
                     type="text"
                     placeholder="Search members..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{
-                        width: '100%',
-                        background: '#18181b',
-                        border: '1px solid #27272a',
-                        borderRadius: '8px',
-                        padding: '0.8rem 1rem 0.8rem 3rem',
-                        color: '#fff',
-                        outline: 'none'
-                    }}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg py-3 pl-12 pr-4 text-white focus:outline-none focus:border-[var(--neon-cyan)] transition-colors"
                 />
             </div>
 
-            {/* Table */}
-            <div style={{
-                background: '#18181b',
-                border: '1px solid #27272a',
-                borderRadius: '12px',
-                overflow: 'hidden'
-            }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            {/* Desktop Table View */}
+            <div className="hidden md:block bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr style={{ background: '#27272a', color: '#a1a1aa', fontSize: '0.85rem', textTransform: 'uppercase' }}>
-                            <th style={{ padding: '1rem' }}>Name</th>
-                            <th style={{ padding: '1rem' }}>Role</th>
-
-                            <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
+                        <tr className="bg-zinc-800 text-zinc-400 text-sm uppercase">
+                            <th className="p-4 font-medium">Name</th>
+                            <th className="p-4 font-medium">Role</th>
+                            <th className="p-4 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {filteredMembers.length === 0 ? (
                             <tr>
-                                <td colSpan="3" style={{ padding: '2rem', textAlign: 'center', color: '#71717a' }}>
+                                <td colSpan="3" className="p-8 text-center text-zinc-500">
                                     {loading ? "Loading members..." : "No members found."}
                                 </td>
                             </tr>
                         ) : (
                             filteredMembers.map((member) => (
-                                <tr key={member.id} style={{ borderBottom: '1px solid #27272a' }}>
-                                    <td style={{ padding: '1rem', fontWeight: '500' }}>{member.name}</td>
-                                    <td style={{ padding: '1rem', color: '#a1a1aa' }}>{member.role}</td>
-
-                                    <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                <tr key={member.id} className="border-b border-zinc-800 last:border-0 hover:bg-white/5 transition-colors">
+                                    <td className="p-4 font-medium">{member.name}</td>
+                                    <td className="p-4 text-zinc-400">{member.role}</td>
+                                    <td className="p-4 text-right">
                                         <button
                                             onClick={() => handleEdit(member)}
-                                            style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer', marginRight: '0.5rem' }}>
+                                            className="bg-transparent border-none text-zinc-400 hover:text-white cursor-pointer mr-2 transition-colors"
+                                        >
                                             <Edit2 size={16} />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(member.id)}
-                                            style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                                            className="bg-transparent border-none text-red-500 hover:text-red-400 cursor-pointer transition-colors"
+                                        >
                                             <Trash2 size={16} />
                                         </button>
                                     </td>
@@ -166,10 +143,40 @@ const AdminMembers = () => {
                     </tbody>
                 </table>
             </div>
-            <style>{`
-                .spin { animation: spin 1s linear infinite; }
-                @keyframes spin { 100% { transform: rotate(360deg); } }
-            `}</style>
+
+            {/* Mobile Card View */}
+            <div className="md:hidden flex flex-col gap-4">
+                {filteredMembers.length === 0 ? (
+                    <div className="p-8 text-center text-zinc-500 bg-zinc-900 rounded-xl border border-zinc-800">
+                        {loading ? "Loading members..." : "No members found."}
+                    </div>
+                ) : (
+                    filteredMembers.map((member) => (
+                        <div key={member.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex flex-col gap-3">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="font-bold text-lg">{member.name}</h3>
+                                    <p className="text-zinc-400 text-sm">{member.role}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleEdit(member)}
+                                        className="p-2 bg-zinc-800 rounded-lg text-zinc-400 hover:text-white"
+                                    >
+                                        <Edit2 size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(member.id)}
+                                        className="p-2 bg-zinc-800 rounded-lg text-red-500 hover:text-red-400"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 };

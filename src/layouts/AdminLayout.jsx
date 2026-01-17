@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LayoutDashboard, Users, Calendar, LogOut, Menu, X, Trophy } from 'lucide-react';
@@ -7,7 +7,24 @@ const AdminLayout = () => {
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+    const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768);
+
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            // Only auto-close/open if crossing the breakpoint
+            if (mobile && !isMobile) {
+                setSidebarOpen(false);
+            } else if (!mobile && isMobile) {
+                setSidebarOpen(true);
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, [isMobile]);
 
     if (!currentUser) {
         return <Navigate to="/admin/login" />;
@@ -25,39 +42,65 @@ const AdminLayout = () => {
     const navItems = [
         { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
         { path: '/admin/members', icon: Users, label: 'Members' },
-
         { path: '/admin/contestants', icon: Trophy, label: 'Contestants' },
         { path: '/admin/applications', icon: Calendar, label: 'Applications' },
         { path: '/admin/events', icon: Calendar, label: 'Events' },
     ];
 
     return (
-        <div style={{ display: 'flex', height: '100vh', background: '#09090b', color: '#fff' }}>
+        <div className="flex h-screen bg-zinc-950 text-white overflow-hidden">
+            {/* Mobile Header */}
+            {/* Mobile Header */}
+            <div className="md:hidden fixed top-0 w-full bg-zinc-900 border-b border-zinc-800 z-50 h-16 px-4 flex items-center justify-between">
+                <span className="text-lg font-bold tracking-widest text-white">
+                    <span className="text-[var(--neon-cyan)]">TECH</span> ADMIN
+                </span>
+                <button
+                    onClick={() => setSidebarOpen(!sidebarOpen)}
+                    className="text-zinc-400 hover:text-white"
+                >
+                    {sidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                </button>
+            </div>
+
+            {/* Sidebar Overlay (Mobile) */}
+            {isMobile && sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside style={{
-                width: sidebarOpen ? '250px' : '80px',
-                background: '#18181b', // Zinc-900
-                borderRight: '1px solid #27272a',
-                transition: 'width 0.3s ease',
-                display: 'flex',
-                flexDirection: 'column',
-                padding: '1.5rem 1rem'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', marginBottom: '3rem' }}>
+            <aside
+                className={`
+                    fixed md:static inset-y-0 left-0 z-40
+                    flex flex-col
+                    bg-zinc-900 border-zinc-800
+                    transition-all duration-300 ease-in-out
+                    ${sidebarOpen ? 'w-64 translate-x-0 border-r' : '-translate-x-full w-64 md:w-20 md:translate-x-0 md:border-r'}
+                    ${isMobile ? 'top-16 h-[calc(100vh-4rem)] shadow-none border-t border-zinc-800' : ''}
+                `}
+            >
+                {/* Sidebar Header */}
+                <div className={`p-6 flex items-center ${sidebarOpen ? 'justify-between' : 'justify-center'} mb-6`}>
                     {sidebarOpen && (
-                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', letterSpacing: '1px' }}>
-                            <span className="text-neon-cyan">TECH</span> ADMIN
+                        <span className="text-xl font-bold tracking-widest whitespace-nowrap">
+                            <span className="text-[var(--neon-cyan)]">TECH</span> ADMIN
                         </span>
                     )}
+
+                    {/* Desktop Toggle Button */}
                     <button
                         onClick={() => setSidebarOpen(!sidebarOpen)}
-                        style={{ background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer' }}
+                        className={`text-zinc-400 hover:text-white hidden md:block ${!sidebarOpen && 'mx-auto'}`}
                     >
                         {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
                     </button>
                 </div>
 
-                <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {/* Navigation */}
+                <nav className="flex-1 flex flex-col gap-2 px-3 overflow-y-auto">
                     {navItems.map((item) => {
                         const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(item.path));
 
@@ -65,52 +108,49 @@ const AdminLayout = () => {
                             <Link
                                 key={item.path}
                                 to={item.path}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '1rem',
-                                    padding: '0.8rem',
-                                    borderRadius: '8px',
-                                    color: isActive ? '#fff' : '#a1a1aa',
-                                    background: isActive ? 'rgba(0, 243, 255, 0.1)' : 'transparent',
-                                    border: isActive ? '1px solid rgba(0, 243, 255, 0.2)' : '1px solid transparent',
-                                    textDecoration: 'none',
-                                    transition: 'all 0.2s',
-                                    overflow: 'hidden',
-                                    justifyContent: sidebarOpen ? 'flex-start' : 'center'
-                                }}
+                                onClick={() => isMobile && setSidebarOpen(false)}
+                                className={`
+                                    flex items-center gap-3 p-3 rounded-lg transition-all duration-200
+                                    ${isActive
+                                        ? 'bg-[var(--neon-cyan)]/10 text-white border border-[var(--neon-cyan)]/20'
+                                        : 'text-zinc-400 hover:text-white hover:bg-white/5 border border-transparent'
+                                    }
+                                    ${!sidebarOpen && 'justify-center'}
+                                `}
+                                title={!sidebarOpen ? item.label : ''}
                             >
-                                <item.icon size={20} color={isActive ? 'var(--neon-cyan)' : 'currentColor'} />
-                                {sidebarOpen && <span>{item.label}</span>}
+                                <item.icon size={20} className={isActive ? 'text-[var(--neon-cyan)]' : 'currentColor'} />
+                                <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarOpen ? 'opacity-100' : 'opacity-0 md:hidden'}`}>
+                                    {item.label}
+                                </span>
                             </Link>
                         );
                     })}
                 </nav>
 
-                <button
-                    onClick={handleLogout}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        padding: '0.8rem',
-                        marginTop: 'auto',
-                        background: 'transparent',
-                        border: 'none',
-                        color: '#ef4444',
-                        cursor: 'pointer',
-                        justifyContent: sidebarOpen ? 'flex-start' : 'center',
-                        width: '100%'
-                    }}
-                >
-                    <LogOut size={20} />
-                    {sidebarOpen && <span>Logout</span>}
-                </button>
+                {/* Logout Button */}
+                <div className="p-3 mt-auto">
+                    <button
+                        onClick={handleLogout}
+                        className={`
+                            flex items-center gap-3 p-3 rounded-lg text-red-500 hover:bg-red-500/10 w-full transition-all
+                            ${!sidebarOpen ? 'justify-center' : ''}
+                        `}
+                        title="Logout"
+                    >
+                        <LogOut size={20} />
+                        <span className={`whitespace-nowrap transition-opacity duration-200 ${sidebarOpen ? 'opacity-100' : 'opacity-0 md:hidden'}`}>
+                            Logout
+                        </span>
+                    </button>
+                </div>
             </aside>
 
             {/* Main Content */}
-            <main style={{ flex: 1, overflowY: 'auto', padding: '2rem' }}>
-                <Outlet />
+            <main className="flex-1 overflow-x-hidden overflow-y-auto bg-zinc-950 p-4 md:p-8 pt-20 md:pt-8 w-full">
+                <div className="max-w-7xl mx-auto">
+                    <Outlet />
+                </div>
             </main>
         </div>
     );

@@ -5,10 +5,10 @@ import { collection, query, onSnapshot, orderBy, where } from 'firebase/firestor
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState([
-        { label: 'Total Members', value: '-', icon: Users, color: 'var(--neon-cyan)' },
-        { label: 'Upcoming Events', value: '-', icon: Calendar, color: 'var(--neon-violet)' },
-        { label: 'Total Events', value: '-', icon: Activity, color: 'var(--neon-green)' },
-        { label: 'Top Contestant', value: '-', icon: Trophy, color: '#ff0055' },
+        { label: 'Total Members', value: '-', icon: Users, color: 'text-[var(--neon-cyan)]', bg: 'bg-[var(--neon-cyan)]/10' },
+        { label: 'Upcoming Events', value: '-', icon: Calendar, color: 'text-[var(--neon-violet)]', bg: 'bg-[var(--neon-violet)]/10' },
+        { label: 'Total Events', value: '-', icon: Activity, color: 'text-[var(--neon-green)]', bg: 'bg-[var(--neon-green)]/10' },
+        { label: 'Top Contestant', value: '-', icon: Trophy, color: 'text-[#ff0055]', bg: 'bg-[#ff0055]/10' },
     ]);
     const [loading, setLoading] = useState(true);
 
@@ -67,38 +67,20 @@ const AdminDashboard = () => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Dashboard Overview</h1>
-                {loading && <RefreshCw className="spin" size={20} color="var(--text-dim)" />}
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl md:text-3xl font-bold">Dashboard Overview</h1>
+                {loading && <RefreshCw className="animate-spin text-zinc-500" size={20} />}
             </div>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                gap: '1.5rem',
-                marginBottom: '3rem'
-            }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {stats.map((stat, index) => (
-                    <div key={index} style={{
-                        background: '#18181b',
-                        border: '1px solid #27272a',
-                        borderRadius: '12px',
-                        padding: '1.5rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1.5rem'
-                    }}>
-                        <div style={{
-                            padding: '1rem',
-                            borderRadius: '12px',
-                            background: `${stat.color}15`,
-                            color: stat.color
-                        }}>
+                    <div key={index} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex items-center gap-4 hover:border-zinc-700 transition-colors">
+                        <div className={`p-4 rounded-xl ${stat.bg} ${stat.color}`}>
                             <stat.icon size={24} />
                         </div>
-                        <div style={{ flex: 1, overflow: 'hidden' }}>
-                            <p style={{ color: '#a1a1aa', fontSize: '0.9rem', marginBottom: '0.3rem' }}>{stat.label}</p>
-                            <h3 style={{ fontSize: '1.8rem', fontWeight: 'bold', lineHeight: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={stat.value}>
+                        <div className="flex-1 overflow-hidden">
+                            <p className="text-zinc-400 text-sm mb-1">{stat.label}</p>
+                            <h3 className="text-2xl md:text-3xl font-bold leading-none truncate" title={stat.value}>
                                 {stat.value}
                             </h3>
                         </div>
@@ -106,28 +88,19 @@ const AdminDashboard = () => {
                 ))}
             </div>
 
-            <div style={{
-                background: '#18181b',
-                border: '1px solid #27272a',
-                borderRadius: '12px',
-                padding: '2rem'
-            }}>
-                <h2 style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>System Status</h2>
-                <div style={{ display: 'flex', gap: '1rem', color: '#a1a1aa', fontSize: '0.9rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></div>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 md:p-8">
+                <h2 className="text-lg md:text-xl font-semibold mb-4">System Status</h2>
+                <div className="flex gap-4 text-zinc-400 text-sm md:text-base">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
                         Firestore Connected
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
                         Auth Service Online
                     </div>
                 </div>
             </div>
-            <style>{`
-                .spin { animation: spin 1s linear infinite; }
-                @keyframes spin { 100% { transform: rotate(360deg); } }
-            `}</style>
         </div>
     );
 };
