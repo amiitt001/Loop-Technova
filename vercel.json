@@ -5,6 +5,10 @@
             "destination": "/api/apply.js"
         },
         {
+            "source": "/api/admin/applications",
+            "destination": "/api/admin/applications.js"
+        },
+        {
             "source": "/(.*)",
             "destination": "/index.html"
         }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { normalizeError, ApiError } from '../utils/errorHandler';
 
 
 
@@ -27,9 +28,10 @@ const Join = () => {
             return;
         }
 
+
+
         setStatus('submitting');
         try {
-            // Send Application to Backend (Validates unique email + Saves to DB + Sends Email)
             const response = await fetch('/api/apply', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -39,12 +41,8 @@ const Join = () => {
             const data = await response.json();
 
             if (!response.ok) {
-                if (response.status === 409) {
-                    alert(data.error); // Duplicate found
-                    setStatus('idle');
-                    return;
-                }
-                throw new Error(data.error || "Submission failed");
+                // Throw structured error to be caught below
+                throw new ApiError(data.error || "Submission failed", data.code);
             }
 
             setStatus('success');
@@ -59,7 +57,9 @@ const Join = () => {
                 reason: ''
             });
         } catch (error) {
-            console.error("Error submitting application:", error);
+            console.error("Submission Error:", error);
+            const safeMessage = normalizeError(error);
+            alert(safeMessage); // Or set to state if you have an error toast
             setStatus('error');
         }
     };

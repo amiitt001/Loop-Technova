@@ -44,54 +44,59 @@ async function validateEmail(email) {
     }
 }
 
-export default async function handler(req, res) {
+import { safeHandler } from './utils/wrapper.js';
+import { ValidationError, ConflictError } from './utils/errors.js';
+
+export default safeHandler(async function handler(req, res) {
     if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method Not Allowed' });
+        res.setHeader('Allow', 'POST');
+        throw new ValidationError('Method Not Allowed'); // Technically 405, but simplified for now
     }
 
     const { name, email, domain, reason, branch, year, college, github } = req.body;
 
     if (!email || !name) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        throw new ValidationError('Missing required fields');
     }
 
+    // 0. Strict Email Validation
+    const emailValidation = await validateEmail(email);
+    if (!emailValidation.valid) {
+        throw new ValidationError(`Invalid email: ${emailValidation.reason}`);
+    }
+
+    // 1. Check for duplicates (SERVER-SIDE VALIDATION)
+    const appsRef = db.collection('applications');
+    const snapshot = await appsRef.where('email', '==', email).get();
+
+    if (!snapshot.empty) {
+        throw new ConflictError('Application with this email already exists.');
+    }
+
+    // 2. Save to Firestore (Secure Write)
+    const newApp = {
+        name,
+        email,
+        domain,
+        reason,
+        branch,
+        year,
+        college,
+        github,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        status: 'Pending'
+    };
+
+    const docRef = await appsRef.add(newApp);
+
+    // 3. Send Email via EmailJS (Graceful Degradation)
+    // We wrap this in a localized try/catch because email failure
+    // should NOT revert the successful application submission.
     try {
-
-        // 0. Strict Email Validation
-        const emailValidation = await validateEmail(email);
-        if (!emailValidation.valid) {
-            return res.status(400).json({ error: `Invalid email: ${emailValidation.reason}` });
-        }
-
-        // 1. Check for duplicates (SERVER-SIDE VALIDATION)
-        const appsRef = db.collection('applications');
-        const snapshot = await appsRef.where('email', '==', email).get();
-
-        if (!snapshot.empty) {
-            console.warn(`Duplicate application blocked for: ${email}`);
-            return res.status(409).json({ error: 'Application with this email already exists.' });
-        }
-
-        // 2. Save to Firestore (Secure Write)
-        const newApp = {
-            name,
-            email,
-            domain,
-            reason,
-            branch,
-            year,
-            college,
-            github,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            status: 'Pending'
-        };
-
-        const docRef = await appsRef.add(newApp);
-
-        // 3. Send Email via EmailJS (Server-side)
         if (process.env.EMAIL_TEST_MODE === 'true') {
             console.log(`[TEST MODE] Email would be sent to ${email} for application ${docRef.id}`);
-            return res.status(200).json({ message: 'Application received (Test Mode)!' });
+            res.status(200).json({ message: 'Application received (Test Mode)!' });
+            return;
         }
 
         const serviceID = process.env.EMAILJS_SERVICE_ID;
@@ -101,8 +106,6 @@ export default async function handler(req, res) {
 
         if (serviceID && templateID && publicKey) {
             console.log("EmailJS Params Present: ServiceID, TemplateID, PublicKey");
-            if (privateKey) console.log("EmailJS Private Key Present");
-            else console.warn("EmailJS Private Key MISSING");
 
             const templateParams = {
                 name,
@@ -125,28 +128,23 @@ export default async function handler(req, res) {
 
             if (privateKey) data.accessToken = privateKey;
 
-            try {
-                const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                });
+            const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
 
-                if (!emailResponse.ok) {
-                    console.error('EmailJS Error (Silent Fail):', await emailResponse.text());
-                } else {
-                    console.log('EmailJS Success: Email sent to', email);
-                }
-                // Silent failure: We do not return 500, because application IS saved.
-            } catch (err) {
-                console.error('EmailJS Network Error (Silent Fail):', err);
+            if (!emailResponse.ok) {
+                console.error('EmailJS Error (Silent Fail):', await emailResponse.text());
+            } else {
+                console.log('EmailJS Success: Email sent to', email);
             }
         }
-
-        return res.status(200).json({ message: 'Application received successfully!' });
-
-    } catch (error) {
-        console.error('Server Error:', error);
-        return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+    } catch (emailError) {
+        // Critical: Do NOT throw here. Just log it.
+        console.error("Email subsystem failed gracefully:", emailError);
     }
-}
+
+    // 4. Return Success
+    return res.status(200).json({ message: 'Application received successfully!' });
+});
