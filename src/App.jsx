@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Leaderboard from './pages/Leaderboard';
 import Team from './pages/Team';
 import Events from './pages/Events';
+import EventDetails from './pages/EventDetails';
 import Join from './pages/Join';
 import Chatbot from './components/Chatbot';
 
@@ -62,6 +63,7 @@ function App() {
                 <Route path="/leaderboard" element={<Leaderboard />} />
                 <Route path="/team" element={<Team />} />
                 <Route path="/events" element={<Events />} />
+                <Route path="/events/:id" element={<EventDetails />} />
                 <Route path="/join" element={<Join />} />
               </Routes>
             </PublicLayout>

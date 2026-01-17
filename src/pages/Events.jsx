@@ -1,28 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom'; // Added import
-import { Calendar, Clock, MapPin, RefreshCw } from 'lucide-react';
-import RegistrationModal from '../components/RegistrationModal';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Calendar, Clock, MapPin, RefreshCw, ArrowRight } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot } from 'firebase/firestore';
 
 const Events = () => {
-  const [selectedEvent, setSelectedEvent] = useState(null);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchParams] = useSearchParams(); // Hook for query params
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-  // Auto-open modal if URL has ?register=EVENT_ID
+  // Redirect to details page if ?register=ID is present
   useEffect(() => {
-    if (!loading && events.length > 0) {
-      const eventIdToOpen = searchParams.get('register');
-      if (eventIdToOpen) {
-        const eventToOpen = events.find(e => e.id === eventIdToOpen);
-        if (eventToOpen && eventToOpen.registrationOpen) {
-          setSelectedEvent(eventToOpen);
-        }
-      }
+    const eventIdToOpen = searchParams.get('register');
+    if (eventIdToOpen) {
+      navigate(`/events/${eventIdToOpen}`);
     }
-  }, [loading, events, searchParams]);
+  }, [searchParams, navigate]);
 
   useEffect(() => {
     setLoading(true);
@@ -30,12 +24,8 @@ const Events = () => {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const eventsList = snapshot.docs.map(doc => {
         const data = doc.data();
-        // Determine type based on status or date
-        // Mapping Admin 'Active'/'Upcoming' -> 'upcoming', 'Past' -> 'past'
-        // If status is missing, infer from date? Let's rely on status for now as per admin panel.
         let type = 'upcoming';
         if (data.status === 'Past') type = 'past';
-
         const dateDisplay = data.date?.toDate ? data.date.toDate().toLocaleDateString() : data.date;
 
         return {
@@ -46,14 +36,8 @@ const Events = () => {
         };
       });
 
-      // Sort: Upcoming/Active first, then Past. Within groups, sort by date?
-      // Simple sort: Newest dates first usually.
       eventsList.sort((a, b) => {
-        // Custom sort: Active/Upcoming first
-        if (a.type !== b.type) {
-          return a.type === 'upcoming' ? -1 : 1;
-        }
-        // Then by date
+        if (a.type !== b.type) return a.type === 'upcoming' ? -1 : 1;
         return new Date(b.date) - new Date(a.date);
       });
 
@@ -81,7 +65,10 @@ const Events = () => {
         {events.map((event, index) => (
           <div key={event.id} className={`timeline-item ${event.type} animate-fade-in`} style={{ animationDelay: `${index * 0.1}s` }}>
             <div className="timeline-dot"></div>
-            <div className="timeline-content">
+            <div
+              className="timeline-content cursor-pointer group"
+              onClick={() => navigate(`/events/${event.id}`)}
+            >
               <div style={{
                 position: 'absolute',
                 top: '-10px',
@@ -106,26 +93,16 @@ const Events = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Clock size={14} color="var(--neon-violet)" /> {event.location || 'TBD'}
                 </div>
-                {/*  Time isn't always in DB separately, maybe add if needed or rely on string date? Keeping simple for now using location/time field reuse if any */}
               </div>
 
-              <p style={{ marginTop: '1rem', lineHeight: '1.4' }}>{event.description || "No description available."}</p>
-
-              {/* Register Button for Upcoming/Active Events where registration is OPEN */}
-              {event.type === 'upcoming' && event.registrationOpen && (
-                <button
-                  onClick={() => setSelectedEvent(event)}
-                  className="register-btn"
-                >
-                  REGISTER NOW
-                </button>
-              )}
+              {/* View Details Link */}
+              <div className="mt-4 flex items-center gap-2 text-[var(--neon-cyan)] text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                View Details <ArrowRight size={14} />
+              </div>
             </div>
           </div>
         ))}
       </div>
-
-      <RegistrationModal event={selectedEvent} onClose={() => setSelectedEvent(null)} />
 
       <style>{`
         .timeline {
