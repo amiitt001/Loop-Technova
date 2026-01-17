@@ -20,15 +20,27 @@ import { promisify } from 'util';
 
 const resolveMx = promisify(dns.resolveMx);
 
-async function isValidEmailDomain(email) {
-    try {
-        const domain = email.split('@')[1];
-        if (!domain) return false;
+const BLOCKED_DOMAINS = ['example.com', 'test.com', 'dummy.com', 'mailinator.com', 'yopmail.com'];
+const BLOCKED_PREFIXES = ['test', 'admin', 'user', 'no-reply', 'noreply'];
+const EMAIL_REGEX = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+async function validateEmail(email) {
+    if (!email || !EMAIL_REGEX.test(email)) return { valid: false, reason: 'Invalid email format' };
+
+    const [local, domain] = email.split('@');
+
+    if (BLOCKED_DOMAINS.includes(domain.toLowerCase())) return { valid: false, reason: 'Domain is blocked' };
+    if (BLOCKED_PREFIXES.includes(local.toLowerCase())) return { valid: false, reason: 'Email prefix is blocked' };
+
+    // Prevent self-send (system email)
+    if (email === 'technova@galgotias.edu') return { valid: false, reason: 'Cannot use system email' };
+
+    try {
         const addresses = await resolveMx(domain);
-        return addresses && addresses.length > 0;
+        if (!addresses || addresses.length === 0) return { valid: false, reason: 'No mail server found for domain' };
+        return { valid: true };
     } catch (error) {
-        return false;
+        return { valid: false, reason: 'Domain validation failed' };
     }
 }
 
@@ -44,11 +56,13 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 0. Verify Email Existence (MX Check)
-        const isEmailValid = await isValidEmailDomain(email);
-        if (!isEmailValid) {
-            return res.status(400).json({ error: 'Invalid email address. The domain does not exist or accept emails.' });
+
+        // 0. Strict Email Validation
+        const emailValidation = await validateEmail(email);
+        if (!emailValidation.valid) {
+            return res.status(400).json({ error: `Invalid email: ${emailValidation.reason}` });
         }
+
         // 1. Check for duplicates (SERVER-SIDE VALIDATION)
         const appsRef = db.collection('applications');
         const snapshot = await appsRef.where('email', '==', email).get();
@@ -72,9 +86,14 @@ export default async function handler(req, res) {
             status: 'Pending'
         };
 
-        await appsRef.add(newApp);
+        const docRef = await appsRef.add(newApp);
 
         // 3. Send Email via EmailJS (Server-side)
+        if (process.env.EMAIL_TEST_MODE === 'true') {
+            console.log(`[TEST MODE] Email would be sent to ${email} for application ${docRef.id}`);
+            return res.status(200).json({ message: 'Application received (Test Mode)!' });
+        }
+
         const serviceID = process.env.EMAILJS_SERVICE_ID;
         const templateID = process.env.EMAILJS_TEMPLATE_ID;
         const publicKey = process.env.EMAILJS_PUBLIC_KEY;
@@ -102,15 +121,19 @@ export default async function handler(req, res) {
 
             if (privateKey) data.accessToken = privateKey;
 
-            const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
+            try {
+                const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
 
-            if (!emailResponse.ok) {
-                console.error('EmailJS Error:', await emailResponse.text());
-                // We don't fail the request here because the DB write was successful
+                if (!emailResponse.ok) {
+                    console.error('EmailJS Error (Silent Fail):', await emailResponse.text());
+                    // Silent failure: We do not return 500, because application IS saved.
+                }
+            } catch (err) {
+                console.error('EmailJS Network Error (Silent Fail):', err);
             }
         }
 

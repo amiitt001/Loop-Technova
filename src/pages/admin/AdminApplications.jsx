@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Search, Check, X, Trash2, Mail, Github, GraduationCap } from 'lucide-react';
+import { safeRender } from '../../utils/security';
 import { db } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
@@ -76,14 +77,14 @@ const AdminApplications = () => {
                     <div key={app.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 flex flex-col md:flex-row gap-6 relative overflow-hidden group">
                         {/* Status Stripe */}
                         <div className={`absolute left-0 top-0 bottom-0 w-1 ${app.status === 'Approved' ? 'bg-green-500' :
-                                app.status === 'Rejected' ? 'bg-red-500' : 'bg-[var(--neon-cyan)]'
+                            app.status === 'Rejected' ? 'bg-red-500' : 'bg-[var(--neon-cyan)]'
                             }`} />
 
                         <div className="flex-1 pl-2">
                             <div className="flex flex-wrap items-center gap-3 mb-2">
-                                <h3 className="text-lg font-bold">{app.name}</h3>
+                                <h3 className="text-lg font-bold">{safeRender(app.name, "Invalid Name")}</h3>
                                 <span className="text-xs px-2.5 py-1 rounded-full bg-zinc-800 text-[var(--neon-violet)] border border-zinc-700">
-                                    {app.domain}
+                                    {safeRender(app.domain)}
                                 </span>
                                 <span className="text-xs text-zinc-500">
                                     {app.createdAt?.toDate ? app.createdAt.toDate().toLocaleDateString() : 'Just now'}
@@ -93,12 +94,14 @@ const AdminApplications = () => {
                             <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4 text-sm text-zinc-400">
                                 <div className="flex items-center gap-2">
                                     <Mail size={14} />
-                                    <a href={`mailto:${app.email}`} className="hover:text-white transition-colors">{app.email}</a>
+                                    <a href={`mailto:${app.email}`} className="hover:text-white transition-colors">
+                                        {safeRender(app.email)}
+                                    </a>
                                 </div>
                                 {(app.branch || app.year) && (
                                     <div className="flex items-center gap-2">
                                         <GraduationCap size={14} />
-                                        <span>{app.branch || 'Unknown'} - {app.year || ''}</span>
+                                        <span>{safeRender(app.branch)} - {safeRender(app.year)}</span>
                                     </div>
                                 )}
                                 {app.github && (
@@ -111,12 +114,12 @@ const AdminApplications = () => {
 
                             {app.college && (
                                 <p className="text-sm text-zinc-500 mb-4 font-medium">
-                                    {app.college}
+                                    {safeRender(app.college)}
                                 </p>
                             )}
 
-                            <div className="bg-zinc-950 p-4 rounded-lg text-zinc-300 text-sm leading-relaxed border border-zinc-800/50">
-                                {app.reason}
+                            <div className="bg-zinc-950 p-4 rounded-lg text-zinc-300 text-sm leading-relaxed border border-zinc-800/50 break-words">
+                                {safeRender(app.reason, "Content hidden for security reasons.")}
                             </div>
                         </div>
 
