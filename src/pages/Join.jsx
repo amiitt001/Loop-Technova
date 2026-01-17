@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Send, CheckCircle, AlertCircle } from 'lucide-react';
 
 import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 const Join = () => {
     const [formData, setFormData] = useState({
@@ -30,6 +30,16 @@ const Join = () => {
 
         setStatus('submitting');
         try {
+            // Check for duplicates
+            const q = query(collection(db, "applications"), where("email", "==", formData.email));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                alert("You have already submitted an application with this email.");
+                setStatus('idle');
+                return;
+            }
+
             // 1. Save to Firestore (Database Record)
             await addDoc(collection(db, "applications"), {
                 ...formData,
