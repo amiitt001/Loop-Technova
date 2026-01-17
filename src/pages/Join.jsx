@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle, AlertCircle } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
@@ -29,11 +30,35 @@ const Join = () => {
 
         setStatus('submitting');
         try {
+            // 1. Save to Firestore (Database Record)
             await addDoc(collection(db, "applications"), {
                 ...formData,
                 createdAt: new Date(),
                 status: 'Pending'
             });
+
+            // 2. Send Email via EmailJS
+            // Make sure to define these in your .env file
+            const serviceID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+            const templateID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+            if (serviceID && templateID && publicKey) {
+                await emailjs.send(
+                    serviceID,
+                    templateID,
+                    {
+                        name: formData.name,
+                        email: formData.email,
+                        domain: formData.domain,
+                        reply_to: "technova@galgotias.edu" // Replace with actual support email if needed
+                    },
+                    publicKey
+                );
+            } else {
+                console.warn("EmailJS credentials missing in .env. Email not sent.");
+            }
+
             setStatus('success');
             setFormData({
                 name: '',

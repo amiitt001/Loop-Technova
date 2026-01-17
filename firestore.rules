@@ -31,6 +31,11 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    match /joinApplications/{applicationId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
     match /contestants/{contestantId} {
         allow read: if true;
         allow write: if isAdmin();
