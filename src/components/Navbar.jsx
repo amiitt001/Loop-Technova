@@ -42,7 +42,7 @@ const Navbar = () => {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                         <img src="/logo.png" alt="LOOP" style={{
-                            height: '38px',
+                            height: '38px',                        
                             width: '38px',
                             objectFit: 'cover',
                             borderRadius: '50%',
