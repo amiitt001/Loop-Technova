@@ -10,8 +10,28 @@ const HomeContact = () => {
     const [isSent, setIsSent] = useState(false);
     const [isSending, setIsSending] = useState(false);
 
+    // Math CAPTCHA State
+    const [captcha, setCaptcha] = useState({
+        num1: Math.floor(Math.random() * 10) + 1,
+        num2: Math.floor(Math.random() * 10) + 1
+    });
+    const [captchaAnswer, setCaptchaAnswer] = useState('');
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Verify CAPTCHA
+        if (parseInt(captchaAnswer) !== captcha.num1 + captcha.num2) {
+            alert("Incorrect verification code. Please try again.");
+            // Reset CAPTCHA on failure
+            setCaptcha({
+                num1: Math.floor(Math.random() * 10) + 1,
+                num2: Math.floor(Math.random() * 10) + 1
+            });
+            setCaptchaAnswer('');
+            return;
+        }
+
         try {
             setIsSending(true);
             await addDoc(collection(db, "messages"), {
@@ -21,6 +41,12 @@ const HomeContact = () => {
             });
             setIsSent(true);
             setFormState({ name: '', email: '', message: '' });
+            setCaptchaAnswer('');
+            // Reset CAPTCHA for next time
+            setCaptcha({
+                num1: Math.floor(Math.random() * 10) + 1,
+                num2: Math.floor(Math.random() * 10) + 1
+            });
             setTimeout(() => setIsSent(false), 5000);
         } catch (error) {
             console.error("Error sending message: ", error);
@@ -137,6 +163,40 @@ const HomeContact = () => {
                                     onBlur={e => e.target.style.borderColor = 'var(--border-dim)'}
                                 ></textarea>
                             </div>
+
+                            {/* Math CAPTCHA */}
+                            <div style={{
+                                padding: '1rem',
+                                background: 'rgba(var(--neon-cyan-rgb), 0.05)',
+                                border: '1px solid var(--border-dim)',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem'
+                            }}>
+                                <label style={{ color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
+                                    Human Verify: <span style={{ color: 'var(--neon-cyan)', fontWeight: 'bold' }}>{captcha.num1} + {captcha.num2} = ?</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    required
+                                    value={captchaAnswer}
+                                    onChange={e => setCaptchaAnswer(e.target.value)}
+                                    placeholder="Answer"
+                                    style={{
+                                        width: '80px',
+                                        padding: '0.5rem',
+                                        background: 'rgba(0,0,0,0.3)',
+                                        border: '1px solid var(--border-dim)',
+                                        borderRadius: '4px',
+                                        color: '#fff',
+                                        outline: 'none'
+                                    }}
+                                    onFocus={e => e.target.style.borderColor = 'var(--neon-cyan)'}
+                                    onBlur={e => e.target.style.borderColor = 'var(--border-dim)'}
+                                />
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={isSending}

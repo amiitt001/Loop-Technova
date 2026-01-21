@@ -32,6 +32,9 @@ This project features a modern, dark-themed UI with neon aesthetics, advanced an
     - **Real-time Review**: Approve/Reject applications instantly.
     - View detailed applicant profiles (GitHub, Branch, College).
 - **Team & Contestants**: Manage internal team members and leaderboard scores.
+- **Messages (New)**: 
+    - **Inquiry Management**: View and reply to contact form submissions.
+    - **Filtering**: Search and filter messages by sender or content.
 
 ## 🛠️ Tech Stack
 

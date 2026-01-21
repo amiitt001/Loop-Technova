@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { LayoutDashboard, Users, Calendar, LogOut, Menu, X, Trophy, Mail } from 'lucide-react';
 
 const AdminLayout = () => {
-    const { currentUser, logout } = useAuth();
+    const { currentUser, logout, isAdmin } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
@@ -28,6 +28,11 @@ const AdminLayout = () => {
 
     if (!currentUser) {
         return <Navigate to="/admin/login" />;
+    }
+
+    // Security Check: Redirect non-admins
+    if (!isAdmin) {
+        return <Navigate to="/" replace />;
     }
 
     const handleLogout = async () => {
