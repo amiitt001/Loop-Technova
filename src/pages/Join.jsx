@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle, AlertCircle, Instagram, ExternalLink } from 'lucide-react';
 import { normalizeError, ApiError } from '../utils/errorHandler';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 
 
@@ -20,33 +22,45 @@ const Join = () => {
     const [instagramVisited, setInstagramVisited] = useState(false);
     const [instagramFollowed, setInstagramFollowed] = useState(false);
 
+    // Math CAPTCHA State
+    const [captcha, setCaptcha] = useState({
+        num1: Math.floor(Math.random() * 10) + 1,
+        num2: Math.floor(Math.random() * 10) + 1
+    });
+    const [captchaAnswer, setCaptchaAnswer] = useState('');
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!formData.name || !formData.email || !formData.reason || !formData.branch || !formData.college) {
             alert("Please fill in all required fields.");
             return;
         }
 
-
+        // Verify CAPTCHA
+        if (parseInt(captchaAnswer) !== captcha.num1 + captcha.num2) {
+            alert("Incorrect verification code. Please try again.");
+            // Reset CAPTCHA
+            setCaptcha({
+                num1: Math.floor(Math.random() * 10) + 1,
+                num2: Math.floor(Math.random() * 10) + 1
+            });
+            setCaptchaAnswer('');
+            return;
+        }
 
         setStatus('submitting');
         try {
-            const response = await fetch('/api/apply', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData)
+            // Direct Firestore Submission
+            await addDoc(collection(db, "applications"), {
+                ...formData,
+                createdAt: serverTimestamp(),
+                status: 'Pending'
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                // Throw structured error to be caught below
-                throw new ApiError(data.error || "Submission failed", data.code);
-            }
 
             setStatus('success');
             setFormData({
@@ -59,10 +73,10 @@ const Join = () => {
                 domain: 'Full Stack Development',
                 reason: ''
             });
+            setCaptchaAnswer('');
         } catch (error) {
             console.error("Submission Error:", error);
-            const safeMessage = normalizeError(error);
-            alert(safeMessage); // Or set to state if you have an error toast
+            alert("Failed to submit application. Please try again.");
             setStatus('error');
         }
     };
@@ -278,6 +292,34 @@ const Join = () => {
                                 </span>
                             </label>
                         </div>
+                    </div>
+
+                    {/* Math CAPTCHA */}
+                    <div style={{
+                        marginBottom: '1.5rem',
+                        padding: '1rem',
+                        background: 'rgba(var(--neon-cyan-rgb), 0.05)',
+                        border: '1px solid var(--border-dim)',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '1rem'
+                    }}>
+                        <label style={{ color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
+                            Human Verify: <span style={{ color: 'var(--neon-cyan)', fontWeight: 'bold' }}>{captcha.num1} + {captcha.num2} = ?</span>
+                        </label>
+                        <input
+                            type="number"
+                            required
+                            value={captchaAnswer}
+                            onChange={e => setCaptchaAnswer(e.target.value)}
+                            placeholder="Answer"
+                            className="input-field"
+                            style={{
+                                width: '100px',
+                                background: 'rgba(0,0,0,0.3)'
+                            }}
+                        />
                     </div>
 
                     <button
