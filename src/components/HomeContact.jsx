@@ -10,12 +10,26 @@ const HomeContact = () => {
     const [isSent, setIsSent] = useState(false);
     const [isSending, setIsSending] = useState(false);
 
+    // Spam Protection State
+    const [startTime] = useState(Date.now());
+    const [honeypot, setHoneypot] = useState('');
+
 
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Spam Check 1: Honeypot (Bot Trap)
+        if (honeypot) {
+            console.log("Bot detected (honeypot)");
+            return;
+        }
 
+        // Spam Check 2: Time-based (Speed Trap)
+        if (Date.now() - startTime < 3000) {
+            alert("Please take your time to fill out the form.");
+            return;
+        }
 
         try {
             setIsSending(true);
@@ -145,6 +159,15 @@ const HomeContact = () => {
                             </div>
 
 
+
+                            {/* Honeypot Field (Hidden) */}
+                            <input
+                                type="text"
+                                name="website_contact_check"
+                                value={honeypot}
+                                onChange={(e) => setHoneypot(e.target.value)}
+                                style={{ display: 'none', tabindex: '-1', autocomplete: 'off' }}
+                            />
 
                             <button
                                 type="submit"
