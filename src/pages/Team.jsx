@@ -69,7 +69,7 @@ const Team = () => {
       const groups = [];
       if (mentors.length > 0) groups.push({ title: 'Mentors', width: '300px', members: mentors });
       if (coreTeam.length > 0) groups.push({ title: 'Core Team', width: '280px', members: coreTeam });
-      if (generalMembers.length > 0) groups.push({ title: 'Members', width: '220px', members: generalMembers });
+      // General Members hidden per request
 
       setTeamGroups(groups);
       setLoading(false);
