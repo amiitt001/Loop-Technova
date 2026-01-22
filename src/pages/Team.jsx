@@ -50,26 +50,19 @@ const Team = () => {
       }));
 
       // Group by role
-      // Group: Core Team vs General Members
-      const coreRoles = /Head|Lead|President|Vice|Coordinator|Core/i;
-
+      // Group: Mentors, Heads, Coordinators
       const mentors = allMembers.filter(m => /Mentor/i.test(m.role));
-      const coreTeam = allMembers.filter(m => coreRoles.test(m.role) && !/Mentor/i.test(m.role));
-      const generalMembers = allMembers.filter(m => !coreRoles.test(m.role) && !/Mentor/i.test(m.role));
-
-      // Sort Core Team: Heads/Presidents first, then others
-      coreTeam.sort((a, b) => {
-        const isAHead = /Head|President|Vice/i.test(a.role);
-        const isBHead = /Head|President|Vice/i.test(b.role);
-        if (isAHead && !isBHead) return -1;
-        if (!isAHead && isBHead) return 1;
-        return 0; // Keep original order otherwise
-      });
+      const heads = allMembers.filter(m => /Head|Lead|President|Vice/i.test(m.role) && !/Mentor/i.test(m.role));
+      const coordinators = allMembers.filter(m => /Coordinator/i.test(m.role) && !/Head|Lead|President|Vice|Mentor/i.test(m.role));
+      // Any other 'Core' members not fitting above categories could land here if needed, 
+      // but user strictly requested these 3 categories.
 
       const groups = [];
       if (mentors.length > 0) groups.push({ title: 'Mentors', width: '300px', members: mentors });
-      if (coreTeam.length > 0) groups.push({ title: 'Core Team', width: '280px', members: coreTeam });
-      // General Members hidden per request
+      if (heads.length > 0) groups.push({ title: 'Heads & Leads', width: '280px', members: heads });
+      if (coordinators.length > 0) groups.push({ title: 'Coordinators', width: '250px', members: coordinators });
+
+      // General Members hidden per previous request
 
       setTeamGroups(groups);
       setLoading(false);
