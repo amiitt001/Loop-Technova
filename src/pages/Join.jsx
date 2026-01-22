@@ -70,8 +70,8 @@ const Join = () => {
 
             const templateParams = {
                 to_name: "Admin",
-                from_name: formData.name,
-                from_email: formData.email,
+                name: formData.name, // Matched to {{name}} in template
+                email: formData.email, // Matched to {{email}} in template
                 branch: formData.branch,
                 year: formData.year,
                 college: formData.college,
