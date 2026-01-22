@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Send, CheckCircle, AlertCircle, Instagram, ExternalLink, Mail, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Send, CheckCircle, AlertCircle, Instagram, ExternalLink } from 'lucide-react';
 import { normalizeError, ApiError } from '../utils/errorHandler';
-import { db, auth } from '../firebase';
+import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut } from 'firebase/auth';
 import emailjs from '@emailjs/browser';
 
 const Join = () => {
@@ -97,10 +96,7 @@ const Join = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (verificationStatus !== 'verified') {
-            alert("Please verify your email address before submitting.");
-            return;
-        }
+
 
         if (!formData.name || !formData.email || !formData.reason || !formData.branch || !formData.college) {
             alert("Please fill in all required fields.");
@@ -147,15 +143,11 @@ const Join = () => {
                 domain: 'Full Stack Development',
                 reason: ''
             });
-            // Sign out the temporary user
-            signOut(auth);
-            setVerificationStatus('idle');
 
         } catch (error) {
             console.error("Submission Error:", error);
             alert("Application saved, but email notification failed. We have received your data.");
             setStatus('success');
-            signOut(auth);
         }
     };
 
@@ -223,52 +215,15 @@ const Join = () => {
                         </div>
                         <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>College Email *</label>
-                            <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    className="input-field"
-                                    placeholder="john@college.edu"
-                                    required
-                                    disabled={verificationStatus === 'verified' || verificationStatus === 'sent'}
-                                />
-                                {verificationStatus === 'verified' ? (
-                                    <div style={{
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        background: 'rgba(0, 255, 136, 0.1)', border: '1px solid var(--neon-green)',
-                                        color: 'var(--neon-green)', padding: '0 1rem', borderRadius: '8px'
-                                    }}>
-                                        <Check size={20} />
-                                    </div>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={handleVerifyEmail}
-                                        disabled={verificationStatus === 'sending' || verificationStatus === 'sent' || !formData.email}
-                                        style={{
-                                            background: verificationStatus === 'sent' ? 'var(--bg-card)' : 'var(--neon-cyan)',
-                                            color: verificationStatus === 'sent' ? 'var(--text-dim)' : '#000',
-                                            border: verificationStatus === 'sent' ? '1px solid var(--border-dim)' : 'none',
-                                            borderRadius: '8px', padding: '0 1rem', cursor: 'pointer', fontWeight: 'bold',
-                                            whiteSpace: 'nowrap', transition: 'all 0.3s ease'
-                                        }}
-                                    >
-                                        {verificationStatus === 'sending' ? 'Sending...' : verificationStatus === 'sent' ? 'Sent' : 'Verify'}
-                                    </button>
-                                )}
-                            </div>
-                            {verificationStatus === 'sent' && (
-                                <p style={{ fontSize: '0.8rem', color: 'var(--neon-cyan)', marginTop: '0.5rem' }}>
-                                    Verification link sent! Please check your inbox and click the link to verify.
-                                </p>
-                            )}
-                            {verificationError && (
-                                <p style={{ fontSize: '0.8rem', color: '#ff0055', marginTop: '0.5rem' }}>
-                                    {verificationError}
-                                </p>
-                            )}
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className="input-field"
+                                placeholder="john@college.edu"
+                                required
+                            />
                         </div>
                     </div>
 
@@ -413,11 +368,11 @@ const Join = () => {
 
                     <button
                         type="submit"
-                        disabled={status === 'submitting' || !instagramFollowed || verificationStatus !== 'verified'}
+                        disabled={status === 'submitting' || !instagramFollowed}
                         className="submit-btn"
                         style={{
-                            opacity: (status === 'submitting' || !instagramFollowed || verificationStatus !== 'verified') ? 0.5 : 1,
-                            cursor: (status === 'submitting' || !instagramFollowed || verificationStatus !== 'verified') ? 'not-allowed' : 'pointer'
+                            opacity: (status === 'submitting' || !instagramFollowed) ? 0.5 : 1,
+                            cursor: (status === 'submitting' || !instagramFollowed) ? 'not-allowed' : 'pointer'
                         }}
                     >
                         {status === 'submitting' ? 'SENDING...' : 'SUBMIT APPLICATION'} <Send size={18} />
