@@ -50,14 +50,24 @@ const Team = () => {
       }));
 
       // Group by role
-      const leadership = allMembers.filter(m => ['Head', 'President', 'Vice President'].includes(m.role));
-      const coordinators = allMembers.filter(m => m.role === 'Coordinator');
-      const members = allMembers.filter(m => m.role === 'Member');
+      // Group: Core Team vs General Members
+      const coreRoles = /Head|Lead|President|Vice|Coordinator|Core/i;
+
+      const coreTeam = allMembers.filter(m => coreRoles.test(m.role));
+      const generalMembers = allMembers.filter(m => !coreRoles.test(m.role));
+
+      // Sort Core Team: Heads/Presidents first, then others
+      coreTeam.sort((a, b) => {
+        const isAHead = /Head|President|Vice/i.test(a.role);
+        const isBHead = /Head|President|Vice/i.test(b.role);
+        if (isAHead && !isBHead) return -1;
+        if (!isAHead && isBHead) return 1;
+        return 0; // Keep original order otherwise
+      });
 
       const groups = [];
-      if (leadership.length > 0) groups.push({ role: 'Head', width: '300px', members: leadership });
-      if (coordinators.length > 0) groups.push({ role: 'Coordinator', width: '250px', members: coordinators });
-      if (members.length > 0) groups.push({ role: 'Member', width: '200px', members: members });
+      if (coreTeam.length > 0) groups.push({ title: 'Core Team', width: '280px', members: coreTeam });
+      if (generalMembers.length > 0) groups.push({ title: 'General Members', width: '220px', members: generalMembers });
 
       setTeamGroups(groups);
       setLoading(false);
@@ -198,18 +208,18 @@ const Team = () => {
         </div>
       ) : (
         teamGroups.map((group, groupIndex) => (
-          <div key={group.role} style={{ marginBottom: '5rem' }}>
+          <div key={group.title} style={{ marginBottom: '5rem' }}>
             <h2 style={{
               textAlign: 'center',
               marginBottom: '2rem',
               color: 'var(--neon-violet)',
-              fontSize: group.role === 'Head' ? '2rem' : '1.5rem',
+              fontSize: '2rem',
               position: 'relative',
               display: 'inline-block',
               left: '50%',
               transform: 'translateX(-50%)'
             }}>
-              {group.role === 'Head' ? 'Leadership' : group.role + 's'}
+              {group.title}
               <span style={{ position: 'absolute', bottom: '-10px', left: '0', width: '100%', height: '2px', background: 'var(--neon-violet)', opacity: 0.5 }}></span>
             </h2>
 
