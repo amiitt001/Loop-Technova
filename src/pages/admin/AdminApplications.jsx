@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { RefreshCw, Search, Check, X, Trash2, Mail, Github, GraduationCap } from 'lucide-react';
 import { safeRender } from '../../utils/security';
 import { db, auth } from '../../firebase';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 const AdminApplications = () => {
     const [applications, setApplications] = useState([]);
@@ -37,35 +37,22 @@ const AdminApplications = () => {
     const handleDelete = async (id) => {
         if (!window.confirm("Delete this application?")) return;
         try {
-            const token = await auth.currentUser.getIdToken();
-            const response = await fetch(`/api/admin/applications?id=${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            if (!response.ok) throw new Error('Failed to delete');
+            await deleteDoc(doc(db, "applications", id));
+            // No need to alert success, the real-time listener will update the UI
         } catch (error) {
             console.error("Error deleting application:", error);
-            alert("Failed to delete application. You might not be authorized.");
+            alert("Failed to delete application. Check your permissions.");
         }
     };
 
     const handleStatusUpdate = async (id, newStatus) => {
         try {
-            const token = await auth.currentUser.getIdToken();
-            const response = await fetch(`/api/admin/applications?id=${id}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: newStatus })
+            await updateDoc(doc(db, "applications", id), {
+                status: newStatus
             });
-            if (!response.ok) throw new Error('Failed to update status');
         } catch (error) {
             console.error("Error updating status:", error);
-            alert("Failed to update status. You might not be authorized.");
+            alert("Failed to update status. Check your permissions.");
         }
     };
 
