@@ -36,8 +36,27 @@ const AdminApplications = () => {
 
     const handleDelete = async (id) => {
         if (!window.confirm("Delete this application?")) return;
+
+        const appToDelete = applications.find(a => a.id === id);
+
         try {
+            // 1. Delete from Firestore
             await deleteDoc(doc(db, "applications", id));
+
+            // 2. Delete from Google Sheet (Fire and Forget)
+            if (appToDelete && appToDelete.email && import.meta.env.VITE_GOOGLE_SHEET_URL) {
+                const params = new URLSearchParams();
+                params.append('action', 'delete');
+                params.append('email', appToDelete.email);
+
+                fetch(import.meta.env.VITE_GOOGLE_SHEET_URL, {
+                    method: 'POST',
+                    body: params,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    mode: 'no-cors'
+                }).catch(err => console.error("Sheet delete error:", err));
+            }
+
             // No need to alert success, the real-time listener will update the UI
         } catch (error) {
             console.error("Error deleting application:", error);
@@ -51,9 +70,24 @@ const AdminApplications = () => {
                 status: newStatus
             });
 
+            // Sync Status to Google Sheet (Fire and Forget)
+            const app = applications.find(a => a.id === id);
+            if (app && app.email && import.meta.env.VITE_GOOGLE_SHEET_URL) {
+                const params = new URLSearchParams();
+                params.append('action', 'updateStatus');
+                params.append('email', app.email);
+                params.append('status', newStatus);
+
+                fetch(import.meta.env.VITE_GOOGLE_SHEET_URL, {
+                    method: 'POST',
+                    body: params,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    mode: 'no-cors'
+                }).catch(err => console.error("Sheet status sync error:", err));
+            }
+
             // If approved, add to members collection
             if (newStatus === 'Approved') {
-                const app = applications.find(a => a.id === id);
                 if (app) {
                     await addDoc(collection(db, "members"), {
                         name: app.name,
