@@ -33,6 +33,10 @@ This project features a modern, dark-themed UI with neon aesthetics, advanced an
 - **Message Center**: 
     - **Inquiry Management**: Centralized view for contact form submissions.
     - **Smart Filtering**: Rapidly sort and address queries.
+- **Google Sheets Integration**:
+    - **Two-Way Sync**: Automatically adds new applications to a Google Sheet.
+    - **Status Sync**: Updates specific rows when application status changes.
+    - **Deletion Sync**: Removes entries from the Sheet when deleted from the Admin Panel.
 
 ## 🎨 Visuals & Aesthetics
 
@@ -74,7 +78,7 @@ graph TD
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19, Vite, TailwindCSS (for utility), Vanilla CSS (for custom effects).
+- **Frontend**: React 18, Vite, TailwindCSS (for utility), Vanilla CSS (for custom effects).
 - **Styling**: Framer Motion (Animations), Lucide React (Icons).
 - **Backend**: 
     - **Vercel Serverless Functions**: Secure API endpoints for sensitive logic.
@@ -82,6 +86,11 @@ graph TD
     - **Firebase Firestore**: Real-time NoSQL database.
 - **Services**: 
     - **EmailJS**: Transactional email delivery.
+    - **Google Apps Script**: Custom script for Sheets integration.
+
+## 🗄️ Database & Schema
+
+For a detailed overview of the Firestore Cloud Database architecture, collections strategy, and security rules, please refer to the [DATABASE_SCHEMA.md](DATABASE_SCHEMA.md).
 
 ## 📂 Project Structure
 
@@ -95,6 +104,7 @@ src/
 │   └── public/     # Visitor Pages (Home, Team, Events)
 ├── api/            # Serverless Backend Functions
 └── assets/         # Images and Static Resources
+└── GOOGLE_SHEETS_SCRIPT.js # Google Apps Script for Sync
 ```
 
 ## ⚡ Getting Started
@@ -142,5 +152,11 @@ src/
     npm run dev
     ```
     *Note: To test serverless functions locally, use `vercel dev` if configured.*
+
+5.  **Grant Admin Access (Optional):**
+    To enable admin privileges for a user, update the email in `setAdmin.js` and run:
+    ```bash
+    node setAdmin.js
+    ```
  
 *Built with 💻 and ☕ by the LOOP Team.*
