@@ -5,6 +5,7 @@ import { normalizeError, ApiError } from '../utils/errorHandler';
 import { db, auth } from '../firebase';
 import { collection, addDoc, setDoc, doc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
 import emailjs from '@emailjs/browser';
+import ThreeBackground from '../components/ThreeBackground';
 
 const Join = () => {
     const [formData, setFormData] = useState({
@@ -212,6 +213,7 @@ const Join = () => {
 
     return (
         <div className="container" style={{ padding: '8rem 0 4rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <ThreeBackground variant="join" />
 
             <div style={{ textAlign: 'center', marginBottom: '3rem' }} className="animate-fade-in">
                 <h1 className="text-accent" style={{ fontSize: '3rem', marginBottom: '1rem' }}>JOIN THE SQUAD</h1>

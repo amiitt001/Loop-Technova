@@ -31,8 +31,8 @@ const CredibilityStrip = () => {
         <div style={{
             borderTop: '1px solid var(--border-dim)',
             borderBottom: '1px solid var(--border-dim)',
-            background: 'rgba(0,0,0,0.3)',
-            backdropFilter: 'blur(10px)',
+            background: 'transparent',
+            backdropFilter: 'blur(2px)',
             padding: '2rem 0',
             position: 'relative',
             zIndex: 10

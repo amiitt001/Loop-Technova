@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Crown, Search, RefreshCw } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
+import ThreeBackground from '../components/ThreeBackground';
 
 const Leaderboard = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -37,6 +38,7 @@ const Leaderboard = () => {
 
     return (
         <div className="container" style={{ padding: '8rem 0 4rem' }}>
+            <ThreeBackground variant="leaderboard" />
 
             <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="animate-fade-in">
                 <h1 className="text-accent" style={{ fontSize: '3rem', marginBottom: '1rem' }}>LEADERBOARD</h1>

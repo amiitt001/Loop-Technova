@@ -39,7 +39,7 @@ const HomeAbout = () => {
     return (
         <section style={{
             padding: '8rem 0',
-            background: '#030303',
+            background: 'transparent',
             position: 'relative',
             borderTop: '1px solid rgba(255,255,255,0.05)'
         }}>

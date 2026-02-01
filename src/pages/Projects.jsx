@@ -1,5 +1,6 @@
 import React from 'react';
 import { Github, ExternalLink, Code, Layers, Database, Cpu } from 'lucide-react';
+import ThreeBackground from '../components/ThreeBackground';
 
 const PROJECTS = [
     {
@@ -47,6 +48,7 @@ const PROJECTS = [
 const Projects = () => {
     return (
         <div className="container" style={{ padding: '8rem 0 4rem' }}>
+            <ThreeBackground variant="projects" />
             <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="animate-fade-in">
                 <h1 className="text-accent" style={{ fontSize: '3rem', marginBottom: '1rem' }}>PROJECTS</h1>
                 <p style={{ color: 'var(--text-dim)' }}>Pushing the boundaries of what's possible.</p>

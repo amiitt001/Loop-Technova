@@ -4,6 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Calendar, Clock, MapPin, User, ArrowLeft, Globe } from 'lucide-react';
 import RegistrationForm from '../components/RegistrationForm';
+import ThreeBackground from '../components/ThreeBackground';
 
 const EventDetails = () => {
     const { id } = useParams();
@@ -65,6 +66,7 @@ const EventDetails = () => {
 
     return (
         <div className="min-h-screen bg-[var(--bg-dark)] pt-32 pb-20 px-4">
+            <ThreeBackground variant="events" />
             <div className="container max-w-5xl mx-auto">
                 <button
                     onClick={() => navigate('/events')}

@@ -4,6 +4,8 @@ import { MessageSquare, X, Send, Bot, User } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 
+
+
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
@@ -128,7 +130,15 @@ const Chatbot = () => {
                                 justifyContent: 'space-between'
                             }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                    <Bot size={18} color="var(--accent)" />
+                                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', border: '1px solid var(--accent)' }}>
+                                        <motion.img
+                                            src="/mascot_3d.png"
+                                            alt="Bot"
+                                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                            animate={{ y: [0, -2, 0] }}
+                                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                        />
+                                    </div>
                                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '1px' }}>LOOP ASSISTANT</span>
                                 </div>
                                 <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)' }}>
@@ -230,7 +240,19 @@ const Chatbot = () => {
                         right: 0
                     }}
                 >
-                    {isOpen ? <X size={28} color="#000" /> : <MessageSquare size={28} color="#000" />}
+                    {isOpen ? (
+                        <X size={28} color="#000" />
+                    ) : (
+                        <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', border: '2px solid var(--accent)' }}>
+                            <motion.img
+                                src="/mascot_3d.png"
+                                alt="Chat"
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                animate={{ y: [0, -3, 0], rotate: [0, 5, -5, 0] }}
+                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                        </div>
+                    )}
                 </motion.button>
             </div>
         </>

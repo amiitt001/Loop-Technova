@@ -6,7 +6,7 @@ const Footer = () => {
             padding: '4rem 0 2rem',
             textAlign: 'center',
             borderTop: '1px solid var(--border-dim)',
-            background: 'var(--bg-card)'
+            background: 'transparent'
         }}>
             <div className="container">
                 <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#fff' }}>TECHNOVA</h2>

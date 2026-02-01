@@ -11,20 +11,10 @@ import HomeEvents from '../components/HomeEvents';
 import HomeTeam from '../components/HomeTeam';
 import HomeAbout from '../components/HomeAbout';
 import HomeContact from '../components/HomeContact';
+import ThreeBackground from '../components/ThreeBackground';
 
 const Home = () => {
-  const [particles, setParticles] = React.useState([]);
 
-  React.useEffect(() => {
-    setParticles([...Array(20)].map(() => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      targetY: Math.random() * window.innerHeight,
-      duration: Math.random() * 10 + 10,
-      size: Math.random() * 4 + 1,
-      left: Math.random() * 100 + '%'
-    })));
-  }, []);
 
   const letterContainer = {
     hidden: { opacity: 0 },
@@ -60,36 +50,7 @@ const Home = () => {
           position: 'relative',
           background: 'radial-gradient(circle at 30% center, rgba(0, 243, 255, 0.08), transparent 50%)'
         }}>
-          {/* Advanced Animated Background */}
-          <div className="grid-bg"></div>
-
-          <div className="particles">
-            {particles.map((p, i) => (
-              <motion.div
-                key={i}
-                className="particle"
-                initial={{
-                  x: p.x,
-                  y: p.y,
-                  opacity: 0
-                }}
-                animate={{
-                  y: [null, p.targetY],
-                  opacity: [0, 0.5, 0]
-                }}
-                transition={{
-                  duration: p.duration,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                style={{
-                  width: p.size + 'px',
-                  height: p.size + 'px',
-                  left: p.left,
-                }}
-              />
-            ))}
-          </div>
+          <ThreeBackground />
 
           <div className="container" style={{ position: 'relative', zIndex: 1, paddingTop: '4rem', paddingBottom: '4rem' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }} className="hero-grid">
@@ -173,7 +134,7 @@ const Home = () => {
                 >
                   <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.5), transparent)', zIndex: 2 }}></div>
-                    <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?q=80&w=1000&auto=format&fit=crop" alt="Coding" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'grayscale(20%) contrast(1.1)' }} />
+                    <img src="/mascot.jpg" alt="LOOP Mascot" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'none' }} />
                   </div>
                 </motion.div>
 
@@ -240,7 +201,7 @@ const Home = () => {
         <HomeContact />
 
         {/* SECTION 9: FINAL CTA */}
-        <div style={{ padding: '8rem 0', textAlign: 'center', background: 'linear-gradient(0deg, var(--bg-card) 0%, transparent 100%)' }}>
+        <div style={{ padding: '8rem 0', textAlign: 'center', background: 'transparent' }}>
           <div className="container">
             <h2 style={{ fontSize: '3rem', marginBottom: '2rem', maxWidth: '800px', margin: '0 auto 2rem' }}>
               READY TO <span style={{ color: 'var(--accent)' }}>BUILD</span> THE IMPOSSIBLE?
