@@ -29,14 +29,16 @@ export const verifyAdmin = async (req) => {
 
     const token = authHeader.split('Bearer ')[1];
 
+    let decodedToken;
     try {
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        // Here you could add extra checks, e.g., allowed emails:
-        // const ALLOWED_ADMINS = ['admin@technova.com'];
-        // if (!ALLOWED_ADMINS.includes(decodedToken.email)) throw new ForbiddenError();
-
-        return decodedToken;
+        decodedToken = await admin.auth().verifyIdToken(token);
     } catch (error) {
         throw new UnauthorizedError('Invalid or expired token');
     }
+
+    if (decodedToken.admin !== true) {
+        throw new ForbiddenError('User is not an admin');
+    }
+
+    return decodedToken;
 };
