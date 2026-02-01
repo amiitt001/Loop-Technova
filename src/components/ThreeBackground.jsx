@@ -61,8 +61,10 @@ const TechLoop = ({ isMobile }) => {
     useFrame((state, delta) => {
         if (meshRef.current) {
             const scrollY = window.scrollY;
-            meshRef.current.rotation.x += delta * 0.1 + scrollY * 0.0002;
-            meshRef.current.rotation.y += delta * 0.15 + scrollY * 0.0001;
+            // FIX: Use direct mapping instead of additive accumulator for scrollY
+            // t * 0.1 gives constant rotation, scrollY * 0.001 adds rotation based on scroll position
+            meshRef.current.rotation.x = state.clock.getElapsedTime() * 0.1 + scrollY * 0.0005;
+            meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.15 + scrollY * 0.0005;
 
             // Mouse Parallax
             meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, -state.pointer.x * 1.5, 0.1);
@@ -101,11 +103,13 @@ const ParticleFlow = ({ isMobile }) => {
     useFrame((state, delta) => {
         if (!meshRef.current) return;
         const positions = meshRef.current.geometry.attributes.position.array;
-        const scrollOffset = window.scrollY * 0.01;
+        const scrollOffset = window.scrollY * 0.002; // Slower factor
 
         for (let i = 0; i < count; i++) {
-            // Move left to right + Scroll Speed Boost
-            positions[i * 3] += (speeds[i] + scrollOffset * 0.05) * delta;
+            // Move left to right (constant speed)
+            // Add scrollOffset to X position directly in the logic below? 
+            // Better: just let them flow at constant speed, and move the WHOLE MESH x position based on scroll
+            positions[i * 3] += speeds[i] * delta;
 
             // Reset if out of bounds
             if (positions[i * 3] > 10) {
@@ -114,8 +118,10 @@ const ParticleFlow = ({ isMobile }) => {
         }
         meshRef.current.geometry.attributes.position.needsUpdate = true;
 
-        // Interactive Sway + Scroll Tilt
-        meshRef.current.rotation.z = THREE.MathUtils.lerp(meshRef.current.rotation.z, state.pointer.x * 0.2 + window.scrollY * 0.0005, 0.05);
+        // Interactive Sway + Scroll Tilt + Scroll Horizontal Shift
+        meshRef.current.rotation.z = THREE.MathUtils.lerp(meshRef.current.rotation.z, state.pointer.x * 0.2, 0.05);
+        // Direct scroll influence on position instead of speed
+        meshRef.current.position.x = -scrollOffset;
         meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, -state.pointer.y * 2, 0.05);
     });
 
@@ -233,8 +239,9 @@ const Vortex = ({ isMobile }) => {
 
     useFrame((state, delta) => {
         if (meshRef.current) {
-            meshRef.current.rotation.z += delta * 0.2;
-            // spiral effect illusion
+            const scrollY = window.scrollY;
+            // FIX: Use direct mapping instead of additive accumulator
+            meshRef.current.rotation.z = state.clock.getElapsedTime() * 0.2 + scrollY * 0.001;
 
             // Move center based on mouse
             meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, state.pointer.x * 2, 0.05);
