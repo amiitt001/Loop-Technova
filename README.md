@@ -20,7 +20,11 @@ This project features a modern, dark-themed UI with neon aesthetics, advanced an
 - **Join Us (Membership)**: 
     - Comprehensive application form with automated validation.
     - Status tracking system.
-- **Chatbot**: Integrated AI assistant to guide visitors.
+- **Leaderboard**: Real-time ranking system for the top competitive programmers.
+- **Chatbot (LOOP Assistant)**: 
+    - **Smart Responses**: Replies with "Rich Cards" (Events, Profiles) instead of just text.
+    - **Quick Actions**: One-tap suggestions for common queries.
+    - **Interactive**: Fully transparent UI with intelligent context awareness.
 - **Mobile Responsive**: Fully optimized for all devices with touch-friendly interactions.
 
 ### Admin Panel (Secure)
