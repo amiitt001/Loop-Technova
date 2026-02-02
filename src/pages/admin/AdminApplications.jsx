@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Search, Check, X, Trash2, Mail, Github, Linkedin, GraduationCap, ExternalLink } from 'lucide-react';
-import { safeRender } from '../../utils/security';
-import { db, auth } from '../../firebase';
+import { safeRender, safeHref } from '../../utils/security';
+import { db } from '../../firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const AdminApplications = () => {
@@ -170,7 +170,7 @@ const AdminApplications = () => {
                             <div className="flex flex-wrap gap-x-6 gap-y-2 mb-4 text-sm text-zinc-400">
                                 <div className="flex items-center gap-2">
                                     <Mail size={14} />
-                                    <a href={`mailto:${app.email}`} className="hover:text-main transition-colors">
+                                    <a href={safeHref(`mailto:${app.email}`)} className="hover:text-main transition-colors">
                                         {safeRender(app.email)}
                                     </a>
                                 </div>
@@ -183,13 +183,13 @@ const AdminApplications = () => {
                                 {app.github && (
                                     <div className="flex items-center gap-2">
                                         <Github size={14} />
-                                        <a href={app.github} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] hover:underline">GitHub Profile</a>
+                                        <a href={safeHref(app.github)} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] hover:underline">GitHub Profile</a>
                                     </div>
                                 )}
                                 {app.linkedin && (
                                     <div className="flex items-center gap-2">
                                         <Linkedin size={14} />
-                                        <a href={app.linkedin} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] hover:underline">LinkedIn Profile</a>
+                                        <a href={safeHref(app.linkedin)} target="_blank" rel="noopener noreferrer" className="text-[var(--accent)] hover:underline">LinkedIn Profile</a>
                                     </div>
                                 )}
                             </div>
