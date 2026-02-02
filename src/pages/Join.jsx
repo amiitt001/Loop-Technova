@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { signInWithEmailLink, isSignInWithEmailLink, sendSignInLinkToEmail } from 'firebase/auth';
 import { Send, CheckCircle, AlertCircle, Instagram, ExternalLink } from 'lucide-react';
-import { normalizeError, ApiError } from '../utils/errorHandler';
-import { db, auth } from '../firebase';
-import { collection, addDoc, setDoc, doc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
-import emailjs from '@emailjs/browser';
+import { auth } from '../firebase';
 import ThreeBackground from '../components/ThreeBackground';
 
 const Join = () => {
@@ -161,78 +158,52 @@ const Join = () => {
 
         setStatus('submitting');
 
-        // 1. Database Submission (Critical)
         try {
-            // Direct Firestore Submission matched by Email ID to prevent duplicates
-            // We removed the manual 'getDocs' duplicate check because public users cannot read the collection.
-            // setDoc will fail with 'permission-denied' if the document already exists (because allow update is admin-only),
-            // effectively acting as a duplicate check.
-            // Rules allow create but deny update for non-admins, enforcing uniqueness
-            await setDoc(doc(db, "applications", sanitizedData.email), {
-                ...sanitizedData,
-                createdAt: serverTimestamp(),
-                status: 'Pending'
+            // 1. Backend Submission (Validation + DB + Email)
+            const response = await fetch('/api/apply', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(sanitizedData)
             });
 
-            // Google Sheets Submission (Non-blocking)
+            const result = await response.json();
+
+            if (!response.ok) {
+                // Handle duplicate specifically
+                if (response.status === 409) {
+                    alert("You have already submitted an application with this email address.");
+                } else {
+                    throw new Error(result.error || result.message || "Submission failed");
+                }
+                setStatus('error');
+                return;
+            }
+
+            // 2. Google Sheets Submission (Non-blocking redundancy)
             submitToGoogleSheets(sanitizedData);
 
+            // 3. Success State
+            setStatus('success');
+            setFormData({
+                name: '',
+                email: '',
+                github: '',
+                branch: '',
+                year: '1st Year',
+                college: 'Galgotias College of Engineering and Technology',
+                domain: 'Full Stack Development',
+                customDomain: '',
+                linkedin: '',
+                reason: ''
+            });
+
         } catch (error) {
-            console.error("Database Submission Error:", error);
-            // If the write fails due to permission denied, it means the document already exists 
-            // (because we allow create but deny update for non-admins)
-            if (error.code === 'permission-denied' || error.message.includes('permission-denied')) {
-                alert("You have already submitted an application with this email address.");
-            } else {
-                alert(`Application Failed: ${error.message}. Please try again or contact support.`);
-            }
+            console.error("Application Submission Error:", error);
+            alert(`Application Failed: ${error.message}. Please try again or contact support.`);
             setStatus('error');
-            return; // Stop execution if DB save fails
         }
-
-        // 2. Email Notification (Non-Critical)
-        try {
-            // Send Email Notification
-            const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-            const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-            const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
-
-            const templateParams = {
-                to_name: "Admin",
-                name: sanitizedData.name,
-                email: sanitizedData.email,
-                branch: sanitizedData.branch,
-                year: sanitizedData.year,
-                college: sanitizedData.college,
-                domain: sanitizedData.domain,
-                reason: sanitizedData.reason,
-                github: sanitizedData.github,
-                linkedin: sanitizedData.linkedin,
-                message: `New Application from ${sanitizedData.name} (${sanitizedData.branch}, ${sanitizedData.year})`
-            };
-
-            await emailjs.send(serviceId, templateId, templateParams, publicKey);
-
-        } catch (error) {
-            console.error("Email Submission Error:", error);
-            // Alert user but still show success screen since data is saved
-            alert("Application saved successfully, but the confirmation email could not be sent.");
-        }
-
-        // 3. Success State
-        setStatus('success');
-        setFormData({
-            name: '',
-            email: '',
-            github: '',
-            branch: '',
-            year: '1st Year',
-            college: 'Galgotias College of Engineering and Technology',
-            domain: 'Full Stack Development',
-            customDomain: '',
-            linkedin: '',
-            reason: ''
-        });
     };
 
     return (
