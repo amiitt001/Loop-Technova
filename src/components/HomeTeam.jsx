@@ -97,6 +97,7 @@ const HomeTeamCard = ({ member, index }) => {
 
 const HomeTeam = () => {
     const [teamPreview, setTeamPreview] = useState([]);
+    const [mentors, setMentors] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isMobile, setIsMobile] = useState(() => {
         if (typeof window !== 'undefined') {
@@ -142,6 +143,14 @@ const HomeTeam = () => {
             }));
 
             setFeaturedMembers(featuredWithColors);
+
+            // Filter for Mentors
+            const mentorsList = allMembers.filter(m => m.role.includes('Mentor'));
+            const mentorsWithColors = mentorsList.map((m, i) => ({
+                ...m,
+                color: neonColors[i % neonColors.length]
+            }));
+            setMentors(mentorsWithColors);
 
             setTeamPreview(previewWithColors);
             setLoading(false);
@@ -281,6 +290,23 @@ const HomeTeam = () => {
                         {teamPreview.map((member, i) => (
                             <HomeTeamCard key={member.id} member={member} index={i} />
                         ))}
+                    </div>
+                )}
+
+                {/* Mentors Section */}
+                {mentors.length > 0 && (
+                    <div style={{ marginBottom: '4rem' }}>
+                        <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem', marginTop: '3rem' }}>OUR <span style={{ color: 'var(--accent)' }}>MENTORS</span></h3>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            flexWrap: 'wrap',
+                            gap: '2rem'
+                        }}>
+                            {mentors.map((member, i) => (
+                                <HomeTeamCard key={member.id} member={member} index={i} />
+                            ))}
+                        </div>
                     </div>
                 )}
 
