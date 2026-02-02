@@ -120,7 +120,6 @@ const HomeAbout = () => {
                                 e.currentTarget.style.borderColor = 'var(--border-dim)';
                                 e.currentTarget.style.boxShadow = 'none';
                             }}
-                            onClick={() => navigate('/join')}
                         >
                             INITIALIZE PROTOCOLS <ArrowRight size={16} />
                         </button>

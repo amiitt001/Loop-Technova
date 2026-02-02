@@ -109,8 +109,7 @@ const Chatbot = () => {
                             style={{
                                 width: '350px',
                                 height: '500px',
-                                background: 'rgba(10, 10, 10, 0.95)',
-                                backdropFilter: 'blur(16px)',
+                                background: 'rgba(10, 10, 10, 0.1)',
                                 borderRadius: '16px',
                                 border: '1px solid var(--accent)',
                                 boxShadow: '0 0 30px rgba(0, 243, 255, 0.15)',

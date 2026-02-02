@@ -155,53 +155,53 @@ const Home = () => {
                     transform: 'rotate(-3deg)'
                   }}
                 >
-                  <div style={{ width: '100%', height: '100%', overflow: 'hidden', position: 'relative' }}>
-                    <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)', zIndex: 2 }}></div>
-                    <img src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?q=80&w=1000&auto=format&fit=crop" alt="Conference" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'sepia(15%) contrast(1.1)' }} />
-                  </div>
+                  <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)', zIndex: 2 }}></div>
+                  <img src="/squad.png" alt="Team LOOP" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </motion.div>
-
-                {/* Ambient Glow Refinement */}
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '450px',
-                  height: '450px',
-                  background: 'radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, transparent 70%)',
-                  filter: 'blur(80px)',
-                  zIndex: 1,
-                  pointerEvents: 'none'
-                }}></div>
               </motion.div>
-            </div>
 
+              {/* Ambient Glow Refinement */}
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '450px',
+                height: '450px',
+                background: 'radial-gradient(circle, rgba(0, 243, 255, 0.15) 0%, transparent 70%)',
+                filter: 'blur(80px)',
+                zIndex: 1,
+                pointerEvents: 'none'
+              }}></div>
+            </div>
           </div>
-        </section>
+
+
+        </section >
 
         {/* SECTION 2: CREDIBILITY STRIP */}
-        <CredibilityStrip />
+        < CredibilityStrip />
 
         {/* SECTION 3: ABOUT */}
-        <HomeAbout />
+        < HomeAbout />
 
         {/* SECTION 4: GALLERY */}
-        <HomeGallery />
+        < HomeGallery />
 
 
 
         {/* SECTION 6: EVENTS PREVIEW */}
-        <HomeEvents />
+        < HomeEvents />
 
         {/* SECTION 7: TEAM PREVIEW */}
-        <HomeTeam />
+        < HomeTeam />
 
         {/* SECTION 8: CONTACT */}
-        <HomeContact />
+        < HomeContact />
 
         {/* SECTION 9: FINAL CTA */}
-        <div style={{ padding: '8rem 0', textAlign: 'center', background: 'transparent' }}>
+        < div style={{ padding: '8rem 0', textAlign: 'center', background: 'transparent' }
+        }>
           <div className="container">
             <h2 style={{ fontSize: '3rem', marginBottom: '2rem', maxWidth: '800px', margin: '0 auto 2rem' }}>
               READY TO <span style={{ color: 'var(--accent)' }}>BUILD</span> THE IMPOSSIBLE?
@@ -217,9 +217,9 @@ const Home = () => {
               </motion.button>
             </Link>
           </div>
-        </div>
+        </div >
 
-      </div>
+      </div >
 
       <style>{`
         .grid-bg {
@@ -294,9 +294,7 @@ const Home = () => {
           backdrop-filter: blur(5px);
         }
 
-        . {
-          text-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
-        }
+
 
         @media (max-width: 768px) {
             .btn-primary, .btn-secondary {

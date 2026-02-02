@@ -16,9 +16,7 @@ const Navbar = () => {
             left: 0,
             width: '100%',
             zIndex: 1000,
-            background: 'rgba(5, 5, 5, 0.9)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(0, 243, 255, 0.1)',
+            background: 'transparent',
             height: '70px',
             display: 'flex',
             alignItems: 'center'
@@ -42,7 +40,7 @@ const Navbar = () => {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
                         <img src="/logo.png" alt="LOOP" style={{
-                            height: '38px',                        
+                            height: '38px',
                             width: '38px',
                             objectFit: 'cover',
                             borderRadius: '50%',
