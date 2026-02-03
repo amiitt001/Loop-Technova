@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit2, Trash2, RefreshCw, Mail, Phone, Linkedin, Github, Shield } from 'lucide-react';
+import { safeHref } from '../../utils/security';
 import { db } from '../../firebase';
 import { collection, deleteDoc, doc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
@@ -110,12 +111,12 @@ const AdminMembers = () => {
 
                                 <div className="flex gap-3 mt-2 justify-center">
                                     {member.social?.linkedin && (
-                                        <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-[#0077b5] transition-colors">
+                                        <a href={safeHref(member.social.linkedin)} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-[#0077b5] transition-colors">
                                             <Linkedin size={20} />
                                         </a>
                                     )}
                                     {member.social?.github && (
-                                        <a href={member.social.github} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-main transition-colors">
+                                        <a href={safeHref(member.social.github)} target="_blank" rel="noopener noreferrer" className="text-zinc-500 hover:text-main transition-colors">
                                             <Github size={20} />
                                         </a>
                                     )}

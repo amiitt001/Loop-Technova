@@ -66,3 +66,23 @@ export const safeRender = (content, fallback = "Invalid Content") => {
 
     return str;
 };
+
+/**
+ * Validates and returns a safe href URL.
+ * Prevents javascript: URI injection and other malicious schemes.
+ * @param {string} url - The URL to validate
+ * @returns {string} - Safe URL or '#'
+ */
+export const safeHref = (url) => {
+    if (!url || typeof url !== 'string') return '#';
+
+    // Trim whitespace
+    const cleanUrl = url.trim();
+
+    // Allow http, https, mailto, tel
+    if (cleanUrl.match(/^(https?:\/\/|mailto:|tel:)/i)) {
+        return cleanUrl;
+    }
+
+    return '#';
+};
