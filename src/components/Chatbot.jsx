@@ -154,7 +154,7 @@ const Chatbot = () => {
 
         if (lowerInput.includes('about') || lowerInput.includes('loop') || lowerInput.includes('club')) {
             return {
-                text: "LOOP (League of Oriented Programmers) is the official coding club of GCET. We foster a community of developers, designers, and innovators through hackathons, workshops, and projects.",
+                text: "LOOP is the official coding club of GCET. We foster a community of developers, designers, and innovators through hackathons, workshops, and projects.",
                 type: 'text'
             };
         }
