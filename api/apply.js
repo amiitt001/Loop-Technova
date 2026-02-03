@@ -48,6 +48,32 @@ async function validateEmail(email) {
 import { safeHandler } from './utils/wrapper.js';
 import { ValidationError, ConflictError } from './utils/errors.js';
 
+function validateInput(data) {
+    const rules = {
+        name: { maxLength: 100 },
+        admissionNumber: { maxLength: 20 },
+        branch: { maxLength: 50 },
+        year: { maxLength: 20 },
+        college: { maxLength: 100 },
+        reason: { maxLength: 1000 },
+        domain: { maxLength: 50 },
+        github: { maxLength: 200 },
+        linkedin: { maxLength: 200 }
+    };
+
+    for (const [field, rule] of Object.entries(rules)) {
+        if (data[field]) {
+            if (typeof data[field] !== 'string') {
+                return { valid: false, reason: `${field} must be a string` };
+            }
+            if (data[field].length > rule.maxLength) {
+                return { valid: false, reason: `${field} exceeds maximum length of ${rule.maxLength}` };
+            }
+        }
+    }
+    return { valid: true };
+}
+
 export default safeHandler(async function handler(req, res) {
     if (req.method !== 'POST') {
         res.setHeader('Allow', 'POST');
@@ -60,7 +86,13 @@ export default safeHandler(async function handler(req, res) {
         throw new ValidationError('Missing required fields');
     }
 
-    // 0. Strict Email Validation
+    // 0. Input Validation
+    const inputValidation = validateInput(req.body);
+    if (!inputValidation.valid) {
+        throw new ValidationError(`Invalid input: ${inputValidation.reason}`);
+    }
+
+    // 0.1 Strict Email Validation
     const emailValidation = await validateEmail(email);
     if (!emailValidation.valid) {
         throw new ValidationError(`Invalid email: ${emailValidation.reason}`);
