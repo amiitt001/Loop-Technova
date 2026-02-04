@@ -159,6 +159,13 @@ const Chatbot = () => {
             };
         }
 
+        if (lowerInput.includes('college') || lowerInput.includes('gcet')) {
+            return {
+                text: "We are proudly established at Galgotias College of Engineering and Technology (GCET).",
+                type: 'text'
+            };
+        }
+
         if (lowerInput.includes('contact') || lowerInput.includes('mail') || lowerInput.includes('email') || lowerInput.includes('reach')) {
             return {
                 text: "You can reach us at 'loop.gcetclub@gmail.com' or use the 'Get in Touch' form at the bottom of the home page. Connect with us on Instagram @gcetloop!",
