@@ -2,6 +2,7 @@
 import admin from 'firebase-admin';
 import { safeHandler } from './utils/wrapper.js';
 import { ValidationError, ConflictError } from './utils/errors.js';
+import { sanitizeForSheets } from './utils/sanitizers.js';
 
 // prevent re-initialization ensuring singleton
 if (!admin.apps.length) {
@@ -152,15 +153,15 @@ export default safeHandler(async function handler(req, res) {
 
                 const formParams = new URLSearchParams();
                 formParams.append('action', 'register');
-                formParams.append('eventTitle', eventTitle);
-                formParams.append('eventId', eventId);
-                formParams.append('name', name);
+                formParams.append('eventTitle', sanitizeForSheets(eventTitle));
+                formParams.append('eventId', sanitizeForSheets(eventId));
+                formParams.append('name', sanitizeForSheets(name));
                 formParams.append('email', email);
-                formParams.append('mobile', mobile);
-                formParams.append('year', year);
-                formParams.append('branch', branch);
-                formParams.append('enrollmentId', enrollmentId);
-                formParams.append('teamName', teamName);
+                formParams.append('mobile', sanitizeForSheets(mobile));
+                formParams.append('year', sanitizeForSheets(year));
+                formParams.append('branch', sanitizeForSheets(branch));
+                formParams.append('enrollmentId', sanitizeForSheets(enrollmentId));
+                formParams.append('teamName', sanitizeForSheets(teamName));
                 if (responses) formParams.append('responses', JSON.stringify(responses));
                 formParams.append('timestamp', new Date().toISOString());
 

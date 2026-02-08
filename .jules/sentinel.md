@@ -12,3 +12,8 @@
 **Vulnerability:** The Google Apps Script URL was exposed in the client-side code (`VITE_GOOGLE_SHEET_URL`), allowing unauthenticated users to trigger arbitrary actions (including deletion) defined in the script.
 **Learning:** External integrations often lack granular permissions (like "append-only"). Exposing their direct URLs to the client grants the client full permissions over that integration.
 **Prevention:** Proxy all external integrations through the backend. This allows the backend to enforce authentication, validation, and rate limiting before forwarding the request to the external service.
+
+## 2025-02-06 - Inconsistent Input Sanitization (CSV Injection)
+**Vulnerability:** While the application form endpoint (`api/apply.js`) correctly sanitized inputs against CSV/Formula Injection, the registration endpoint (`api/register.js`) did not, despite using the same Google Sheets backend.
+**Learning:** Security measures applied to one endpoint (like sanitization) are often forgotten in similar endpoints created later or by different developers. Consistency is key.
+**Prevention:** Centralize data submission logic to external services (like Google Sheets) into a single utility function that handles sanitization automatically, rather than relying on each endpoint to manually sanitize before sending.
