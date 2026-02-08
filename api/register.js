@@ -67,150 +67,126 @@ export default safeHandler(async function handler(req, res) {
 
     const docRef = await registrationsRef.add(newRegistration);
 
-    // 3. Send Email via EmailJS (Graceful Degradation)
-    try {
-        const serviceID = process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID;
+    // 3. Initiate Background Tasks (Fire-and-Forget)
+    const runBackgroundTasks = async () => {
+        // --- EmailJS Logic ---
+        try {
+            const serviceID = process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID;
+            const publicKey = process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY;
+            const privateKey = process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY;
 
-        const publicKey = process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY;
-        const privateKey = process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY;
+            if (serviceID && publicKey) {
+                // User Confirmation Email
+                const confirmTemplateID = process.env.EMAILJS_CONFIRM_TEMPLATE_ID || process.env.VITE_EMAILJS_CONFIRM_TEMPLATE_ID || "template_mzmcp88";
 
-        if (serviceID && publicKey) {
+                if (confirmTemplateID) {
+                    let eventDetails = { date: 'TBA', time: 'TBA', venue: 'TBA' };
 
-            // 1. Admin Notification (Disabled to prevent "Join Us" email confusion)
-            /* 
-            const adminParams = {
-                to_name: "Admin",
-                name,
-                email,
-                message: `New Registration for ${eventTitle} by ${name} (${email})`,
-                reply_to: "technova@galgotias.edu"
-            };
- 
-            const adminData = {
-                service_id: serviceID,
-                template_id: templateID, // This was using the Join Us template
-                user_id: publicKey,
-                template_params: adminParams
-            };
- 
-            if (privateKey) adminData.accessToken = privateKey;
- 
-            await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(adminData),
-            });
-            */
+                    try {
+                        const eventDoc = await db.collection('events').doc(eventId).get();
+                        if (eventDoc.exists) {
+                            const evt = eventDoc.data();
+                            eventDetails.date = evt.date ? (evt.date.toDate ? evt.date.toDate().toDateString() : new Date(evt.date).toDateString()) : 'TBA';
+                            eventDetails.time = evt.time || 'TBA';
+                            eventDetails.venue = evt.location || evt.venue || 'TBA';
+                        }
+                    } catch (fetchErr) {
+                        console.error("Failed to fetch event details for email:", fetchErr);
+                    }
 
-            // 2. User Confirmation Email
-            const confirmTemplateID = process.env.EMAILJS_CONFIRM_TEMPLATE_ID || process.env.VITE_EMAILJS_CONFIRM_TEMPLATE_ID || "template_mzmcp88";
+                    const userParams = {
+                        name: name,
+                        to_name: name,
+                        email: email,
+                        eventName: eventTitle,
+                        eventDate: eventDetails.date,
+                        eventTime: eventDetails.time,
+                        eventVenue: eventDetails.venue,
+                        reply_to: "loop.gcetclub@gmail.com"
+                    };
 
-            if (confirmTemplateID) {
-                // Fetch Event Details for Email
-                let eventDetails = {
-                    date: 'TBA',
-                    time: 'TBA',
-                    venue: 'TBA'
+                    const userData = {
+                        service_id: serviceID,
+                        template_id: confirmTemplateID,
+                        user_id: publicKey,
+                        template_params: userParams
+                    };
+
+                    if (privateKey) userData.accessToken = privateKey;
+
+                    try {
+                        const userEmailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(userData),
+                        });
+
+                        if (!userEmailResponse.ok) {
+                            console.error('User Confirmation Email Failed:', await userEmailResponse.text());
+                        } else {
+                            console.log('User Confirmation Email Sent');
+                        }
+                    } catch (fetchError) {
+                        console.error('Email API Fetch Error:', fetchError);
+                    }
+                }
+            }
+        } catch (emailError) {
+            console.error("Email subsystem failed gracefully:", emailError);
+        }
+
+        // --- Google Sheets Logic ---
+        try {
+            const sheetURL = process.env.GOOGLE_SHEET_URL || process.env.VITE_GOOGLE_SHEET_URL;
+            if (sheetURL) {
+                const getResponse = (labelPart) => {
+                    if (!responses) return '';
+                    const found = responses.find(r => r.question.toLowerCase().includes(labelPart.toLowerCase()));
+                    return found ? found.answer : '';
                 };
+
+                const mobile = getResponse('mobile') || getResponse('phone') || getResponse('contact');
+                const year = getResponse('year');
+                const branch = getResponse('branch') || department;
+
+                const formParams = new URLSearchParams();
+                formParams.append('action', 'register');
+                formParams.append('eventTitle', eventTitle);
+                formParams.append('eventId', eventId);
+                formParams.append('name', name);
+                formParams.append('email', email);
+                formParams.append('mobile', mobile);
+                formParams.append('year', year);
+                formParams.append('branch', branch);
+                formParams.append('enrollmentId', enrollmentId);
+                formParams.append('teamName', teamName);
+                if (responses) formParams.append('responses', JSON.stringify(responses));
+                formParams.append('timestamp', new Date().toISOString());
 
                 try {
-                    const eventDoc = await db.collection('events').doc(eventId).get();
-                    if (eventDoc.exists) {
-                        const evt = eventDoc.data();
-                        eventDetails.date = evt.date ? (evt.date.toDate ? evt.date.toDate().toDateString() : new Date(evt.date).toDateString()) : 'TBA';
-                        eventDetails.time = evt.time || 'TBA';
-                        eventDetails.venue = evt.location || evt.venue || 'TBA';
+                    const sheetResponse = await fetch(sheetURL, {
+                        method: 'POST',
+                        body: formParams,
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    });
+
+                    if (!sheetResponse.ok) {
+                        console.error('Google Sheet Error:', await sheetResponse.text());
+                    } else {
+                        console.log('Google Sheet Submission Success');
                     }
-                } catch (fetchErr) {
-                    console.error("Failed to fetch event details for email:", fetchErr);
-                }
-
-                const userParams = {
-                    name: name,
-                    to_name: name, // Added for email header compatibility
-                    email: email,
-                    eventName: eventTitle,
-                    eventDate: eventDetails.date,
-                    eventTime: eventDetails.time,
-                    eventVenue: eventDetails.venue,
-                    reply_to: "loop.gcetclub@gmail.com"
-                };
-
-                const userData = {
-                    service_id: serviceID,
-                    template_id: confirmTemplateID,
-                    user_id: publicKey,
-                    template_params: userParams
-                };
-
-                if (privateKey) userData.accessToken = privateKey;
-
-                const userEmailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(userData),
-                });
-
-                if (!userEmailResponse.ok) {
-                    console.error('User Confirmation Email Failed:', await userEmailResponse.text());
-                } else {
-                    console.log('User Confirmation Email Sent');
+                } catch (fetchError) {
+                    console.error('Sheet API Fetch Error:', fetchError);
                 }
             }
+        } catch (sheetError) {
+            console.error('Google Sheet Submission Failed:', sheetError);
         }
-    } catch (emailError) {
-        console.error("Email subsystem failed gracefully:", emailError);
-    }
+    };
 
+    // Execute background tasks without awaiting them
+    runBackgroundTasks().catch(err => console.error("Critical Background Task Error:", err));
 
-    // 3.5. Submit to Google Sheets (Hidden from Client)
-    try {
-        const sheetURL = process.env.GOOGLE_SHEET_URL || process.env.VITE_GOOGLE_SHEET_URL;
-        if (sheetURL) {
-            // Extract useful fields from dynamic responses
-            const getResponse = (labelPart) => {
-                const found = responses.find(r => r.question.toLowerCase().includes(labelPart.toLowerCase()));
-                return found ? found.answer : '';
-            };
-
-            const mobile = getResponse('mobile') || getResponse('phone') || getResponse('contact');
-            const year = getResponse('year');
-            const branch = getResponse('branch') || department; // Fallback to department if branch not found
-
-            const formParams = new URLSearchParams();
-            formParams.append('action', 'register'); // Distinguish from 'apply'
-            formParams.append('eventTitle', eventTitle);
-            formParams.append('eventId', eventId);
-            formParams.append('name', name);
-            formParams.append('email', email);
-            formParams.append('mobile', mobile);
-            formParams.append('year', year);
-            formParams.append('branch', branch);
-            formParams.append('enrollmentId', enrollmentId);
-            formParams.append('teamName', teamName);
-            formParams.append('responses', JSON.stringify(responses)); // Full data just in case
-            formParams.append('timestamp', new Date().toISOString());
-
-            const sheetResponse = await fetch(sheetURL, {
-                method: 'POST',
-                body: formParams,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-            });
-
-            if (!sheetResponse.ok) {
-                console.error('Google Sheet Error:', await sheetResponse.text());
-            } else {
-                console.log('Google Sheet Submission Success');
-            }
-        } else {
-            console.warn('Google Sheet URL not configured (Skipping Sheet Submission)');
-        }
-    } catch (sheetError) {
-        console.error('Google Sheet Submission Failed:', sheetError);
-    }
-
-    // 4. Return Success
+    // 4. Return Success Immediately
     return res.status(200).json({ message: 'Registration successful!', id: docRef.id });
 });
