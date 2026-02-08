@@ -10,8 +10,16 @@ const Events = () => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [pastEvents, setPastEvents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ total: 0, major: 0, minor: 0 });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const scrollToPastEvents = () => {
+    const section = document.getElementById('past-events');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   // Redirect to details page if ?register=ID is present
   useEffect(() => {
@@ -26,23 +34,35 @@ const Events = () => {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const allEvents = snapshot.docs.map(doc => {
         const data = doc.data();
-        const type = data.status === 'Past' ? 'past' : 'upcoming'; // Basic status check
+        let normalizedStatus = 'upcoming'; // Default
+
+        if (data.status === 'Past') normalizedStatus = 'past';
+        else if (['Live', 'Active', 'Ongoing'].includes(data.status)) normalizedStatus = 'live';
+
         const dateDisplay = data.date?.toDate ? data.date.toDate().toLocaleDateString() : data.date;
 
         return {
           id: doc.id,
           ...data,
           dateDisplay,
-          type // 'upcoming' or 'past' based on status
+          normalizedStatus,
+          type: normalizedStatus // Restoration for CSS classes
         };
       });
 
       // Split into two lists
-      const upcoming = allEvents.filter(e => e.type === 'upcoming');
-      const past = allEvents.filter(e => e.type === 'past');
+      // Timeline includes both LIVE and UPCOMING
+      const timelineEvents = allEvents.filter(e => e.normalizedStatus === 'live' || e.normalizedStatus === 'upcoming');
+      const past = allEvents.filter(e => e.normalizedStatus === 'past');
 
-      // Sort Upcoming: Nearest date first
-      upcoming.sort((a, b) => {
+      // Sort Timeline: LIVE first, then UPCOMING (both ascending by date)
+      timelineEvents.sort((a, b) => {
+        // Priority: Live < Upcoming
+        const priority = { 'live': 1, 'upcoming': 2 };
+        if (priority[a.normalizedStatus] !== priority[b.normalizedStatus]) {
+          return priority[a.normalizedStatus] - priority[b.normalizedStatus];
+        }
+        // Secondary: Date Ascending
         const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date);
         const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date);
         return dateA - dateB;
@@ -55,7 +75,20 @@ const Events = () => {
         return dateB - dateA;
       });
 
-      setUpcomingEvents(upcoming);
+      // Calculate Stats for Current Year
+      const currentYear = new Date().getFullYear();
+      const thisYearEvents = allEvents.filter(e => {
+        const d = e.date?.toDate ? e.date.toDate() : new Date(e.date);
+        return d.getFullYear() === currentYear;
+      });
+
+      setStats({
+        total: thisYearEvents.length,
+        major: thisYearEvents.filter(e => e.eventType === 'Major').length,
+        minor: thisYearEvents.filter(e => !e.eventType || e.eventType === 'Minor').length
+      });
+
+      setUpcomingEvents(timelineEvents);
       setPastEvents(past);
       setLoading(false);
     }, (error) => {
@@ -115,10 +148,35 @@ const Events = () => {
 
       <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="animate-fade-in">
         <h1 className="text-accent" style={{ fontSize: '3rem', marginBottom: '1rem' }}>EVENTS TIMELINE</h1>
-        <p style={{ color: 'var(--text-dim)', maxWidth: '600px', margin: '0 auto' }}>
+        <p style={{ color: 'var(--text-dim)', maxWidth: '600px', margin: '0 auto', marginBottom: '2rem' }}>
           Explore our schedule of <strong>hackathons, coding bootcamps, and tech talks</strong>.
           Stay ahead of the curve with LOOP's hands-on sessions designed for students.
         </p>
+
+
+
+        {/* Past Events Button */}
+        <button
+          onClick={scrollToPastEvents}
+          style={{
+            background: 'transparent',
+            border: '1px solid var(--border-dim)',
+            color: 'var(--text-dim)',
+            padding: '0.8rem 1.5rem',
+            borderRadius: '50px',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-mono)',
+            transition: 'all 0.3s ease',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.color = 'var(--accent)'; }}
+          onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-dim)'; e.currentTarget.style.color = 'var(--text-dim)'; }}
+        >
+          View Past Events <ArrowRight size={16} />
+        </button>
+
         {loading && <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}><RefreshCw className="spin" /></div>}
       </div>
 
@@ -191,8 +249,32 @@ const Events = () => {
 
       {/* PAST EVENTS GRID */}
       {!loading && pastEvents.length > 0 && (
-        <div style={{ marginTop: '6rem', paddingTop: '4rem', borderTop: '1px solid var(--border-dim)' }}>
+        <div id="past-events" style={{ marginTop: '6rem', paddingTop: '4rem', borderTop: '1px solid var(--border-dim)' }}>
           <h2 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '3rem', color: 'var(--text-dim)' }}>PAST EVENTS</h2>
+
+          {/* Stats Bar */}
+          {!loading && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              gap: '2rem',
+              flexWrap: 'wrap',
+              marginBottom: '4rem'
+            }}>
+              <div className="stat-card">
+                <span className="stat-number">{stats.total}</span>
+                <span className="stat-label">Total Events ({new Date().getFullYear()})</span>
+              </div>
+              <div className="stat-card" style={{ borderColor: '#ef4444' }}>
+                <span className="stat-number" style={{ color: '#ef4444' }}>{stats.major}</span>
+                <span className="stat-label">Major Events</span>
+              </div>
+              <div className="stat-card" style={{ borderColor: '#facc15' }}>
+                <span className="stat-number" style={{ color: '#facc15' }}>{stats.minor}</span>
+                <span className="stat-label">Minor Events</span>
+              </div>
+            </div>
+          )}
 
           <div className="past-events-grid">
             {pastEvents.map((event, index) => (
@@ -290,6 +372,28 @@ const Events = () => {
           left: -7px;
         }
 
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-dim);
+            padding: 1rem 2rem;
+            borderRadius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #fff;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
         .timeline-content {
           background: var(--bg-card);
           border: 1px solid var(--border-dim);
@@ -302,6 +406,10 @@ const Events = () => {
 
         .timeline-item.upcoming .timeline-content {
           border-color: rgba(0, 243, 255, 0.3);
+        }
+        .timeline-item.live .timeline-content {
+          border-color: var(--accent);
+          box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
         }
         .timeline-item:hover .timeline-content {
           transform: translateY(-5px);
