@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
 import { AlertCircle, CheckCircle, Instagram, ExternalLink, User, Mail, Hash, Building2, Users } from 'lucide-react';
 
 const RegistrationForm = ({ event, onSuccess }) => {
@@ -68,7 +66,6 @@ const RegistrationForm = ({ event, onSuccess }) => {
                 eventTitle: event.title,
                 name: formData.name,
                 email: formData.email,
-                createdAt: new Date(),
                 // Save legacy fields if they exist, else N/A
                 enrollmentId: formData.enrollmentId || 'N/A',
                 department: formData.department || 'N/A',
@@ -80,13 +77,32 @@ const RegistrationForm = ({ event, onSuccess }) => {
                 })) : []
             };
 
-            await addDoc(collection(db, "registrations"), registrationData);
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(registrationData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 409) {
+                    alert(result.error || "You have already registered for this event with this email.");
+                } else {
+                    throw new Error(result.error || 'Registration failed');
+                }
+                setIsSubmitting(false);
+                return;
+            }
+
             setIsSubmitting(false);
             setIsSuccess(true);
             if (onSuccess) onSuccess();
         } catch (error) {
             console.error("Error registering: ", error);
-            alert("Registration failed. Please try again.");
+            alert(error.message || "Registration failed. Please try again.");
             setIsSubmitting(false);
         }
     };
