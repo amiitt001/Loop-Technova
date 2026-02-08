@@ -1,7 +1,7 @@
 /* global process */
 import admin from 'firebase-admin';
-import { safeHandler } from './utils/wrapper.js';
-import { ValidationError, ConflictError } from './utils/errors.js';
+import { safeHandler } from './_utils/wrapper.js';
+import { ValidationError, ConflictError } from './_utils/errors.js';
 
 // prevent re-initialization ensuring singleton
 if (!admin.apps.length) {

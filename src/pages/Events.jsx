@@ -7,7 +7,8 @@ import { collection, query, onSnapshot } from 'firebase/firestore';
 import ThreeBackground from '../components/ThreeBackground';
 
 const Events = () => {
-  const [events, setEvents] = useState([]);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [pastEvents, setPastEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -23,26 +24,39 @@ const Events = () => {
   useEffect(() => {
     const q = query(collection(db, "events"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const eventsList = snapshot.docs.map(doc => {
+      const allEvents = snapshot.docs.map(doc => {
         const data = doc.data();
-        let type = 'upcoming';
-        if (data.status === 'Past') type = 'past';
+        const type = data.status === 'Past' ? 'past' : 'upcoming'; // Basic status check
         const dateDisplay = data.date?.toDate ? data.date.toDate().toLocaleDateString() : data.date;
 
         return {
           id: doc.id,
           ...data,
           dateDisplay,
-          type
+          type // 'upcoming' or 'past' based on status
         };
       });
 
-      eventsList.sort((a, b) => {
-        if (a.type !== b.type) return a.type === 'upcoming' ? -1 : 1;
-        return new Date(b.date) - new Date(a.date);
+      // Split into two lists
+      const upcoming = allEvents.filter(e => e.type === 'upcoming');
+      const past = allEvents.filter(e => e.type === 'past');
+
+      // Sort Upcoming: Nearest date first
+      upcoming.sort((a, b) => {
+        const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date);
+        const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+        return dateA - dateB;
       });
 
-      setEvents(eventsList);
+      // Sort Past: Most recent past date first
+      past.sort((a, b) => {
+        const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date);
+        const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+        return dateB - dateA;
+      });
+
+      setUpcomingEvents(upcoming);
+      setPastEvents(past);
       setLoading(false);
     }, (error) => {
       console.error("Error fetching events:", error);
@@ -51,6 +65,10 @@ const Events = () => {
 
     return () => unsubscribe();
   }, []);
+
+  const getTypeColor = (eventType) => {
+    return eventType === 'Major' ? '#ef4444' : '#facc15'; // Red for Major, Yellow for Minor
+  };
 
   return (
     <div className="container" style={{ padding: '8rem 0 4rem' }}>
@@ -63,7 +81,7 @@ const Events = () => {
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "ItemList",
-            "itemListElement": events.map((event, index) => ({
+            "itemListElement": upcomingEvents.map((event, index) => ({
               "@type": "ListItem",
               "position": index + 1,
               "item": {
@@ -105,28 +123,50 @@ const Events = () => {
       </div>
 
       <div className="timeline">
-        {!loading && events.length === 0 && <p style={{ textAlign: 'center', color: '#71717a' }}>No events announced yet.</p>}
+        {!loading && upcomingEvents.length === 0 && <p style={{ textAlign: 'center', color: '#71717a' }}>No upcoming events announced yet.</p>}
 
-        {events.map((event, index) => (
+        {upcomingEvents.map((event, index) => (
           <div key={event.id} className={`timeline-item ${event.type} animate-fade-in`} style={{ animationDelay: `${index * 0.1}s` }}>
             <div className="timeline-dot"></div>
             <div
               className="timeline-content cursor-pointer group"
               onClick={() => navigate(`/events/${event.id}`)}
+              style={{
+                borderColor: event.eventType === 'Major' ? 'rgba(239, 68, 68, 0.5)' : 'var(--border-dim)'
+              }}
             >
+              {/* Badges Container */}
               <div style={{
                 position: 'absolute',
                 top: '-10px',
                 right: '20px',
-                background: event.type === 'upcoming' ? 'var(--accent)' : '#333',
-                color: event.type === 'upcoming' ? '#000' : '#888',
-                padding: '0.2rem 0.8rem',
-                borderRadius: '12px',
-                fontSize: '0.7rem',
-                fontWeight: 'bold',
-                textTransform: 'uppercase'
+                display: 'flex',
+                gap: '0.5rem'
               }}>
-                {event.status || event.type}
+                {/* Event Type Badge */}
+                <div style={{
+                  background: getTypeColor(event.eventType || 'Minor'),
+                  color: '#000',
+                  padding: '0.2rem 0.8rem',
+                  borderRadius: '12px',
+                  fontSize: '0.7rem',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }}>
+                  {event.eventType || 'Minor'}
+                </div>
+                {/* Status Badge */}
+                <div style={{
+                  background: 'var(--accent)',
+                  color: '#000',
+                  padding: '0.2rem 0.8rem',
+                  borderRadius: '12px',
+                  fontSize: '0.7rem',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }}>
+                  {event.status}
+                </div>
               </div>
 
               <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>{event.title}</h2>
@@ -148,6 +188,52 @@ const Events = () => {
           </div>
         ))}
       </div>
+
+      {/* PAST EVENTS GRID */}
+      {!loading && pastEvents.length > 0 && (
+        <div style={{ marginTop: '6rem', paddingTop: '4rem', borderTop: '1px solid var(--border-dim)' }}>
+          <h2 style={{ textAlign: 'center', fontSize: '2rem', marginBottom: '3rem', color: 'var(--text-dim)' }}>PAST EVENTS</h2>
+
+          <div className="past-events-grid">
+            {pastEvents.map((event, index) => (
+              <div
+                key={event.id}
+                className="past-event-card cursor-pointer group"
+                onClick={() => navigate(`/events/${event.id}`)}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    background: '#333',
+                    color: '#888',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '4px'
+                  }}>
+                    PAST
+                  </span>
+                  <div style={{
+                    background: getTypeColor(event.eventType || 'Minor'),
+                    color: '#000',
+                    padding: '0.1rem 0.5rem',
+                    borderRadius: '8px',
+                    fontSize: '0.6rem',
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase'
+                  }}>
+                    {event.eventType || 'Minor'}
+                  </div>
+                </div>
+
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#ccc' }}>{event.title}</h3>
+
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', gap: '1rem' }}>
+                  <span>{event.dateDisplay}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <style>{`
         .timeline {
@@ -246,6 +332,28 @@ const Events = () => {
 
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Past Events Grid */
+        .past-events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .past-event-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-dim);
+            padding: 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .past-event-card:hover {
+            border-color: #666;
+            transform: translateY(-3px);
+        }
 
         /* Mobile Responsive */
         @media (max-width: 768px) {

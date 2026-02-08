@@ -1,9 +1,9 @@
 
 import admin from 'firebase-admin';
-import { safeHandler } from '../utils/wrapper.js';
-import { verifyAdmin } from '../utils/auth.js';
-import { ValidationError as CustomValidationError } from '../utils/errors.js';
-import { sanitizeForSheets } from '../utils/sanitizers.js';
+import { safeHandler } from '../_utils/wrapper.js';
+import { verifyAdmin } from '../_utils/auth.js';
+import { ValidationError as CustomValidationError } from '../_utils/errors.js';
+import { sanitizeForSheets } from '../_utils/sanitizers.js';
 
 // Note: db initialization moved inside handler to prevent cold-start crashes
 

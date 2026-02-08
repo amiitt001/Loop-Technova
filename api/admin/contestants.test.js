@@ -11,11 +11,11 @@ vi.mock('firebase-admin', () => ({
 }));
 
 // Mock utilities
-vi.mock('../utils/auth.js', () => ({
+vi.mock('../_utils/auth.js', () => ({
     verifyAdmin: vi.fn()
 }));
 
-import { verifyAdmin } from '../utils/auth.js';
+import { verifyAdmin } from '../_utils/auth.js';
 
 describe('Admin Contestants API', () => {
     let mockReq, mockRes, mockDoc, mockContestantRef, mockDb;

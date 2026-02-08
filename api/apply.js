@@ -46,9 +46,9 @@ async function validateEmail(email) {
     }
 }
 
-import { safeHandler } from './utils/wrapper.js';
-import { ValidationError, ConflictError } from './utils/errors.js';
-import { sanitizeForSheets } from './utils/sanitizers.js';
+import { safeHandler } from './_utils/wrapper.js';
+import { ValidationError, ConflictError } from './_utils/errors.js';
+import { sanitizeForSheets } from './_utils/sanitizers.js';
 
 function validateInput(data) {
     const rules = {

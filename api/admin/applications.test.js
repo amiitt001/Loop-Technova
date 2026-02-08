@@ -25,11 +25,11 @@ vi.mock('firebase-admin', () => ({
     }
 }));
 
-vi.mock('../utils/auth.js', () => ({
+vi.mock('../_utils/auth.js', () => ({
     verifyAdmin: vi.fn(() => Promise.resolve({ uid: 'admin-123' }))
 }));
 
-vi.mock('../utils/wrapper.js', () => ({
+vi.mock('../_utils/wrapper.js', () => ({
     safeHandler: (fn) => fn // Pass through
 }));
 

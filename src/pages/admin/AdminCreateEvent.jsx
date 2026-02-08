@@ -17,7 +17,8 @@ const AdminCreateEvent = () => {
         speaker: '',
         description: '',
         registrationLink: '',
-        status: 'Upcoming'
+        status: 'Upcoming',
+        eventType: 'Minor'
     });
 
     const handleChange = (e) => {
@@ -132,6 +133,20 @@ const AdminCreateEvent = () => {
                             <option value="Upcoming">Upcoming</option>
                             <option value="Active">Active (Live)</option>
                             <option value="Past">Past</option>
+                        </select>
+                    </div>
+
+                    {/* Event Type */}
+                    <div className="flex flex-col gap-2">
+                        <label className="text-zinc-400 text-sm">Event Type</label>
+                        <select
+                            name="eventType"
+                            value={formData.eventType}
+                            onChange={handleChange}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                        >
+                            <option value="Minor">Minor Event (🟡)</option>
+                            <option value="Major">Major Event (🔴)</option>
                         </select>
                     </div>
                 </div>

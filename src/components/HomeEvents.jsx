@@ -43,6 +43,10 @@ const HomeEvents = () => {
     const featuredEvent = events.length > 0 ? events[0] : null;
     const secondaryEvents = events.length > 1 ? events.slice(1, 4) : [];
 
+    const getTypeColor = (eventType) => {
+        return eventType === 'Major' ? '#ef4444' : '#facc15';
+    };
+
     return (
         <div style={{ padding: '6rem 0', background: 'transparent', borderTop: '1px solid var(--border-dim)' }}>
             <div className="container">
@@ -77,9 +81,25 @@ const HomeEvents = () => {
                                     display: 'flex',
                                     flexDirection: 'column',
                                     justifyContent: 'center',
-                                    minHeight: '400px'
+                                    minHeight: '400px',
+                                    position: 'relative'
                                 }}
                             >
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    right: '20px',
+                                    background: getTypeColor(featuredEvent.eventType || 'Minor'),
+                                    color: '#000',
+                                    padding: '0.2rem 0.8rem',
+                                    borderRadius: '12px',
+                                    fontSize: '0.7rem',
+                                    fontWeight: 'bold',
+                                    textTransform: 'uppercase'
+                                }}>
+                                    {featuredEvent.eventType || 'Minor'}
+                                </div>
+
                                 <div style={{
                                     display: 'inline-block',
                                     background: 'var(--accent)',
@@ -146,10 +166,24 @@ const HomeEvents = () => {
                                             display: 'flex',
                                             justifyContent: 'space-between',
                                             alignItems: 'center',
-                                            flex: 1
+                                            flex: 1,
+                                            position: 'relative'
                                         }}
                                     >
                                         <div>
+                                            <div style={{
+                                                display: 'inline-block',
+                                                marginBottom: '0.5rem',
+                                                background: getTypeColor(evt.eventType || 'Minor'),
+                                                color: '#000',
+                                                padding: '0.1rem 0.5rem',
+                                                borderRadius: '8px',
+                                                fontSize: '0.6rem',
+                                                fontWeight: 'bold',
+                                                textTransform: 'uppercase'
+                                            }}>
+                                                {evt.eventType || 'Minor'}
+                                            </div>
                                             <h4 style={{ fontSize: '1.1rem', marginBottom: '0.3rem' }}>{evt.title}</h4>
                                             <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
                                                 {evt.type || 'Event'} • {evt.dateObj.toLocaleDateString()}
