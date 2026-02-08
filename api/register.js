@@ -107,6 +107,54 @@ export default safeHandler(async function handler(req, res) {
         console.error("Email subsystem failed gracefully:", emailError);
     }
 
+    // 3.5. Submit to Google Sheets (Hidden from Client)
+    try {
+        const sheetURL = process.env.GOOGLE_SHEET_URL || process.env.VITE_GOOGLE_SHEET_URL;
+        if (sheetURL) {
+            // Extract useful fields from dynamic responses
+            const getResponse = (labelPart) => {
+                const found = responses.find(r => r.question.toLowerCase().includes(labelPart.toLowerCase()));
+                return found ? found.answer : '';
+            };
+
+            const mobile = getResponse('mobile') || getResponse('phone') || getResponse('contact');
+            const year = getResponse('year');
+            const branch = getResponse('branch') || department; // Fallback to department if branch not found
+
+            const formParams = new URLSearchParams();
+            formParams.append('action', 'register'); // Distinguish from 'apply'
+            formParams.append('eventTitle', eventTitle);
+            formParams.append('eventId', eventId);
+            formParams.append('name', name);
+            formParams.append('email', email);
+            formParams.append('mobile', mobile);
+            formParams.append('year', year);
+            formParams.append('branch', branch);
+            formParams.append('enrollmentId', enrollmentId);
+            formParams.append('teamName', teamName);
+            formParams.append('responses', JSON.stringify(responses)); // Full data just in case
+            formParams.append('timestamp', new Date().toISOString());
+
+            const sheetResponse = await fetch(sheetURL, {
+                method: 'POST',
+                body: formParams,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            });
+
+            if (!sheetResponse.ok) {
+                console.error('Google Sheet Error:', await sheetResponse.text());
+            } else {
+                console.log('Google Sheet Submission Success');
+            }
+        } else {
+            console.warn('Google Sheet URL not configured (Skipping Sheet Submission)');
+        }
+    } catch (sheetError) {
+        console.error('Google Sheet Submission Failed:', sheetError);
+    }
+
     // 4. Return Success
     return res.status(200).json({ message: 'Registration successful!', id: docRef.id });
 });
