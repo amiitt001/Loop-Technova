@@ -67,16 +67,17 @@ export default safeHandler(async function handler(req, res) {
 
     const docRef = await registrationsRef.add(newRegistration);
 
-    // 3. Initiate Background Tasks (Fire-and-Forget)
-    const runBackgroundTasks = async () => {
-        // --- EmailJS Logic ---
+    // 3. Parallel Execution of External Services (Fast & Reliable)
+    // We define them as promises but do not await them yet.
+
+    // --- EmailJS Promise ---
+    const emailPromise = (async () => {
         try {
             const serviceID = process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID;
             const publicKey = process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY;
             const privateKey = process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY;
 
             if (serviceID && publicKey) {
-                // User Confirmation Email
                 const confirmTemplateID = process.env.EMAILJS_CONFIRM_TEMPLATE_ID || process.env.VITE_EMAILJS_CONFIRM_TEMPLATE_ID || "template_mzmcp88";
 
                 if (confirmTemplateID) {
@@ -114,28 +115,28 @@ export default safeHandler(async function handler(req, res) {
 
                     if (privateKey) userData.accessToken = privateKey;
 
-                    try {
-                        const userEmailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(userData),
-                        });
+                    const userEmailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(userData),
+                    });
 
-                        if (!userEmailResponse.ok) {
-                            console.error('User Confirmation Email Failed:', await userEmailResponse.text());
-                        } else {
-                            console.log('User Confirmation Email Sent');
-                        }
-                    } catch (fetchError) {
-                        console.error('Email API Fetch Error:', fetchError);
+                    if (!userEmailResponse.ok) {
+                        console.error('User Confirmation Email Failed:', await userEmailResponse.text());
+                        throw new Error('EmailJS responded with error');
+                    } else {
+                        console.log('User Confirmation Email Sent');
                     }
                 }
             }
         } catch (emailError) {
-            console.error("Email subsystem failed gracefully:", emailError);
+            console.error("Email subsystem failed:", emailError);
+            throw emailError; // Re-throw to be caught by allSettled
         }
+    })();
 
-        // --- Google Sheets Logic ---
+    // --- Google Sheets Promise ---
+    const sheetPromise = (async () => {
         try {
             const sheetURL = process.env.GOOGLE_SHEET_URL || process.env.VITE_GOOGLE_SHEET_URL;
             if (sheetURL) {
@@ -163,30 +164,28 @@ export default safeHandler(async function handler(req, res) {
                 if (responses) formParams.append('responses', JSON.stringify(responses));
                 formParams.append('timestamp', new Date().toISOString());
 
-                try {
-                    const sheetResponse = await fetch(sheetURL, {
-                        method: 'POST',
-                        body: formParams,
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    });
+                const sheetResponse = await fetch(sheetURL, {
+                    method: 'POST',
+                    body: formParams,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                });
 
-                    if (!sheetResponse.ok) {
-                        console.error('Google Sheet Error:', await sheetResponse.text());
-                    } else {
-                        console.log('Google Sheet Submission Success');
-                    }
-                } catch (fetchError) {
-                    console.error('Sheet API Fetch Error:', fetchError);
+                if (!sheetResponse.ok) {
+                    console.error('Google Sheet Error:', await sheetResponse.text());
+                    throw new Error('Google Sheet responded with error');
+                } else {
+                    console.log('Google Sheet Submission Success');
                 }
             }
         } catch (sheetError) {
             console.error('Google Sheet Submission Failed:', sheetError);
+            throw sheetError;
         }
-    };
+    })();
 
-    // Execute background tasks without awaiting them
-    runBackgroundTasks().catch(err => console.error("Critical Background Task Error:", err));
+    // Execute both in parallel and wait for both to finish (succeed or fail)
+    await Promise.allSettled([emailPromise, sheetPromise]);
 
-    // 4. Return Success Immediately
+    // 4. Return Success
     return res.status(200).json({ message: 'Registration successful!', id: docRef.id });
 });
