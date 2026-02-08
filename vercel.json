@@ -5,11 +5,15 @@
             "destination": "/api/apply.js"
         },
         {
+            "source": "/api/admin/contestants",
+            "destination": "/api/admin/contestants.js"
+        },
+        {
             "source": "/api/admin/applications",
             "destination": "/api/admin/applications.js"
         },
         {
-            "source": "/(.*)",
+            "source": "/((?!api/|.*\\..*).*)",
             "destination": "/index.html"
         }
     ],

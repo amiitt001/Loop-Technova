@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Trophy, Trash2, RefreshCw } from 'lucide-react';
+import { Plus, Search, Trophy, Trash2, RefreshCw, Edit } from 'lucide-react';
 import { db } from '../../firebase';
 import { collection, deleteDoc, doc, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
@@ -122,6 +122,11 @@ const AdminLeaderboard = () => {
                                     <td style={{ padding: '1rem', color: '#a1a1aa' }}>@{contestant.platformHandle}</td>
                                     <td style={{ padding: '1rem', color: 'var(--accent)' }}>{contestant.points}</td>
                                     <td style={{ padding: '1rem', textAlign: 'right' }}>
+                                        <button
+                                            onClick={() => navigate(`/admin/contestants/edit/${contestant.id}`)}
+                                            style={{ background: 'transparent', border: 'none', color: 'var(--accent)', cursor: 'pointer', marginRight: '1rem' }}>
+                                            <Edit size={16} />
+                                        </button>
                                         <button
                                             onClick={() => handleDelete(contestant.id)}
                                             style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }}>

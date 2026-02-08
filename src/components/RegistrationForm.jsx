@@ -22,7 +22,7 @@ const RegistrationForm = ({ event, onSuccess }) => {
         if (!formData.name.trim()) newErrors.name = 'Full Name is required';
         if (!formData.email.trim()) {
             newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Invalid email format';
         }
 
@@ -34,10 +34,19 @@ const RegistrationForm = ({ event, onSuccess }) => {
         // Dynamic Validation
         else {
             event.questions.forEach(q => {
+                const val = formData[q.id];
+
+                // Required check
                 if (q.required) {
-                    const val = formData[q.id];
                     if (!val || (Array.isArray(val) && val.length === 0)) {
                         newErrors[q.id] = 'This field is required';
+                    }
+                }
+
+                // Specific validation for Mobile/Phone
+                if (val && (q.label.toLowerCase().includes('mobile') || q.label.toLowerCase().includes('phone') || q.label.toLowerCase().includes('contact'))) {
+                    if (val.length !== 10) {
+                        newErrors[q.id] = 'Must be exactly 10 digits';
                     }
                 }
             });
@@ -82,10 +91,24 @@ const RegistrationForm = ({ event, onSuccess }) => {
         }
     };
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-        if (errors[e.target.name]) {
-            setErrors({ ...errors, [e.target.name]: null });
+    const handleChange = (e, question = null) => {
+        let { name, value, type } = e.target;
+
+        // Custom sanitization logic
+        if (question) {
+            const labelLower = question.label.toLowerCase();
+
+            // Mobile/Phone: Digits only, max 10
+            if (labelLower.includes('mobile') || labelLower.includes('phone') || labelLower.includes('contact')) {
+                value = value.replace(/\D/g, '').slice(0, 10);
+            }
+        }
+
+        setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Clear error on change
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: null }));
         }
     };
 
@@ -131,15 +154,19 @@ const RegistrationForm = ({ event, onSuccess }) => {
             {event.questions && event.questions.length > 0 ? (
                 event.questions.map((q) => {
                     if (q.type === 'text') {
+                        const isPhone = q.label.toLowerCase().includes('mobile') || q.label.toLowerCase().includes('phone');
                         return (
                             <InputField
                                 key={q.id}
                                 label={q.label}
                                 name={q.id}
                                 value={formData[q.id] || ''}
-                                onChange={handleChange}
+                                onChange={(e) => handleChange(e, q)}
                                 error={errors[q.id]}
-                                placeholder="Your answer"
+                                placeholder={isPhone ? "1234567890" : "Your answer"}
+                                inputMode={isPhone ? "numeric" : "text"}
+                                type={isPhone ? "tel" : "text"}
+                                maxLength={isPhone ? 10 : undefined}
                             />
                         );
                     }
@@ -290,7 +317,7 @@ const RegistrationForm = ({ event, onSuccess }) => {
     );
 };
 
-const InputField = ({ label, name, type = "text", value, onChange, error, placeholder, icon: Icon }) => (
+const InputField = ({ label, name, type = "text", value, onChange, error, placeholder, icon: Icon, inputMode, maxLength }) => (
     <div className="w-full">
         <label className="block mb-2 text-zinc-400 text-sm font-medium">
             {label}
@@ -307,12 +334,14 @@ const InputField = ({ label, name, type = "text", value, onChange, error, placeh
                 value={value}
                 onChange={onChange}
                 placeholder={placeholder}
+                inputMode={inputMode}
+                maxLength={maxLength}
                 className={`
-                    w-full bg-main/20 border rounded-xl p-3 text-main outline-none transition-all duration-300
+                    w-full bg-zinc-100 border rounded-xl p-3 text-black placeholder:text-zinc-500 outline-none transition-all duration-300
                     ${Icon ? 'pl-11' : 'pl-4'}
                     ${error
                         ? 'border-[#ff0055] focus:shadow-[0_0_20px_rgba(255,0,85,0.2)]'
-                        : 'border-zinc-800 focus:border-[var(--accent)] focus:bg-[var(--accent)]/5 focus:shadow-[0_0_20px_rgba(0, 243, 255,0.1)]'}
+                        : 'border-zinc-800 focus:border-[var(--accent)] focus:bg-white focus:shadow-[0_0_20px_rgba(0, 243, 255,0.1)]'}
                 `}
             />
             {error && (

@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"pnpm --filter server --prefix server run dev\" \"vite\"",
+    "dev": "vite",
+    "dev:full": "concurrently \"vercel dev --listen 3000\" \"vite\"",
+    "dev:api": "vercel dev --listen 3000",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
