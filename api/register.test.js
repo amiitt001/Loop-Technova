@@ -2,6 +2,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import handler from './register.js';
 import admin from 'firebase-admin';
+import dns from 'dns';
+
+// Mock DNS
+vi.mock('dns', () => ({
+    default: {
+        resolveMx: (domain, cb) => cb(null, [{ exchange: 'mail.example.com', priority: 10 }])
+    }
+}));
 
 // Mock global fetch for EmailJS and Google Sheets
 global.fetch = vi.fn(() => Promise.resolve({
@@ -161,5 +169,15 @@ describe('api/register.js', () => {
         expect(body.get('teamName')).toBe("'+MaliciousTeam");
         expect(body.get('mobile')).toBe("'=1+1");
         expect(body.get('year')).toBe("'@cmd");
+    });
+
+    it('should reject registration for non-existent event', async () => {
+        // Mock event NOT found
+        mockDocGet.mockResolvedValue({ exists: false });
+
+        await handler(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400); // Expect Bad Request (ValidationError)
+        expect(mockAdd).not.toHaveBeenCalled(); // Should NOT save to DB
     });
 });
