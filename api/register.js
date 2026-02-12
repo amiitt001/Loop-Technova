@@ -39,6 +39,27 @@ function validateInput(data) {
         }
     }
 
+    // Validate responses array
+    if (data.responses) {
+        if (!Array.isArray(data.responses)) {
+            return { valid: false, reason: 'Responses must be an array' };
+        }
+        if (data.responses.length > 20) {
+            return { valid: false, reason: 'Too many responses (max 20)' };
+        }
+        for (const resp of data.responses) {
+            if (!resp || typeof resp !== 'object') {
+                return { valid: false, reason: 'Response items must be objects' };
+            }
+            if (typeof resp.question !== 'string' || typeof resp.answer !== 'string') {
+                return { valid: false, reason: 'Response items must have string question and answer' };
+            }
+            if (resp.question.length > 200 || resp.answer.length > 500) {
+                return { valid: false, reason: 'Response question or answer too long' };
+            }
+        }
+    }
+
     return { valid: true };
 }
 
@@ -54,6 +75,14 @@ export default safeHandler(async function handler(req, res) {
     const inputValidation = validateInput(req.body);
     if (!inputValidation.valid) {
         throw new ValidationError(`Invalid input: ${inputValidation.reason}`);
+    }
+
+    // 0.5 Check Event Existence
+    // Security: Prevent orphaned registrations and spam with invalid event IDs
+    const eventRef = db.collection('events').doc(eventId);
+    const eventDoc = await eventRef.get();
+    if (!eventDoc.exists) {
+        throw new ValidationError('Event not found or invalid eventId');
     }
 
     // 1. Check for duplicates (SERVER-SIDE VALIDATION)

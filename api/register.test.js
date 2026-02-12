@@ -162,4 +162,36 @@ describe('api/register.js', () => {
         expect(body.get('mobile')).toBe("'=1+1");
         expect(body.get('year')).toBe("'@cmd");
     });
+
+    it('should reject registration for non-existent event', async () => {
+        // Override mock to return exists: false
+        mockDocGet.mockResolvedValueOnce({ exists: false });
+
+        await handler(req, res);
+
+        // This fails currently because the code does not check for event existence before saving
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Event not found') }));
+    });
+
+    it('should reject registration with too many responses', async () => {
+        // Limit is 20
+        req.body.responses = new Array(21).fill({ question: 'q', answer: 'a' });
+
+        await handler(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Too many responses') }));
+    });
+
+    it('should reject registration with malformed responses', async () => {
+        req.body.responses = [null, { question: 'q', answer: 123 }];
+
+        await handler(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        // Expect either "Response items must be objects" or "Response items must have string question and answer"
+        // But since null is first, it should hit the first check
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Response items must be objects') }));
+    });
 });
