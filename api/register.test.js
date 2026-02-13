@@ -2,6 +2,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import handler from './register.js';
 import admin from 'firebase-admin';
+import dns from 'dns';
+
+// Mock DNS
+vi.mock('dns', () => ({
+    default: {
+        resolveMx: (domain, cb) => cb(null, [{ exchange: 'mail.example.com', priority: 10 }])
+    }
+}));
 
 // Mock global fetch for EmailJS and Google Sheets
 global.fetch = vi.fn(() => Promise.resolve({
@@ -134,6 +142,27 @@ describe('api/register.js', () => {
         await handler(req, res);
         expect(res.status).toHaveBeenCalledWith(409); // ConflictError
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('already registered') }));
+    });
+
+    it('should reject invalid eventId', async () => {
+        req.body.eventId = 123; // Invalid type
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Invalid eventId') }));
+    });
+
+    it('should reject invalid responses', async () => {
+        req.body.responses = "not-an-array";
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Responses must be an array') }));
+    });
+
+    it('should reject invalid email domain', async () => {
+        req.body.email = 'user@example.com'; // Blocked domain
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Invalid email') }));
     });
 
     // SECURITY TESTS

@@ -3,6 +3,7 @@ import admin from 'firebase-admin';
 import { safeHandler } from './_utils/wrapper.js';
 import { ValidationError, ConflictError } from './_utils/errors.js';
 import { sanitizeForSheets } from './_utils/sanitizers.js';
+import { validateEmail, validateResponses } from './_utils/validators.js';
 
 // prevent re-initialization ensuring singleton
 if (!admin.apps.length) {
@@ -23,6 +24,10 @@ function validateInput(data) {
         return { valid: false, reason: 'Missing required fields (eventId, name, email)' };
     }
 
+    if (typeof data.eventId !== 'string' || data.eventId.length === 0) {
+        return { valid: false, reason: 'Invalid eventId' };
+    }
+
     // Max length validation to prevent DoS/Storage Exhaustion
     const MAX_LENGTHS = {
         name: 100,
@@ -36,6 +41,14 @@ function validateInput(data) {
     for (const [key, max] of Object.entries(MAX_LENGTHS)) {
         if (data[key] && typeof data[key] === 'string' && data[key].length > max) {
             return { valid: false, reason: `${key} exceeds maximum length of ${max}` };
+        }
+    }
+
+    // Validate Responses
+    if (data.responses) {
+        const responseValidation = validateResponses(data.responses);
+        if (!responseValidation.valid) {
+            return responseValidation;
         }
     }
 
@@ -54,6 +67,12 @@ export default safeHandler(async function handler(req, res) {
     const inputValidation = validateInput(req.body);
     if (!inputValidation.valid) {
         throw new ValidationError(`Invalid input: ${inputValidation.reason}`);
+    }
+
+    // 0.1 Strict Email Validation
+    const emailValidation = await validateEmail(email);
+    if (!emailValidation.valid) {
+        throw new ValidationError(`Invalid email: ${emailValidation.reason}`);
     }
 
     // 1. Check for duplicates (SERVER-SIDE VALIDATION)
