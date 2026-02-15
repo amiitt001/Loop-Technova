@@ -15,6 +15,11 @@ vi.mock('../_utils/auth.js', () => ({
     verifyAdmin: vi.fn()
 }));
 
+// Bypass safeHandler so exceptions bubble up for testing
+vi.mock('../_utils/wrapper.js', () => ({
+    safeHandler: (fn) => fn
+}));
+
 import { verifyAdmin } from '../_utils/auth.js';
 
 describe('Admin Contestants API', () => {

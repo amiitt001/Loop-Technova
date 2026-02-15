@@ -162,4 +162,33 @@ describe('api/register.js', () => {
         expect(body.get('mobile')).toBe("'=1+1");
         expect(body.get('year')).toBe("'@cmd");
     });
+
+    it('should reject massive responses payload (DoS Prevention)', async () => {
+        const hugeString = 'A'.repeat(6000); // Max allowed is 5000
+        req.body.responses = Array(10).fill({
+            question: 'Q',
+            answer: hugeString
+        });
+
+        await handler(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.stringContaining('Response answer exceeds max length')
+        }));
+    });
+
+    it('should reject too many responses (DoS Prevention)', async () => {
+        req.body.responses = Array(51).fill({ // Max allowed is 50
+            question: 'Q',
+            answer: 'A'
+        });
+
+        await handler(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+            error: expect.stringContaining('Too many responses')
+        }));
+    });
 });
