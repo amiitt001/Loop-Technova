@@ -138,6 +138,43 @@ describe('api/register.js', () => {
 
     // SECURITY TESTS
 
+    describe('Response Validation', () => {
+        it('should reject non-array responses', async () => {
+            req.body.responses = 'invalid-string';
+            await handler(req, res);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Responses must be an array') }));
+        });
+
+        it('should reject too many responses', async () => {
+            req.body.responses = Array(51).fill({ question: 'q', answer: 'a' });
+            await handler(req, res);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Too many responses') }));
+        });
+
+        it('should reject response items missing question or answer', async () => {
+            req.body.responses = [{ question: 'q' }]; // Missing answer
+            await handler(req, res);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Response item must have question and answer') }));
+        });
+
+        it('should reject non-string questions', async () => {
+            req.body.responses = [{ question: 123, answer: 'valid' }];
+            await handler(req, res);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Question must be a string') }));
+        });
+
+        it('should reject very long questions', async () => {
+            req.body.responses = [{ question: 'a'.repeat(501), answer: 'valid' }];
+            await handler(req, res);
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Question too long') }));
+        });
+    });
+
     it('should sanitize formula injection attempts in Google Sheets', async () => {
         req.body.name = '=HYPERLINK("http://evil.com")';
         req.body.teamName = '+MaliciousTeam';

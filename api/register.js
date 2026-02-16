@@ -3,6 +3,7 @@ import admin from 'firebase-admin';
 import { safeHandler } from './_utils/wrapper.js';
 import { ValidationError, ConflictError } from './_utils/errors.js';
 import { sanitizeForSheets } from './_utils/sanitizers.js';
+import { validateResponses } from './_utils/validators.js';
 
 // prevent re-initialization ensuring singleton
 if (!admin.apps.length) {
@@ -37,6 +38,12 @@ function validateInput(data) {
         if (data[key] && typeof data[key] === 'string' && data[key].length > max) {
             return { valid: false, reason: `${key} exceeds maximum length of ${max}` };
         }
+    }
+
+    // Validate responses array structure and content
+    const responseValidation = validateResponses(data.responses);
+    if (!responseValidation.valid) {
+        return responseValidation;
     }
 
     return { valid: true };
