@@ -16,35 +16,7 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-import dns from 'dns';
-import { promisify } from 'util';
-
-const resolveMx = promisify(dns.resolveMx);
-
-const BLOCKED_DOMAINS = ['example.com', 'test.com', 'dummy.com', 'mailinator.com', 'yopmail.com'];
-const BLOCKED_PREFIXES = ['test', 'admin', 'user', 'no-reply', 'noreply'];
-// Strict Regex: prevents starting with +, -, = (Formula Injection prevention)
-const EMAIL_REGEX = /^[a-zA-Z0-9._%][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-async function validateEmail(email) {
-    if (!email || !EMAIL_REGEX.test(email)) return { valid: false, reason: 'Invalid email format' };
-
-    const [local, domain] = email.split('@');
-
-    if (BLOCKED_DOMAINS.includes(domain.toLowerCase())) return { valid: false, reason: 'Domain is blocked' };
-    if (BLOCKED_PREFIXES.includes(local.toLowerCase())) return { valid: false, reason: 'Email prefix is blocked' };
-
-    // Prevent self-send (system email)
-    if (email === 'technova@galgotias.edu') return { valid: false, reason: 'Cannot use system email' };
-
-    try {
-        const addresses = await resolveMx(domain);
-        if (!addresses || addresses.length === 0) return { valid: false, reason: 'No mail server found for domain' };
-        return { valid: true };
-    } catch (error) {
-        return { valid: false, reason: 'Domain validation failed' };
-    }
-}
+import { validateEmail } from './_utils/validators.js';
 
 import { safeHandler } from './_utils/wrapper.js';
 import { ValidationError, ConflictError } from './_utils/errors.js';

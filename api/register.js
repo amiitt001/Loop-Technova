@@ -3,6 +3,7 @@ import admin from 'firebase-admin';
 import { safeHandler } from './_utils/wrapper.js';
 import { ValidationError, ConflictError } from './_utils/errors.js';
 import { sanitizeForSheets } from './_utils/sanitizers.js';
+import { validateEmail, validateResponses } from './_utils/validators.js';
 
 // prevent re-initialization ensuring singleton
 if (!admin.apps.length) {
@@ -54,6 +55,18 @@ export default safeHandler(async function handler(req, res) {
     const inputValidation = validateInput(req.body);
     if (!inputValidation.valid) {
         throw new ValidationError(`Invalid input: ${inputValidation.reason}`);
+    }
+
+    // 0.1 Strict Email Validation
+    const emailValidation = await validateEmail(email);
+    if (!emailValidation.valid) {
+        throw new ValidationError(`Invalid email: ${emailValidation.reason}`);
+    }
+
+    // 0.2 Response Validation
+    const responsesValidation = validateResponses(responses);
+    if (!responsesValidation.valid) {
+        throw new ValidationError(`Invalid responses: ${responsesValidation.reason}`);
     }
 
     // 1. Check for duplicates (SERVER-SIDE VALIDATION)

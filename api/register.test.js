@@ -3,6 +3,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import handler from './register.js';
 import admin from 'firebase-admin';
 
+// Mock DNS for email validation
+vi.mock('dns', () => ({
+    default: {
+        resolveMx: (domain, cb) => cb(null, [{ exchange: 'mail.example.com', priority: 10 }])
+    }
+}));
+
 // Mock global fetch for EmailJS and Google Sheets
 global.fetch = vi.fn(() => Promise.resolve({
     ok: true,
@@ -137,6 +144,20 @@ describe('api/register.js', () => {
     });
 
     // SECURITY TESTS
+
+    it('should reject invalid responses (too long)', async () => {
+        req.body.responses = Array(51).fill({ question: 'q', answer: 'a' });
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Too many responses') }));
+    });
+
+    it('should reject invalid responses (answer too long)', async () => {
+        req.body.responses = [{ question: 'q', answer: 'a'.repeat(5001) }];
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('Answer too long') }));
+    });
 
     it('should sanitize formula injection attempts in Google Sheets', async () => {
         req.body.name = '=HYPERLINK("http://evil.com")';

@@ -12,3 +12,8 @@
 **Vulnerability:** The Google Apps Script URL was exposed in the client-side code (`VITE_GOOGLE_SHEET_URL`), allowing unauthenticated users to trigger arbitrary actions (including deletion) defined in the script.
 **Learning:** External integrations often lack granular permissions (like "append-only"). Exposing their direct URLs to the client grants the client full permissions over that integration.
 **Prevention:** Proxy all external integrations through the backend. This allows the backend to enforce authentication, validation, and rate limiting before forwarding the request to the external service.
+
+## 2025-10-27 - Inconsistent Input Validation
+**Vulnerability:** Similar endpoints (`/apply` and `/register`) implemented divergent validation logic, with `/register` missing crucial checks (email MX validation, response size limits) present in `/apply` or missing entirely.
+**Learning:** Duplicating validation logic across endpoints leads to inconsistencies and gaps. Security features added to one endpoint are easily missed in others.
+**Prevention:** Centralize validation logic in shared utilities (`api/_utils/validators.js`) and enforce its use across all similar endpoints. This ensures consistent security posture and simplifies updates.
