@@ -1,4 +1,3 @@
-
 /* global process */
 import admin from 'firebase-admin';
 
@@ -108,15 +107,11 @@ export default safeHandler(async function handler(req, res) {
             return;
         }
 
+        // Security: Only use server-side environment variables for sensitive keys.
         const serviceID = process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID;
         const templateID = process.env.EMAILJS_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID;
         const publicKey = process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY;
-        const privateKey = process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY;
-
-        // Security Warning: Check if the private key is exposed via VITE_ env var
-        if (process.env.VITE_EMAILJS_PRIVATE_KEY) {
-            console.warn("🚨 SECURITY WARNING: VITE_EMAILJS_PRIVATE_KEY is defined! This exposes your private key to the client. Please rename it to EMAILJS_PRIVATE_KEY and remove the VITE_ prefix.");
-        }
+        const privateKey = process.env.EMAILJS_PRIVATE_KEY; // Removed VITE_ fallback
 
         if (serviceID && templateID && publicKey) {
             console.log("EmailJS Params Present: ServiceID, TemplateID, PublicKey");
@@ -167,7 +162,7 @@ export default safeHandler(async function handler(req, res) {
 
     // 3.5. Submit to Google Sheets (Hidden from Client)
     try {
-        const sheetURL = process.env.GOOGLE_SHEET_URL || process.env.VITE_GOOGLE_SHEET_URL;
+        const sheetURL = process.env.GOOGLE_SHEET_URL; // Removed VITE_ fallback
         if (sheetURL) {
             const formParams = new URLSearchParams();
             formParams.append('name', sanitizeForSheets(name));

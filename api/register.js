@@ -82,6 +82,14 @@ export default safeHandler(async function handler(req, res) {
         throw new ConflictError('You have already registered for this event with this email.');
     }
 
+    // 1.5 Validate Event ID exists (and fetch details for email)
+    // Security Note: Validating existence prevents "orphan" registrations and enhances data integrity.
+    const eventDocSnapshot = await db.collection('events').doc(eventId).get();
+    if (!eventDocSnapshot.exists) {
+        throw new ValidationError('Invalid Event ID');
+    }
+    const eventData = eventDocSnapshot.data();
+
     // 2. Save to Firestore (Secure Write)
     const newRegistration = {
         eventId,
@@ -104,27 +112,21 @@ export default safeHandler(async function handler(req, res) {
     // --- EmailJS Promise ---
     const emailPromise = (async () => {
         try {
-            const serviceID = process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID;
-            const publicKey = process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY;
-            const privateKey = process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY;
+            // Security: Only use server-side environment variables for sensitive keys.
+            // Removed fallback to VITE_ prefixed variables to prevent client-side exposure.
+            const serviceID = process.env.EMAILJS_SERVICE_ID;
+            const publicKey = process.env.EMAILJS_PUBLIC_KEY;
+            const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
             if (serviceID && publicKey) {
-                const confirmTemplateID = process.env.EMAILJS_CONFIRM_TEMPLATE_ID || process.env.VITE_EMAILJS_CONFIRM_TEMPLATE_ID || "template_mzmcp88";
+                const confirmTemplateID = process.env.EMAILJS_CONFIRM_TEMPLATE_ID || "template_mzmcp88";
 
                 if (confirmTemplateID) {
-                    let eventDetails = { date: 'TBA', time: 'TBA', venue: 'TBA' };
-
-                    try {
-                        const eventDoc = await db.collection('events').doc(eventId).get();
-                        if (eventDoc.exists) {
-                            const evt = eventDoc.data();
-                            eventDetails.date = evt.date ? (evt.date.toDate ? evt.date.toDate().toDateString() : new Date(evt.date).toDateString()) : 'TBA';
-                            eventDetails.time = evt.time || 'TBA';
-                            eventDetails.venue = evt.location || evt.venue || 'TBA';
-                        }
-                    } catch (fetchErr) {
-                        console.error("Failed to fetch event details for email:", fetchErr);
-                    }
+                    let eventDetails = {
+                        date: eventData.date ? (eventData.date.toDate ? eventData.date.toDate().toDateString() : new Date(eventData.date).toDateString()) : 'TBA',
+                        time: eventData.time || 'TBA',
+                        venue: eventData.location || eventData.venue || 'TBA'
+                    };
 
                     const userParams = {
                         name: name,
@@ -169,7 +171,8 @@ export default safeHandler(async function handler(req, res) {
     // --- Google Sheets Promise ---
     const sheetPromise = (async () => {
         try {
-            const sheetURL = process.env.GOOGLE_SHEET_URL || process.env.VITE_GOOGLE_SHEET_URL;
+            // Security: Only use server-side environment variables for sensitive keys.
+            const sheetURL = process.env.GOOGLE_SHEET_URL;
             if (sheetURL) {
                 const getResponse = (labelPart) => {
                     if (!responses) return '';

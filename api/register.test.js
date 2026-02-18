@@ -143,6 +143,13 @@ describe('api/register.js', () => {
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('already registered') }));
     });
 
+    it('should reject invalid eventId', async () => {
+        mockDocGet.mockResolvedValue({ exists: false }); // Event does not exist
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400); // ValidationError
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: 'Invalid Event ID' }));
+    });
+
     // SECURITY TESTS
 
     it('should reject invalid responses (too long)', async () => {
