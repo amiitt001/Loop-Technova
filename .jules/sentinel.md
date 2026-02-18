@@ -17,3 +17,8 @@
 **Vulnerability:** Similar endpoints (`/apply` and `/register`) implemented divergent validation logic, with `/register` missing crucial checks (email MX validation, response size limits) present in `/apply` or missing entirely.
 **Learning:** Duplicating validation logic across endpoints leads to inconsistencies and gaps. Security features added to one endpoint are easily missed in others.
 **Prevention:** Centralize validation logic in shared utilities (`api/_utils/validators.js`) and enforce its use across all similar endpoints. This ensures consistent security posture and simplifies updates.
+
+## 2025-10-28 - Implicit Trust in Foreign Key Existence
+**Vulnerability:** The registration endpoint accepted any `eventId` and created a record, only checking for duplicates but not existence. This allowed creation of "orphan" registrations for non-existent events.
+**Learning:** Validating uniqueness (duplicates) is not enough; validity of the reference must also be checked. Writing to the database based on unverified IDs compromises data integrity.
+**Prevention:** Always validate the existence of referenced documents (foreign keys) before creating dependent records, even in NoSQL databases.
