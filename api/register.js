@@ -35,8 +35,13 @@ function validateInput(data) {
     };
 
     for (const [key, max] of Object.entries(MAX_LENGTHS)) {
-        if (data[key] && typeof data[key] === 'string' && data[key].length > max) {
-            return { valid: false, reason: `${key} exceeds maximum length of ${max}` };
+        if (data[key]) {
+            if (typeof data[key] !== 'string') {
+                return { valid: false, reason: `${key} must be a string` };
+            }
+            if (data[key].length > max) {
+                return { valid: false, reason: `${key} exceeds maximum length of ${max}` };
+            }
         }
     }
 
