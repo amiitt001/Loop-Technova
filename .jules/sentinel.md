@@ -22,3 +22,8 @@
 **Vulnerability:** The registration endpoint accepted any `eventId` and created a record, only checking for duplicates but not existence. This allowed creation of "orphan" registrations for non-existent events.
 **Learning:** Validating uniqueness (duplicates) is not enough; validity of the reference must also be checked. Writing to the database based on unverified IDs compromises data integrity.
 **Prevention:** Always validate the existence of referenced documents (foreign keys) before creating dependent records, even in NoSQL databases.
+
+## 2025-10-28 - Type Confusion in Input Validation
+**Vulnerability:** `api/register.js` validated field lengths but failed to validate field types. An attacker could bypass sanitization (which expects strings) by sending an array (e.g., `["=cmd"]`), leading to formula injection in Google Sheets.
+**Learning:** Relying on "truthiness" or loose checks (`if (data[key])`) allows unexpected types to pass through. Sanitization functions often assume specific input types and fail silently or return raw input when types mismatch.
+**Prevention:** Strictly enforce input types (e.g., `typeof value === 'string'`) before performing length checks or passing data to sanitization functions.
