@@ -176,4 +176,11 @@ describe('api/apply.js', () => {
         expect(body.get('name')).toBe("'=HYPERLINK(\"http://evil.com\")");
         expect(body.get('reason')).toBe("'+12345");
     });
+
+    it('should reject excessive input length for email', async () => {
+        req.body.email = 'a'.repeat(200) + '@gmail.com'; // Total > 100
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: expect.stringContaining('exceeds maximum length') }));
+    });
 });

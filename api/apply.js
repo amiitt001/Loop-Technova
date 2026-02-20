@@ -24,6 +24,7 @@ import { sanitizeForSheets } from './_utils/sanitizers.js';
 function validateInput(data) {
     const rules = {
         name: { maxLength: 100 },
+        email: { maxLength: 100 },
         admissionNumber: { maxLength: 20 },
         branch: { maxLength: 50 },
         year: { maxLength: 20 },
