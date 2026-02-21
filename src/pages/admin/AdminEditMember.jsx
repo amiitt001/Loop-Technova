@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, User, Shield, Camera, Github, Linkedin, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Save, User, Shield, Camera, Github, Linkedin, RefreshCw, Trophy, Code, Zap, Cpu } from 'lucide-react';
 import { db } from '../../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
@@ -18,7 +18,12 @@ const AdminEditMember = () => {
         active: true,
         img: '',
         linkedin: '',
-        github: ''
+        github: '',
+        domain: '',
+        latestAchievement: '',
+        projectCount: '',
+        rating: 5,
+        techStack: ''
     });
 
     useEffect(() => {
@@ -38,7 +43,12 @@ const AdminEditMember = () => {
                         active: data.active !== undefined ? data.active : true,
                         img: data.img || '',
                         linkedin: data.social?.linkedin || '',
-                        github: data.social?.github || ''
+                        github: data.social?.github || '',
+                        domain: data.domain || '',
+                        latestAchievement: data.latestAchievement || '',
+                        projectCount: data.projectCount || '',
+                        rating: data.rating || 5,
+                        techStack: data.techStack ? data.techStack.join(', ') : ''
                     });
                 } else {
                     alert("Member not found!");
@@ -76,7 +86,12 @@ const AdminEditMember = () => {
                 social: {
                     linkedin: formData.linkedin,
                     github: formData.github
-                }
+                },
+                domain: formData.domain,
+                latestAchievement: formData.latestAchievement,
+                projectCount: formData.projectCount,
+                rating: Number(formData.rating),
+                techStack: formData.techStack ? formData.techStack.split(',').map(s => s.trim()) : []
             });
             alert("Member Updated Successfully!");
             navigate('/admin/members');
@@ -141,6 +156,28 @@ const AdminEditMember = () => {
                             <option value="Mentor">Mentor</option>
                             <option value="Coordinator">Coordinator</option>
                             <option value="Member">Member</option>
+                        </select>
+                    </div>
+
+                    {/* Domain */}
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Shield size={14} /> Domain
+                        </label>
+                        <select
+                            name="domain"
+                            value={formData.domain}
+                            onChange={handleChange}
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                        >
+                            <option value="">Select Domain</option>
+                            <option value="Full Stack Team">Full Stack Team</option>
+                            <option value="Frontend Team">Frontend Team</option>
+                            <option value="Backend Team">Backend Team</option>
+                            <option value="AI/ML Team">AI/ML Team</option>
+                            <option value="Mobile Team">Mobile Team</option>
+                            <option value="Design Team">Design Team</option>
+                            <option value="DevOps Team">DevOps Team</option>
                         </select>
                     </div>
 
@@ -218,6 +255,64 @@ const AdminEditMember = () => {
                         placeholder="e.g. https://example.com/photo.jpg"
                         className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
                     />
+                </div>
+
+                {/* Extended Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Trophy size={14} /> Latest Achievement
+                        </label>
+                        <input
+                            type="text"
+                            name="latestAchievement"
+                            value={formData.latestAchievement}
+                            onChange={handleChange}
+                            placeholder="e.g. Won 1st Place at Hackathon"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Code size={14} /> Projects Count
+                        </label>
+                        <input
+                            type="text"
+                            name="projectCount"
+                            value={formData.projectCount}
+                            onChange={handleChange}
+                            placeholder="e.g. 15+"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Zap size={14} /> Rating (0-5)
+                        </label>
+                        <input
+                            type="number"
+                            name="rating"
+                            value={formData.rating}
+                            onChange={handleChange}
+                            min="0"
+                            max="5"
+                            step="0.5"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                            <Cpu size={14} /> Tech Stack (comma separated)
+                        </label>
+                        <input
+                            type="text"
+                            name="techStack"
+                            value={formData.techStack}
+                            onChange={handleChange}
+                            placeholder="e.g. React, Node.js, Python"
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                        />
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -11,6 +11,10 @@ vi.mock('firebase-admin', () => ({
 }));
 
 // Mock utilities
+vi.mock('../_utils/wrapper.js', () => ({
+    safeHandler: (fn) => fn
+}));
+
 vi.mock('../_utils/auth.js', () => ({
     verifyAdmin: vi.fn()
 }));

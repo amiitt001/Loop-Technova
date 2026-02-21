@@ -7,61 +7,49 @@ import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
 // FeaturedCarousel removed for mobile stacked scroller implementation
 
 const HomeTeamCard = ({ member, index }) => {
-    const x = useMotionValue(0);
-    const y = useMotionValue(0);
+    const [isExpanded, setIsExpanded] = useState(false);
     const [imgError, setImgError] = useState(false);
 
-    const rotateX = useTransform(y, [-100, 100], [10, -10]);
-    const rotateY = useTransform(x, [-100, 100], [-10, 10]);
-
-    const handleMouseMove = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        x.set(e.clientX - centerX);
-        y.set(e.clientY - centerY);
-
-        // Spotlight Logic
-        e.currentTarget.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-        e.currentTarget.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-    };
-
-    const handleMouseLeave = () => {
-        x.set(0);
-        y.set(0);
-    };
+    // Calculate stars
+    const stars = [];
+    const rating = member.rating || 5;
+    for (let i = 0; i < 5; i++) {
+        stars.push(
+            <span key={i} style={{ color: i < Math.floor(rating) ? '#00f3ff' : '#333', fontSize: '1rem' }}>★</span>
+        );
+    }
 
     return (
         <motion.div
+            layout
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.04 }}
+            transition={{ layout: { duration: 0.3, type: "spring" } }}
+            onClick={() => setIsExpanded(!isExpanded)}
             style={{
-                width: '200px',
-                background: 'var(--bg-card)',
-                border: '1px solid var(--border-dim)',
+                width: '320px',
+                background: isExpanded ? 'rgba(10, 10, 10, 0.95)' : 'rgba(20, 20, 20, 0.6)',
+                border: `1px solid ${isExpanded ? 'var(--accent)' : 'var(--border-dim)'}`,
                 borderRadius: '16px',
-                padding: '2rem 1rem',
+                padding: '2rem',
                 textAlign: 'center',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                boxShadow: isExpanded ? '0 0 30px rgba(0,0,0,0.8)' : '0 0 10px rgba(0,0,0,0.3)',
                 position: 'relative',
-                overflow: 'hidden',
-                perspective: 1000,
-                rotateX,
-                rotateY,
-                cursor: 'pointer'
+                zIndex: isExpanded ? 10 : 1
             }}
-            className="spotlight-card"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
+            className="group"
         >
-            <div style={{
-                width: '120px',
-                height: '120px',
+            <motion.div layout="position" style={{
+                width: isExpanded ? '80px' : '100px',
+                height: isExpanded ? '80px' : '100px',
                 borderRadius: '50%',
                 background: '#111',
                 border: `2px solid ${member.color}`,
-                margin: '0 auto 1.5rem',
+                marginBottom: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -69,7 +57,8 @@ const HomeTeamCard = ({ member, index }) => {
                 fontWeight: 'bold',
                 color: member.color,
                 overflow: 'hidden',
-                pointerEvents: 'none' // Let hover pass through
+                flexShrink: 0,
+                transition: 'all 0.3s ease'
             }}>
                 {member.img && !imgError ? (
                     <img
@@ -81,92 +70,146 @@ const HomeTeamCard = ({ member, index }) => {
                 ) : (
                     <span style={{ fontSize: '2rem' }}>{member.name.charAt(0)}</span>
                 )}
-            </div>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', pointerEvents: 'none' }}>{member.name}</h3>
-            <p style={{ fontSize: '0.85rem', color: member.color, marginBottom: '1rem', pointerEvents: 'none' }}>{member.role}</p>
+            </motion.div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', pointerEvents: 'auto', zIndex: 5 }}>
-                {member.social?.github && (
-                    <a href={member.social.github} target="_blank" rel="noopener noreferrer" style={{ pointerEvents: 'auto' }}>
-                        <Github size={16} color="var(--text-dim)" />
-                    </a>
-                )}
-                {member.social?.linkedin && (
-                    <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" style={{ pointerEvents: 'auto' }}>
-                        <Linkedin size={16} color="var(--text-dim)" />
-                    </a>
-                )}
-            </div>
+            <motion.h3 layout="position" style={{ fontSize: '1.4rem', marginBottom: '0.2rem', color: '#fff' }}>{member.name}</motion.h3>
+            <motion.p layout="position" style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: isExpanded ? '1.5rem' : '0' }}>{member.role}</motion.p>
+
+            {!isExpanded && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    style={{ marginTop: '1rem', color: 'var(--accent)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                >
+                    View Details <ArrowRight size={14} />
+                </motion.div>
+            )}
+
+            {isExpanded && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    style={{ width: '100%' }}
+                >
+                    {/* Achievement */}
+                    {member.latestAchievement && (
+                        <div style={{ width: '100%', textAlign: 'left', marginBottom: '1rem' }}>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--accent)', fontWeight: 'bold', marginBottom: '0.3rem' }}>Latest Achievement:</p>
+                            <p style={{ fontSize: '0.9rem', color: '#fff' }}>{member.latestAchievement}</p>
+                        </div>
+                    )}
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: '1rem' }}>
+                        <div style={{ textAlign: 'left' }}>
+                            <p style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent)' }}>{member.projectCount || '0'}</p>
+                            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Projects</p>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'flex' }}>{stars}</div>
+                            <p style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginTop: '0.2rem' }}>Rating</p>
+                        </div>
+                    </div>
+
+                    {/* Tech Stack */}
+                    {member.techStack && member.techStack.length > 0 && (
+                        <div style={{ width: '100%', textAlign: 'left', marginBottom: '1.5rem' }}>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>Tech Stack:</p>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                {member.techStack.map((tech, i) => (
+                                    <span key={i} style={{
+                                        fontSize: '0.75rem',
+                                        padding: '0.2rem 0.6rem',
+                                        borderRadius: '12px',
+                                        border: '1px solid var(--border-dim)',
+                                        color: '#eee'
+                                    }}>
+                                        {tech}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Socials */}
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', width: '100%', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                        {member.social?.github && (
+                            <a href={member.social.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                <Github size={20} color="var(--text-dim)" className="hover:text-white transition-colors" />
+                            </a>
+                        )}
+                        {member.social?.linkedin && (
+                            <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                                <Linkedin size={20} color="var(--text-dim)" className="hover:text-white transition-colors" />
+                            </a>
+                        )}
+                    </div>
+                </motion.div>
+            )}
         </motion.div>
     );
 };
 
 const HomeTeam = () => {
-    const [teamPreview, setTeamPreview] = useState([]);
-    const [mentors, setMentors] = useState([]);
+    const [allMembers, setAllMembers] = useState([]);
+    const [filteredMembers, setFilteredMembers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeDomain, setActiveDomain] = useState('Full Stack Team');
     const [isMobile, setIsMobile] = useState(() => {
         if (typeof window !== 'undefined') {
             return window.matchMedia('(max-width: 768px)').matches;
         }
         return false;
     });
-    const [featuredMembers, setFeaturedMembers] = useState([]);
+
+    const domains = [
+        'Full Stack Team',
+        'Frontend Team',
+        'Backend Team',
+        'AI/ML Team',
+        'Mobile Team',
+        'Design Team',
+        'DevOps Team'
+    ];
 
     useEffect(() => {
-        // Maybe fetch top pointed members or just Heads?
-        // Let's fetch all and filter/sort to catch "Heads" first.
         const q = query(collection(db, "members"), orderBy("name"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const allMembers = snapshot.docs.map(doc => ({
+            const members = snapshot.docs.map(doc => ({
                 id: doc.id,
-                ...doc.data()
+                ...doc.data(),
+                // Normalize domain/role for legacy members (optional fallback)
+                domain: doc.data().domain || (
+                    /Mentor/i.test(doc.data().role) ? 'Mentors' :
+                        /Head|Lead|President|Vice/i.test(doc.data().role) ? 'Heads & Leads' :
+                            'Member' // Fallback
+                )
             }));
-
-            // Filter for Core/Leadership roles first (Case Insensitive)
-            const leadership = allMembers.filter(m =>
-                ['head', 'president', 'vice president', 'lead'].some(role => m.role.toLowerCase().includes(role))
-            );
-
-            // Strict Filter: Only show Leadership (Heads/Leads) on Home Page
-            const preview = leadership.slice(0, 4);
-
-            // Assign colors dynamically if needed or random neon colors?
-            // The original had specific colors. Let's just cycle through neon colors.
-            const neonColors = ['var(--accent)', 'var(--accent)', '#ff0055', 'var(--accent)'];
-
-            const previewWithColors = preview.map((member, index) => ({
-                ...member,
-                color: neonColors[index % neonColors.length]
-            }));
-
-            // Prepare featured members for mobile (strictly leadership)
-            const featured = leadership.slice(0, 6);
-
-            const featuredWithColors = featured.map((member, index) => ({
-                ...member,
-                color: neonColors[index % neonColors.length]
-            }));
-
-            setFeaturedMembers(featuredWithColors);
-
-            // Filter for Mentors (Case Insensitive)
-            const mentorsList = allMembers.filter(m => m.role.toLowerCase().includes('mentor'));
-            const mentorsWithColors = mentorsList.map((m, i) => ({
-                ...m,
-                color: neonColors[i % neonColors.length]
-            }));
-            setMentors(mentorsWithColors);
-
-            setTeamPreview(previewWithColors);
+            setAllMembers(members);
             setLoading(false);
         }, (error) => {
-            console.error("Error fetching team preview:", error);
+            console.error("Error fetching team:", error);
             setLoading(false);
         });
 
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        if (allMembers.length === 0) return;
+
+        // Show specific domain
+        const filtered = allMembers.filter(m => m.domain === activeDomain);
+
+        // Assign neon colors cycle
+        const neonColors = ['var(--accent)', '#ff0055', '#7000ff', '#00ff9d'];
+        const withColors = filtered.map((m, i) => ({
+            ...m,
+            color: neonColors[i % neonColors.length]
+        }));
+
+        setFilteredMembers(withColors);
+    }, [activeDomain, allMembers]);
 
     // Detect mobile (small screens) to switch layout and animations
     useEffect(() => {
@@ -181,138 +224,187 @@ const HomeTeam = () => {
         };
     }, []);
 
-    // Mobile stacked scroller logic (IntersectionObserver + scroll lock)
-    const scrollerRef = useRef(null);
+    // Mobile 3D Carousel Logic
+    const carouselRef = useRef(null);
     const [activeIndex, setActiveIndex] = useState(0);
+
     useEffect(() => {
         if (!isMobile) return;
-        const scroller = scrollerRef.current;
-        if (!scroller) return;
+        const container = carouselRef.current;
+        if (!container) return;
 
-        let lockTimer = null;
-        const lockBody = () => {
-            document.body.style.overflow = 'hidden';
-            if (lockTimer) clearTimeout(lockTimer);
-            lockTimer = setTimeout(() => { document.body.style.overflow = ''; }, 420);
+        const options = {
+            root: container,
+            threshold: 0.6 // Trigger when 60% of card is visible
         };
 
-        const items = scroller.querySelectorAll('.stack-item');
-        const io = new IntersectionObserver((entries) => {
+        const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const idx = Number(entry.target.dataset.index);
-                    setActiveIndex(idx);
+                    const index = Number(entry.target.getAttribute('data-index'));
+                    if (!isNaN(index)) {
+                        setActiveIndex(index);
+                    }
                 }
             });
-        }, { root: scroller, threshold: [0.5] });
+        }, options);
 
-        items.forEach(it => io.observe(it));
-
-        let scrollTimer = null;
-        const onScroll = () => {
-            lockBody();
-            if (scrollTimer) clearTimeout(scrollTimer);
-            scrollTimer = setTimeout(() => { document.body.style.overflow = ''; }, 450);
-        };
-
-        scroller.addEventListener('scroll', onScroll, { passive: true });
+        const items = container.querySelectorAll('.carousel-item');
+        items.forEach(item => observer.observe(item));
 
         return () => {
-            items.forEach(it => io.unobserve(it));
-            io.disconnect();
-            scroller.removeEventListener('scroll', onScroll);
-            if (lockTimer) clearTimeout(lockTimer);
-            document.body.style.overflow = '';
+            items.forEach(item => observer.unobserve(item));
+            observer.disconnect();
         };
-    }, [isMobile, featuredMembers]);
+    }, [isMobile, filteredMembers]);
 
     return (
         <div style={{ padding: '6rem 0', background: 'transparent' }}>
             <div className="container" style={{ textAlign: 'center' }}>
-                <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>CORE <span style={{ color: 'var(--text-dim)' }}>TEAM</span></h2>
+                <h2 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>OUR <span style={{ color: 'var(--text-dim)' }}>SQUAD</span></h2>
 
-                {/* Mobile stacked scroller: one focused card at a time */}
-                {isMobile && featuredMembers.length > 0 && (
-                    <div>
-                        <div className="stack-scroller hide-scrollbar" ref={scrollerRef}>
-                            {featuredMembers.map((member, idx) => (
-                                <section key={member.id} className={`stack-item ${idx === activeIndex ? 'active' : ''}`} data-index={idx}>
-                                    <div className="stack-card" style={{ borderColor: member.color }}>
-                                        <div className="stack-avatar" style={{ borderColor: member.color }}>
-                                            {member.img ? (
-                                                <img src={member.img} alt={member.name} />
-                                            ) : (
-                                                <span>{member.name.charAt(0)}</span>
-                                            )}
+                <style>{`
+                    .glow-active {
+                        box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+                        transform: scale(1.05);
+                    }
+                    .hover-glow:hover {
+                        border-color: var(--accent) !important;
+                        color: var(--accent) !important;
+                        transform: translateY(-2px);
+                    }
+                    /* Hide Scrollbar */
+                    .no-scrollbar::-webkit-scrollbar {
+                        display: none;
+                    }
+                    .no-scrollbar {
+                        -ms-overflow-style: none;
+                        scrollbar-width: none;
+                    }
+                `}</style>
+
+                {/* Domain Tabs */}
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap',
+                    gap: '0.8rem',
+                    marginBottom: '3rem',
+                    position: 'relative',
+                    zIndex: 2
+                }}>
+                    {domains.map(domain => (
+                        <button
+                            key={domain}
+                            onClick={() => setActiveIndex(0) || setActiveDomain(domain)}
+                            style={{
+                                background: activeDomain === domain ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
+                                color: activeDomain === domain ? '#000' : 'var(--text-dim)',
+                                border: `1px solid ${activeDomain === domain ? 'var(--accent)' : 'var(--border-dim)'}`,
+                                padding: '0.5rem 1rem',
+                                borderRadius: '20px',
+                                cursor: 'pointer',
+                                fontWeight: 'bold',
+                                fontSize: '0.8rem',
+                                transition: 'all 0.3s ease'
+                            }}
+                            className={activeDomain === domain ? 'glow-active' : 'hover-glow'}
+                        >
+                            {domain}
+                        </button>
+                    ))}
+                </div>
+
+                {isMobile ? (
+                    // Mobile View - 3D Carousel
+                    loading ? <p>Loading...</p> : filteredMembers.length > 0 ? (
+                        <div style={{ position: 'relative', minHeight: '500px' }}>
+                            <div
+                                ref={carouselRef}
+                                className="no-scrollbar"
+                                style={{
+                                    display: 'flex',
+                                    overflowX: 'auto',
+                                    scrollSnapType: 'x mandatory',
+                                    padding: '2rem 50vw 2rem 50vw', // Center padding
+                                    gap: '1rem', // Gap between items
+                                    perspective: '1000px',
+                                    alignItems: 'center'
+                                }}
+                            >
+                                {filteredMembers.map((member, i) => {
+                                    // Calculate distance from center index
+                                    const dist = Math.abs(activeIndex - i);
+                                    const isCenter = i === activeIndex;
+
+                                    return (
+                                        <div
+                                            key={member.id}
+                                            className="carousel-item"
+                                            data-index={i}
+                                            style={{
+                                                scrollSnapAlign: 'center',
+                                                flexShrink: 0,
+                                                transformStyle: 'preserve-3d',
+                                                transition: 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)',
+                                                transform: isCenter
+                                                    ? 'scale(1) translateZ(0)'
+                                                    : `scale(0.85) translateZ(-50px) rotateY(${i < activeIndex ? '25deg' : '-25deg'})`,
+                                                opacity: isCenter ? 1 : 0.6,
+                                                zIndex: isCenter ? 10 : 1,
+                                                filter: isCenter ? 'none' : 'blur(2px) grayscale(50%)'
+                                            }}
+                                        >
+                                            <HomeTeamCard member={member} index={i} />
                                         </div>
-                                        <div className="stack-meta">
-                                            <h3>{member.name}</h3>
-                                            <p style={{ color: member.color }}>{member.role}</p>
-                                        </div>
-                                        <div className="stack-links">
-                                            {member.social?.github && (
-                                                <a href={member.social.github} target="_blank" rel="noopener noreferrer">
-                                                    <Github size={20} color="var(--text-dim)" />
-                                                </a>
-                                            )}
-                                            {member.social?.linkedin && (
-                                                <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer">
-                                                    <Linkedin size={20} color="var(--text-dim)" />
-                                                </a>
-                                            )}
-                                        </div>
-                                    </div>
-                                </section>
-                            ))}
+                                    );
+                                })}
+                            </div>
+
+                            {/* Pagination Dots */}
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+                                {filteredMembers.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => {
+                                            const container = carouselRef.current;
+                                            const items = container.querySelectorAll('.carousel-item');
+                                            if (items[i]) {
+                                                items[i].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                                            }
+                                        }}
+                                        style={{
+                                            width: i === activeIndex ? '24px' : '8px',
+                                            height: '8px',
+                                            borderRadius: '4px',
+                                            background: i === activeIndex ? 'var(--accent)' : 'var(--border-dim)',
+                                            border: 'none',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                    />
+                                ))}
+                            </div>
                         </div>
-
-                        <div className="stack-dots" aria-hidden>
-                            {featuredMembers.map((_, i) => (
-                                <button
-                                    key={i}
-                                    className={`dot ${i === activeIndex ? 'dot-active' : ''}`}
-                                    onClick={() => {
-                                        const scroller = scrollerRef.current;
-                                        const target = scroller.querySelector(`.stack-item[data-index="${i}"]`);
-                                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Desktop / tablet canonical preview */}
-                {!isMobile && (
+                    ) : (
+                        <p style={{ color: 'var(--text-dim)', margin: '2rem 0' }}>No members found in this domain.</p>
+                    )
+                ) : (
+                    // Desktop View - Grid
                     <div style={{
                         display: 'flex',
                         justifyContent: 'center',
                         flexWrap: 'wrap',
                         gap: '2rem',
-                        margin: '3rem 0'
+                        margin: '3rem 0',
+                        minHeight: '300px' // Prevent layout shift
                     }}>
-                        {!loading && teamPreview.length === 0 && <p style={{ color: '#71717a' }}>Loading core team...</p>}
+                        {!loading && filteredMembers.length === 0 && (
+                            <p style={{ color: 'var(--text-dim)', alignSelf: 'center' }}>No members found in this domain.</p>
+                        )}
 
-                        {teamPreview.map((member, i) => (
+                        {filteredMembers.map((member, i) => (
                             <HomeTeamCard key={member.id} member={member} index={i} />
                         ))}
-                    </div>
-                )}
-
-                {/* Mentors Section */}
-                {mentors.length > 0 && (
-                    <div style={{ marginBottom: '4rem' }}>
-                        <h3 style={{ fontSize: '2rem', marginBottom: '1.5rem', marginTop: '3rem' }}>OUR <span style={{ color: 'var(--accent)' }}>MENTORS</span></h3>
-                        <div style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            flexWrap: 'wrap',
-                            gap: '2rem'
-                        }}>
-                            {mentors.map((member, i) => (
-                                <HomeTeamCard key={member.id} member={member} index={i} />
-                            ))}
-                        </div>
                     </div>
                 )}
 
@@ -328,7 +420,8 @@ const HomeTeam = () => {
                             cursor: 'pointer',
                             display: 'inline-flex',
                             alignItems: 'center',
-                            gap: '0.5rem'
+                            gap: '0.5rem',
+                            marginTop: '2rem'
                         }}
                     >
                         MEET THE FULL SQUAD <ArrowRight size={16} />
