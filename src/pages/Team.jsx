@@ -28,6 +28,105 @@ const itemVariants = {
   }
 };
 
+const MobileTeamCard = ({ member, idx, activeIndex, onDotClick }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const stars = [];
+  const rating = member.rating || 5;
+  for (let i = 0; i < 5; i++) {
+    stars.push(
+      <span key={i} style={{ color: i < Math.floor(rating) ? 'var(--accent)' : '#333', fontSize: '0.8rem' }}>★</span>
+    );
+  }
+
+  return (
+    <section
+      className={`stack-item ${idx === activeIndex ? 'active' : ''} ${isExpanded ? 'stack-expanded' : ''}`}
+      data-index={idx}
+      onClick={() => setIsExpanded(!isExpanded)}
+    >
+      <div className="stack-card" style={{ borderColor: member.color || 'var(--accent)' }}>
+        <div className="stack-avatar" style={{ borderColor: member.color || 'var(--accent)' }}>
+          {member.img ? <img src={member.img} alt={member.name} /> : <span>{member.name.charAt(0)}</span>}
+        </div>
+        <div className="stack-meta">
+          <h3>{member.name}</h3>
+          <p style={{ color: member.color || 'var(--text-dim)' }}>{member.role}</p>
+        </div>
+
+        {isExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            style={{ width: '100%', marginTop: '1rem', textAlign: 'left' }}
+          >
+            {member.latestAchievement && (
+              <div style={{ marginBottom: '0.8rem' }}>
+                <p style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold' }}>ACHIEVEMENT</p>
+                <p style={{ fontSize: '0.8rem', color: '#fff' }}>{member.latestAchievement}</p>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
+              <div>
+                <p style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{member.projectCount || '0'}</p>
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>PROJECTS</p>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ display: 'flex' }}>{stars}</div>
+                <p style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>RATING</p>
+              </div>
+            </div>
+
+            {member.techStack && member.techStack.length > 0 && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginBottom: '0.3rem' }}>TECH STACK</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+                  {member.techStack.map((tech, i) => (
+                    <span key={i} style={{
+                      fontSize: '0.6rem',
+                      padding: '0.1rem 0.4rem',
+                      borderRadius: '10px',
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: '#bbb'
+                    }}>
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        <div className="stack-links">
+          {member.social?.github && (
+            <a href={member.social.github} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+              <Github size={18} color="var(--text-dim)" />
+            </a>
+          )}
+          {member.social?.linkedin && (
+            <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+              <Linkedin size={18} color="var(--text-dim)" />
+            </a>
+          )}
+          {member.social?.twitter && (
+            <a href={member.social.twitter} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+              <Twitter size={18} color="var(--text-dim)" />
+            </a>
+          )}
+        </div>
+
+        {!isExpanded && (
+          <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '0.5rem', opacity: 0.6 }}>
+            Tap to expand
+          </div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 const Team = () => {
   const [teamGroups, setTeamGroups] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -154,105 +253,14 @@ const Team = () => {
             return (
               <>
                 <div className="stack-scroller hide-scrollbar" ref={scrollerRef}>
-                  {flat.map((member, idx) => {
-                    const [isExpanded, setIsExpanded] = useState(false);
-                    const stars = [];
-                    const rating = member.rating || 5;
-                    for (let i = 0; i < 5; i++) {
-                      stars.push(
-                        <span key={i} style={{ color: i < Math.floor(rating) ? 'var(--accent)' : '#333', fontSize: '0.8rem' }}>★</span>
-                      );
-                    }
-
-                    return (
-                      <section
-                        key={member.id || idx}
-                        className={`stack-item ${idx === activeIndex ? 'active' : ''} ${isExpanded ? 'stack-expanded' : ''}`}
-                        data-index={idx}
-                        onClick={() => setIsExpanded(!isExpanded)}
-                      >
-                        <div className="stack-card" style={{ borderColor: member.color || 'var(--accent)' }}>
-                          <div className="stack-avatar" style={{ borderColor: member.color || 'var(--accent)' }}>
-                            {member.img ? <img src={member.img} alt={member.name} /> : <span>{member.name.charAt(0)}</span>}
-                          </div>
-                          <div className="stack-meta">
-                            <h3>{member.name}</h3>
-                            <p style={{ color: member.color || 'var(--text-dim)' }}>{member.role}</p>
-                          </div>
-
-                          {isExpanded && (
-                            <motion.div
-                              initial={{ opacity: 0, height: 0 }}
-                              animate={{ opacity: 1, height: 'auto' }}
-                              style={{ width: '100%', marginTop: '1rem', textAlign: 'left' }}
-                            >
-                              {member.latestAchievement && (
-                                <div style={{ marginBottom: '0.8rem' }}>
-                                  <p style={{ fontSize: '0.65rem', color: 'var(--accent)', fontWeight: 'bold' }}>ACHIEVEMENT</p>
-                                  <p style={{ fontSize: '0.8rem', color: '#fff' }}>{member.latestAchievement}</p>
-                                </div>
-                              )}
-
-                              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
-                                <div>
-                                  <p style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--accent)' }}>{member.projectCount || '0'}</p>
-                                  <p style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>PROJECTS</p>
-                                </div>
-                                <div style={{ textAlign: 'right' }}>
-                                  <div style={{ display: 'flex' }}>{stars}</div>
-                                  <p style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>RATING</p>
-                                </div>
-                              </div>
-
-                              {member.techStack && member.techStack.length > 0 && (
-                                <div style={{ marginBottom: '1rem' }}>
-                                  <p style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginBottom: '0.3rem' }}>TECH STACK</p>
-                                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
-                                    {member.techStack.map((tech, i) => (
-                                      <span key={i} style={{
-                                        fontSize: '0.6rem',
-                                        padding: '0.1rem 0.4rem',
-                                        borderRadius: '10px',
-                                        background: 'rgba(255,255,255,0.05)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        color: '#bbb'
-                                      }}>
-                                        {tech}
-                                      </span>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                            </motion.div>
-                          )}
-
-                          <div className="stack-links">
-                            {member.social?.github && (
-                              <a href={member.social.github} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-                                <Github size={18} color="var(--text-dim)" />
-                              </a>
-                            )}
-                            {member.social?.linkedin && (
-                              <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-                                <Linkedin size={18} color="var(--text-dim)" />
-                              </a>
-                            )}
-                            {member.social?.twitter && (
-                              <a href={member.social.twitter} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
-                                <Twitter size={18} color="var(--text-dim)" />
-                              </a>
-                            )}
-                          </div>
-
-                          {!isExpanded && (
-                            <div style={{ fontSize: '0.6rem', color: 'var(--accent)', marginTop: '0.5rem', opacity: 0.6 }}>
-                              Tap to expand
-                            </div>
-                          )}
-                        </div>
-                      </section>
-                    );
-                  })}
+                  {flat.map((member, idx) => (
+                    <MobileTeamCard
+                      key={member.id || idx}
+                      member={member}
+                      idx={idx}
+                      activeIndex={activeIndex}
+                    />
+                  ))}
                 </div>
 
                 <div className="stack-dots" aria-hidden>
