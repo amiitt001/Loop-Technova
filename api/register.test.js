@@ -169,6 +169,7 @@ describe('api/register.js', () => {
     it('should sanitize formula injection attempts in Google Sheets', async () => {
         req.body.name = '=HYPERLINK("http://evil.com")';
         req.body.teamName = '+MaliciousTeam';
+        req.body.eventTitle = '=cmd| /C calc';
 
         req.body.responses = [
             { question: 'Mobile Number', answer: '=1+1' },
@@ -187,6 +188,7 @@ describe('api/register.js', () => {
         // These should be sanitized (prepended with ')
         expect(body.get('name')).toBe("'=HYPERLINK(\"http://evil.com\")");
         expect(body.get('teamName')).toBe("'+MaliciousTeam");
+        expect(body.get('eventTitle')).toBe("'=cmd| /C calc");
         expect(body.get('mobile')).toBe("'=1+1");
         expect(body.get('year')).toBe("'@cmd");
     });

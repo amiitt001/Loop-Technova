@@ -191,10 +191,10 @@ export default safeHandler(async function handler(req, res) {
 
                 const formParams = new URLSearchParams();
                 formParams.append('action', 'register');
-                formParams.append('eventTitle', eventTitle);
-                formParams.append('eventId', eventId);
-
                 // Secure: Sanitize inputs to prevent Formula Injection
+                formParams.append('eventTitle', sanitizeForSheets(eventTitle));
+                formParams.append('eventId', sanitizeForSheets(eventId));
+
                 formParams.append('name', sanitizeForSheets(name));
                 formParams.append('email', sanitizeForSheets(email));
                 formParams.append('mobile', sanitizeForSheets(mobile));
