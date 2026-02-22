@@ -41,6 +41,13 @@ export default safeHandler(async function handler(req, res) {
             throw new CustomValidationError('Missing required fields: name and platformHandle are required');
         }
 
+        // Security Validation (Type & Length)
+        if (typeof name !== 'string') throw new CustomValidationError('name must be a string');
+        if (name.length > 100) throw new CustomValidationError('name exceeds maximum length of 100');
+
+        if (typeof platformHandle !== 'string') throw new CustomValidationError('platformHandle must be a string');
+        if (platformHandle.length > 50) throw new CustomValidationError('platformHandle exceeds maximum length of 50');
+
         // Validate points
         if (points !== undefined && points !== null) {
             const pointsNum = Number(points);
@@ -58,6 +65,8 @@ export default safeHandler(async function handler(req, res) {
 
         // Add optional contestName if provided
         if (contestName !== undefined) {
+            if (typeof contestName !== 'string') throw new CustomValidationError('contestName must be a string');
+            if (contestName.length > 100) throw new CustomValidationError('contestName exceeds maximum length of 100');
             updateData.contestName = contestName;
         }
 
