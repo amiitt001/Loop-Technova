@@ -6,6 +6,10 @@ service cloud.firestore {
       return request.auth != null && request.auth.token.admin == true;
     }
 
+    function isValidString(text, max) {
+      return text is string && text.size() > 0 && text.size() <= max;
+    }
+
     match /members/{memberId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -22,17 +26,10 @@ service cloud.firestore {
     }
 
     match /registrations/{registrationId} {
-      allow create: if true;
       allow read, update, delete: if isAdmin();
     }
     
     match /applications/{applicationId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-
-    match /joinApplications/{applicationId} {
-      allow create: if true;
       allow read, update, delete: if isAdmin();
     }
 
@@ -46,7 +43,10 @@ service cloud.firestore {
     }
 
     match /messages/{messageId} {
-      allow create: if true;
+      allow create: if isValidString(request.resource.data.name, 100)
+                    && isValidString(request.resource.data.email, 100)
+                    && isValidString(request.resource.data.message, 2000)
+                    && request.resource.data.read == false;
       allow read, update, delete: if isAdmin();
     }
   }
