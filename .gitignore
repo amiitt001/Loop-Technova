@@ -38,7 +38,7 @@ coverage
 
 .firebaserc
 firebase.json
-DATABASE_SCHEMA.md
+
 .firebase/
 service-account.json
 .vercel
