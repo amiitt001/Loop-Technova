@@ -111,39 +111,14 @@ export default safeHandler(async function handler(req, res) {
         // Security: Only use server-side environment variables for sensitive keys.
         const serviceID = process.env.EMAILJS_SERVICE_ID || process.env.VITE_EMAILJS_SERVICE_ID;
         const templateID = process.env.EMAILJS_TEMPLATE_ID || process.env.VITE_EMAILJS_TEMPLATE_ID;
-        const confirmTemplateID = process.env.EMAILJS_CONFIRM_TEMPLATE_ID || process.env.VITE_EMAILJS_CONFIRM_TEMPLATE_ID;
         const publicKey = process.env.EMAILJS_PUBLIC_KEY || process.env.VITE_EMAILJS_PUBLIC_KEY;
         const privateKey = process.env.EMAILJS_PRIVATE_KEY || process.env.VITE_EMAILJS_PRIVATE_KEY;
 
         if (serviceID && templateID && publicKey) {
             console.log("EmailJS Params Present: ServiceID, TemplateID, PublicKey");
 
-            const sendEmail = async (tplID, params) => {
-                const payload = {
-                    service_id: serviceID,
-                    template_id: tplID,
-                    user_id: publicKey,
-                    template_params: params
-                };
-                if (privateKey) payload.accessToken = privateKey;
-
-                const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                });
-                if (!res.ok) {
-                    console.error(`EmailJS Error (template: ${tplID}):`, await res.text());
-                } else {
-                    console.log(`EmailJS Success (template: ${tplID})`);
-                }
-            };
-
-            // 3a. Admin notification email
-            await sendEmail(templateID, {
-                to_name: 'Admin',
-                to_email: 'technova@galgotias.edu',
-                from_name: name,
+            const templateParams = {
+                to_name: "Admin",
                 name,
                 admissionNumber,
                 email,
@@ -152,22 +127,31 @@ export default safeHandler(async function handler(req, res) {
                 branch,
                 year,
                 college,
-                github: github || 'N/A',
-                linkedin: linkedin || 'N/A',
-                message: `New application from ${name} (${admissionNumber}, ${branch}, ${year})`,
-                reply_to: email,
+                github,
+                linkedin,
+                message: `New Application from ${name} (Admission No: ${admissionNumber}, ${branch}, ${year})`,
+                reply_to: "technova@galgotias.edu"
+            };
+
+            const data = {
+                service_id: serviceID,
+                template_id: templateID,
+                user_id: publicKey,
+                template_params: templateParams
+            };
+
+            if (privateKey) data.accessToken = privateKey;
+
+            const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
             });
 
-            // 3b. Confirmation email to applicant
-            if (confirmTemplateID) {
-                await sendEmail(confirmTemplateID, {
-                    to_name: name,
-                    to_email: email,
-                    from_name: 'LOOP – GCET',
-                    name,
-                    domain,
-                    reply_to: 'technova@galgotias.edu',
-                });
+            if (!emailResponse.ok) {
+                console.error('EmailJS Error (Silent Fail):', await emailResponse.text());
+            } else {
+                console.log('EmailJS Success: Email sent to', email);
             }
         } else {
             console.warn("EmailJS Configuration Missing - Skipping Email Notification");
