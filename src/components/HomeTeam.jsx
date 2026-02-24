@@ -178,12 +178,7 @@ const HomeTeam = () => {
             const members = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
-                // Normalize domain/role for legacy members (optional fallback)
-                domain: doc.data().domain || (
-                    /Mentor/i.test(doc.data().role) ? 'Mentors' :
-                        /Head|Lead|President|Vice/i.test(doc.data().role) ? 'Heads & Leads' :
-                            'Member' // Fallback
-                )
+                social: doc.data().social || {}
             }));
             setAllMembers(members);
             setLoading(false);
@@ -282,6 +277,49 @@ const HomeTeam = () => {
                         scrollbar-width: none;
                     }
                 `}</style>
+
+                {/* MENTORS & HEADS SECTION */}
+                {!loading && (
+                    <div style={{ marginBottom: '5rem' }}>
+                        {/* Mentors */}
+                        {allMembers.filter(m => /Mentor/i.test(m.role)).length > 0 && (
+                            <div style={{ marginBottom: '3rem' }}>
+                                <h3 style={{ fontSize: '1.5rem', color: 'var(--accent)', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                                    Our Mentors
+                                </h3>
+                                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '2rem' }}>
+                                    {allMembers.filter(m => /Mentor/i.test(m.role)).map((member, i) => (
+                                        <HomeTeamCard
+                                            key={member.id}
+                                            member={{ ...member, color: 'var(--accent)' }}
+                                            index={i}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Heads & Leads */}
+                        {allMembers.filter(m => /Head|Lead|President|Vice/i.test(m.role) && !/Mentor/i.test(m.role)).length > 0 && (
+                            <div>
+                                <h3 style={{ fontSize: '1.5rem', color: '#ff0055', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                                    Heads & Leads
+                                </h3>
+                                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '2rem' }}>
+                                    {allMembers.filter(m => /Head|Lead|President|Vice/i.test(m.role) && !/Mentor/i.test(m.role)).map((member, i) => (
+                                        <HomeTeamCard
+                                            key={member.id}
+                                            member={{ ...member, color: '#ff0055' }}
+                                            index={i}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                <div style={{ width: '100px', height: '1px', background: 'var(--border-dim)', margin: '4rem auto' }}></div>
 
                 {/* Domain Tabs */}
                 <div style={{
