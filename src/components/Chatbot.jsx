@@ -78,11 +78,18 @@ const LeaderboardCard = ({ contestant }) => (
 const Chatbot = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
     const [messages, setMessages] = useState([
         { id: 1, text: "LOOP assistant online. How can I help?", sender: 'bot', type: 'text' }
     ]);
     const [inputText, setInputText] = useState('');
     const messagesEndRef = useRef(null);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     // Cache data
     const [dataCache, setDataCache] = useState({ events: [], members: [], contestants: [] });
@@ -209,11 +216,27 @@ const Chatbot = () => {
                             initial={{ opacity: 0, y: 50, scale: 0.8 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 20, scale: 0.8 }}
-                            style={{
+                            style={isMobile ? {
+                                position: 'fixed',
+                                inset: 0,
+                                width: '100%',
+                                height: '100%',
+                                background: 'rgba(5, 5, 5, 0.97)',
+                                backdropFilter: 'blur(10px)',
+                                borderRadius: 0,
+                                border: 'none',
+                                boxShadow: 'none',
+                                marginBottom: 0,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                overflow: 'hidden',
+                                zIndex: 10000,
+                                position: 'fixed'
+                            } : {
                                 width: '350px',
                                 height: '500px',
-                                background: 'rgba(10, 10, 10, 0.4)', // Slightly more opaque for readability
-                                backdropFilter: 'blur(10px)', // Glassmorphism
+                                background: 'rgba(10, 10, 10, 0.4)',
+                                backdropFilter: 'blur(10px)',
                                 borderRadius: '16px',
                                 border: '1px solid var(--accent)',
                                 boxShadow: '0 0 30px rgba(0, 243, 255, 0.15)',
@@ -221,7 +244,7 @@ const Chatbot = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 overflow: 'hidden',
-                                position: 'relative' // Essential for absolute background
+                                position: 'relative'
                             }}
                         >
                             <ChatbotBackground />
@@ -237,7 +260,7 @@ const Chatbot = () => {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                     <div style={{ width: '40px', height: '40px', borderRadius: '50%', overflow: 'hidden', border: '1px solid var(--accent)' }}>
                                         <motion.img
-                                            src="/mascot_3d.png" // Ensure this path is correct
+                                            src="/mascot_3d.png"
                                             alt="Bot"
                                             style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                             animate={{ y: [0, -2, 0] }}
@@ -246,8 +269,10 @@ const Chatbot = () => {
                                     </div>
                                     <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.9rem', letterSpacing: '1px' }}>LOOP ASSISTANT</span>
                                 </div>
-                                <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)' }}>
+                                {/* Close button — always visible on mobile, hidden on desktop since toggle button closes */}
+                                <button onClick={() => setIsOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                     <X size={18} />
+                                    {isMobile && <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>CLOSE</span>}
                                 </button>
                             </div>
 
@@ -350,8 +375,8 @@ const Chatbot = () => {
                     whileHover={{ scale: 1.1, boxShadow: '0 0 20px var(--accent)' }}
                     whileTap={{ scale: 0.9 }}
                     style={{
-                        width: '60px',
-                        height: '60px',
+                        width: isMobile ? '56px' : '60px',
+                        height: isMobile ? '56px' : '60px',
                         borderRadius: '50%',
                         background: 'var(--accent)',
                         border: 'none',

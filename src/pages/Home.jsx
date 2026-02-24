@@ -80,9 +80,9 @@ const Home = () => {
                   initial="hidden"
                   animate="show"
                   transition={{ delay: 0.6 }}
-                  style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}
+                  className="hero-ctas"
                 >
-                  <Link to="/join">
+                  <Link to="/join" className="hero-cta-link">
                     <motion.button
                       className="btn-primary"
                       whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(0, 243, 255, 0.3)' }}
@@ -91,7 +91,7 @@ const Home = () => {
                       JOIN THE CLUB <ArrowRight size={20} />
                     </motion.button>
                   </Link>
-                  <Link to="/leaderboard">
+                  <Link to="/leaderboard" className="hero-cta-link">
                     <motion.button
                       className="btn-secondary"
                       whileHover={{ scale: 1.05, borderColor: 'var(--accent)', color: 'var(--accent)', boxShadow: '0 0 25px rgba(0, 243, 255, 0.15)' }}
@@ -307,7 +307,20 @@ const Home = () => {
                 text-align: center !important;
             }
             .hero-gallery {
-                display: none !important; /* Hide complex gallery on mobile or simplify */
+                display: none !important;
+            }
+            .hero-ctas {
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+            }
+            .hero-cta-link {
+                width: 100%;
+            }
+            .hero-cta-link .btn-primary,
+            .hero-cta-link .btn-secondary {
+                width: 100%;
+                justify-content: center;
             }
         }
       `}</style>

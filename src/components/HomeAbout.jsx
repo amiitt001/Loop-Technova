@@ -126,7 +126,7 @@ const HomeAbout = () => {
                     </motion.div>
 
                     {/* Right Column: Modules Grid */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
+                    <div className="modules-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
                         {SYSTEM_MODULES.map((mod, i) => (
                             <motion.div
                                 key={mod.id}
@@ -179,6 +179,19 @@ const HomeAbout = () => {
         @media (max-width: 900px) {
           .about-grid {
             grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .modules-grid {
+            padding: 0 0.75rem;
+          }
+          .modules-grid > div {
+            padding: 1.2rem !important;
+            overflow: hidden;
+          }
+          .modules-grid p {
+            word-break: break-word;
+            overflow-wrap: break-word;
           }
         }
       `}</style>

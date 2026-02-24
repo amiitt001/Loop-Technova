@@ -84,7 +84,7 @@ const Navbar = () => {
                             }}>
                                 <span className="text-accent">LOOP</span>
                             </span>
-                            <span style={{
+                            <span className="hidden sm:block" style={{
                                 fontSize: '0.6rem',
                                 color: 'var(--text-dim)',
                                 textTransform: 'uppercase',

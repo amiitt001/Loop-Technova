@@ -181,7 +181,25 @@ const Events = () => {
       </div>
 
       <div className="timeline">
-        {!loading && upcomingEvents.length === 0 && <p style={{ textAlign: 'center', color: '#71717a' }}>No upcoming events announced yet.</p>}
+        {!loading && upcomingEvents.length === 0 && (
+          <div style={{
+            textAlign: 'center',
+            border: '1px dashed rgba(0, 243, 255, 0.25)',
+            borderRadius: '16px',
+            padding: '3rem 2rem',
+            maxWidth: '480px',
+            margin: '2rem auto',
+            background: 'rgba(0, 243, 255, 0.03)'
+          }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📅</div>
+            <p style={{ color: 'var(--accent)', fontWeight: 'bold', marginBottom: '0.5rem', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>
+              No upcoming events announced yet.
+            </p>
+            <p style={{ color: 'var(--text-dim)', fontSize: '0.9rem' }}>
+              Check back soon — something big is coming.
+            </p>
+          </div>
+        )}
 
         {upcomingEvents.map((event, index) => (
           <div key={event.id} className={`timeline-item ${event.type} animate-fade-in`} style={{ animationDelay: `${index * 0.1}s` }}>
@@ -283,6 +301,34 @@ const Events = () => {
                 className="past-event-card cursor-pointer group"
                 onClick={() => navigate(`/events/${event.id}`)}
               >
+                {/* Event thumbnail or styled placeholder */}
+                {event.thumbnailUrl ? (
+                  <div style={{ width: '100%', height: '120px', marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden' }}>
+                    <img
+                      src={event.thumbnailUrl}
+                      alt={event.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => { e.currentTarget.parentElement.innerHTML = '<div style="width:100%;height:100%;background:linear-gradient(135deg,#0a0a0a,#111);display:flex;align-items:center;justify-content:center;border-radius:8px"><span style=\"color:#00f3ff;font-size:0.7rem;font-family:monospace;letter-spacing:2px;opacity:0.6\">PHOTO COMING SOON</span></div>'; }}
+                    />
+                  </div>
+                ) : (
+                  <div style={{
+                    width: '100%',
+                    height: '80px',
+                    marginBottom: '1rem',
+                    borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #0a0a0a, #111)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '1px dashed rgba(0,243,255,0.15)'
+                  }}>
+                    <span style={{ color: '#00f3ff', fontSize: '0.65rem', fontFamily: 'monospace', letterSpacing: '2px', opacity: 0.5 }}>
+                      PHOTO COMING SOON
+                    </span>
+                  </div>
+                )}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
                   <span style={{
                     fontSize: '0.7rem',
