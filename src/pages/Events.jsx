@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, MapPin, RefreshCw, ArrowRight } from 'lucide-react';
@@ -13,6 +13,16 @@ const Events = () => {
   const [stats, setStats] = useState({ total: 0, major: 0, minor: 0 });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef(null);
+
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const index = Math.round(el.scrollLeft / (el.offsetWidth * 0.75));
+    setActiveIndex(index);
+  };
 
   const scrollToPastEvents = () => {
     const section = document.getElementById('past-events');
@@ -294,70 +304,89 @@ const Events = () => {
             </div>
           )}
 
-          <div className="past-events-grid">
+          <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 px-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:overflow-visible md:px-0 md:max-w-[1000px] md:mx-auto"
+          >
             {pastEvents.map((event, index) => (
               <div
                 key={event.id}
-                className="past-event-card cursor-pointer group"
+                className="snap-start min-w-[75vw] sm:min-w-[60vw] md:min-w-0 flex-shrink-0"
                 onClick={() => navigate(`/events/${event.id}`)}
               >
-                {/* Event thumbnail or styled placeholder */}
-                {event.thumbnailUrl ? (
-                  <div style={{ width: '100%', height: '120px', marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden' }}>
-                    <img
-                      src={event.thumbnailUrl}
-                      alt={event.title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={(e) => { e.currentTarget.parentElement.innerHTML = '<div style="width:100%;height:100%;background:linear-gradient(135deg,#0a0a0a,#111);display:flex;align-items:center;justify-content:center;border-radius:8px"><span style=\"color:#00f3ff;font-size:0.7rem;font-family:monospace;letter-spacing:2px;opacity:0.6\">PHOTO COMING SOON</span></div>'; }}
-                    />
-                  </div>
-                ) : (
-                  <div style={{
-                    width: '100%',
-                    height: '80px',
-                    marginBottom: '1rem',
-                    borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #0a0a0a, #111)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px dashed rgba(0,243,255,0.15)'
-                  }}>
-                    <span style={{ color: '#00f3ff', fontSize: '0.65rem', fontFamily: 'monospace', letterSpacing: '2px', opacity: 0.5 }}>
-                      PHOTO COMING SOON
+                <div className="past-event-card cursor-pointer group h-full">
+                  {/* Event thumbnail or styled placeholder */}
+                  {event.thumbnailUrl ? (
+                    <div style={{ width: '100%', height: '120px', marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden' }}>
+                      <img
+                        src={event.thumbnailUrl}
+                        alt={event.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { e.currentTarget.parentElement.innerHTML = '<div style="width:100%;height:100%;background:linear-gradient(135deg,#0a0a0a,#111);display:flex;align-items:center;justify-content:center;border-radius:8px"><span style=\"color:#00f3ff;font-size:0.7rem;font-family:monospace;letter-spacing:2px;opacity:0.6\">PHOTO COMING SOON</span></div>'; }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: '100%',
+                      height: '80px',
+                      marginBottom: '1rem',
+                      borderRadius: '8px',
+                      background: 'linear-gradient(135deg, #0a0a0a, #111)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px dashed rgba(0,243,255,0.15)'
+                    }}>
+                      <span style={{ color: '#00f3ff', fontSize: '0.65rem', fontFamily: 'monospace', letterSpacing: '2px', opacity: 0.5 }}>
+                        PHOTO COMING SOON
+                      </span>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+                    <span style={{
+                      fontSize: '0.7rem',
+                      background: '#333',
+                      color: '#888',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: '4px'
+                    }}>
+                      PAST
                     </span>
+                    <div style={{
+                      background: getTypeColor(event.eventType || 'Minor'),
+                      color: '#000',
+                      padding: '0.1rem 0.5rem',
+                      borderRadius: '8px',
+                      fontSize: '0.6rem',
+                      fontWeight: 'bold',
+                      textTransform: 'uppercase'
+                    }}>
+                      {event.eventType || 'Minor'}
+                    </div>
                   </div>
-                )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-                  <span style={{
-                    fontSize: '0.7rem',
-                    background: '#333',
-                    color: '#888',
-                    padding: '0.2rem 0.6rem',
-                    borderRadius: '4px'
-                  }}>
-                    PAST
-                  </span>
-                  <div style={{
-                    background: getTypeColor(event.eventType || 'Minor'),
-                    color: '#000',
-                    padding: '0.1rem 0.5rem',
-                    borderRadius: '8px',
-                    fontSize: '0.6rem',
-                    fontWeight: 'bold',
-                    textTransform: 'uppercase'
-                  }}>
-                    {event.eventType || 'Minor'}
+                  <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#ccc' }}>{event.title}</h3>
+
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', gap: '1rem' }}>
+                    <span>{event.dateDisplay}</span>
                   </div>
-                </div>
-
-                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#ccc' }}>{event.title}</h3>
-
-                <div style={{ fontSize: '0.85rem', color: 'var(--text-dim)', display: 'flex', gap: '1rem' }}>
-                  <span>{event.dateDisplay}</span>
                 </div>
               </div>
+            ))}
+          </div>
+
+          {/* Scroll dots indicator (mobile only) */}
+          <div className="flex justify-center gap-2 mt-3 md:hidden">
+            {pastEvents.map((_, i) => (
+              <div
+                key={i}
+                className={`h-2 rounded-full transition-all duration-300 ${i === activeIndex
+                  ? 'bg-cyan-400 w-4'
+                  : 'bg-gray-600 w-2'
+                  }`}
+              />
             ))}
           </div>
         </div>

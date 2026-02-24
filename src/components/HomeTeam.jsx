@@ -68,7 +68,26 @@ const HomeTeamCard = ({ member, index }) => {
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                     />
                 ) : (
-                    <span style={{ fontSize: '2rem' }}>{member.name.charAt(0)}</span>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%',
+                        width: '100%',
+                        background: 'linear-gradient(135deg, #0a0a0a, #1a1a1a)',
+                        padding: '5px'
+                    }}>
+                        <span style={{ fontSize: '1.2rem', marginBottom: '4px' }}>{member.name.charAt(0)}</span>
+                        <span style={{
+                            fontSize: '0.4rem',
+                            fontFamily: 'var(--font-mono)',
+                            color: 'var(--accent)',
+                            opacity: 0.7,
+                            lineHeight: 1,
+                            textAlign: 'center'
+                        }}>PHOTO COMING SOON</span>
+                    </div>
                 )}
             </motion.div>
 
