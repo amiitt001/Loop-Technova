@@ -122,7 +122,7 @@ src/
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/loop-website.git
+    git clone https://github.com/amiitt001/loop-website.git
     cd loop-website
     ```
 
