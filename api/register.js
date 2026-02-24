@@ -26,6 +26,7 @@ function validateInput(data) {
 
     // Max length validation to prevent DoS/Storage Exhaustion
     const MAX_LENGTHS = {
+        eventId: 100,
         name: 100,
         email: 100,
         eventTitle: 200,
