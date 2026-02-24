@@ -164,7 +164,13 @@ const Team = () => {
     return false;
   });
   const scrollerRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndices, setActiveIndices] = useState({});
+
+  const handleGroupScroll = (groupTitle, el) => {
+    if (!el) return;
+    const index = Math.round(el.scrollLeft / (el.offsetWidth * 0.75));
+    setActiveIndices(prev => ({ ...prev, [groupTitle]: index }));
+  };
 
   useEffect(() => {
     const q = query(collection(db, "members"), orderBy("name"));
@@ -214,48 +220,7 @@ const Team = () => {
     };
   }, []);
 
-  // Mobile stacked scroller logic
-  useEffect(() => {
-    if (!isMobile) return;
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-
-    let lockTimer = null;
-    const lockBody = () => {
-      document.body.style.overflow = 'hidden';
-      if (lockTimer) clearTimeout(lockTimer);
-      lockTimer = setTimeout(() => { document.body.style.overflow = ''; }, 420);
-    };
-
-    const items = scroller.querySelectorAll('.stack-item');
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const idx = Number(entry.target.dataset.index);
-          setActiveIndex(idx);
-        }
-      });
-    }, { root: scroller, threshold: [0.5] });
-
-    items.forEach(it => io.observe(it));
-
-    let scrollTimer = null;
-    const onScroll = () => {
-      lockBody();
-      if (scrollTimer) clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => { document.body.style.overflow = ''; }, 450);
-    };
-
-    scroller.addEventListener('scroll', onScroll, { passive: true });
-
-    return () => {
-      items.forEach(it => io.unobserve(it));
-      io.disconnect();
-      scroller.removeEventListener('scroll', onScroll);
-      if (lockTimer) clearTimeout(lockTimer);
-      document.body.style.overflow = '';
-    };
-  }, [isMobile, teamGroups]);
+  // Mobile stacking scroller logic (Removed in favor of horizontal carousels)
 
 
 
@@ -275,37 +240,42 @@ const Team = () => {
 
       {isMobile && !loading ? (
         <div style={{ paddingBottom: '2rem' }}>
-          {(() => {
-            const flat = teamGroups.reduce((acc, g) => acc.concat(g.members), []);
-            return (
-              <>
-                <div className="stack-scroller hide-scrollbar" ref={scrollerRef}>
-                  {flat.map((member, idx) => (
-                    <MobileTeamCard
-                      key={member.id || idx}
-                      member={member}
-                      idx={idx}
-                      activeIndex={activeIndex}
-                    />
-                  ))}
-                </div>
-
-                <div className="stack-dots" aria-hidden>
-                  {flat.map((_, i) => (
-                    <button
-                      key={i}
-                      className={`dot ${i === activeIndex ? 'dot-active' : ''}`}
-                      onClick={() => {
-                        const scroller = scrollerRef.current;
-                        const target = scroller.querySelector(`.stack-item[data-index="${i}"]`);
-                        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                      }}
-                    />
-                  ))}
-                </div>
-              </>
-            );
-          })()}
+          {teamGroups.map((group, gIdx) => (
+            <div key={group.title} style={{ marginBottom: '4rem' }}>
+              <h2 style={{
+                textAlign: 'left',
+                paddingLeft: '1.5rem',
+                marginBottom: '1.5rem',
+                color: 'var(--accent)',
+                fontSize: '1.5rem',
+                textTransform: 'uppercase',
+                letterSpacing: '1px'
+              }}>
+                {group.title}
+              </h2>
+              <div
+                className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-6 pb-4"
+                onScroll={(e) => handleGroupScroll(group.title, e.currentTarget)}
+              >
+                {group.members.map((member, mIdx) => (
+                  <div key={member.id} className="snap-start min-w-[75vw] flex-shrink-0">
+                    <TeamCard member={member} width="100%" />
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-center gap-2 mt-3">
+                {group.members.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${i === (activeIndices[group.title] || 0)
+                        ? 'bg-cyan-400 w-4'
+                        : 'bg-gray-700 w-1.5'
+                      }`}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         teamGroups.map((group, groupIndex) => (

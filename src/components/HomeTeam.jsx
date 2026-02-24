@@ -181,6 +181,26 @@ const HomeTeam = () => {
         return false;
     });
 
+    const [mentorActiveIndex, setMentorActiveIndex] = useState(0);
+    const [headActiveIndex, setHeadActiveIndex] = useState(0);
+
+    const mentorScrollRef = useRef(null);
+    const headScrollRef = useRef(null);
+
+    const handleMentorScroll = () => {
+        const el = mentorScrollRef.current;
+        if (!el) return;
+        const index = Math.round(el.scrollLeft / (el.offsetWidth * 0.75));
+        setMentorActiveIndex(index);
+    };
+
+    const handleHeadScroll = () => {
+        const el = headScrollRef.current;
+        if (!el) return;
+        const index = Math.round(el.scrollLeft / (el.offsetWidth * 0.75));
+        setHeadActiveIndex(index);
+    };
+
     const domains = [
         'Full Stack Team',
         'Frontend Team',
@@ -301,40 +321,90 @@ const HomeTeam = () => {
                 {!loading && (
                     <div style={{ marginBottom: '5rem' }}>
                         {/* Mentors */}
-                        {allMembers.filter(m => /Mentor/i.test(m.role)).length > 0 && (
-                            <div style={{ marginBottom: '3rem' }}>
-                                <h3 style={{ fontSize: '1.5rem', color: 'var(--accent)', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                                    Our Mentors
-                                </h3>
-                                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '2rem' }}>
-                                    {allMembers.filter(m => /Mentor/i.test(m.role)).map((member, i) => (
-                                        <HomeTeamCard
-                                            key={member.id}
-                                            member={{ ...member, color: 'var(--accent)' }}
-                                            index={i}
-                                        />
-                                    ))}
+                        {(() => {
+                            const mentors = allMembers.filter(m => /Mentor/i.test(m.role));
+                            if (mentors.length === 0) return null;
+                            return (
+                                <div style={{ marginBottom: '4rem' }}>
+                                    <h3 style={{ fontSize: '1.5rem', color: 'var(--accent)', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                                        Our Mentors
+                                    </h3>
+                                    <div
+                                        ref={mentorScrollRef}
+                                        onScroll={handleMentorScroll}
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent: isMobile ? 'flex-start' : 'center',
+                                            flexWrap: isMobile ? 'nowrap' : 'wrap',
+                                            gap: '1.5rem',
+                                            overflowX: isMobile ? 'auto' : 'visible',
+                                            scrollSnapType: isMobile ? 'x mandatory' : 'none',
+                                            paddingBottom: isMobile ? '1rem' : '0'
+                                        }}
+                                        className="scrollbar-hide"
+                                    >
+                                        {mentors.map((member, i) => (
+                                            <div key={member.id} style={{ scrollSnapAlign: 'center', flexShrink: 0, minWidth: isMobile ? '75vw' : 'auto' }}>
+                                                <HomeTeamCard
+                                                    member={{ ...member, color: 'var(--accent)' }}
+                                                    index={i}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {isMobile && (
+                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '1rem' }}>
+                                            {mentors.map((_, i) => (
+                                                <div key={i} className={`h-2 rounded-full transition-all duration-300 ${i === mentorActiveIndex ? 'bg-cyan-400 w-4' : 'bg-gray-600 w-2'}`} />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        )}
+                            );
+                        })()}
 
                         {/* Heads & Leads */}
-                        {allMembers.filter(m => /Head|Lead|President|Vice/i.test(m.role) && !/Mentor/i.test(m.role)).length > 0 && (
-                            <div>
-                                <h3 style={{ fontSize: '1.5rem', color: '#ff0055', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                                    Heads & Leads
-                                </h3>
-                                <div style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '2rem' }}>
-                                    {allMembers.filter(m => /Head|Lead|President|Vice/i.test(m.role) && !/Mentor/i.test(m.role)).map((member, i) => (
-                                        <HomeTeamCard
-                                            key={member.id}
-                                            member={{ ...member, color: '#ff0055' }}
-                                            index={i}
-                                        />
-                                    ))}
+                        {(() => {
+                            const heads = allMembers.filter(m => /Head|Lead|President|Vice/i.test(m.role) && !/Mentor/i.test(m.role));
+                            if (heads.length === 0) return null;
+                            return (
+                                <div>
+                                    <h3 style={{ fontSize: '1.5rem', color: '#ff0055', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                                        Heads & Leads
+                                    </h3>
+                                    <div
+                                        ref={headScrollRef}
+                                        onScroll={handleHeadScroll}
+                                        style={{
+                                            display: 'flex',
+                                            justifyContent: isMobile ? 'flex-start' : 'center',
+                                            flexWrap: isMobile ? 'nowrap' : 'wrap',
+                                            gap: '1.5rem',
+                                            overflowX: isMobile ? 'auto' : 'visible',
+                                            scrollSnapType: isMobile ? 'x mandatory' : 'none',
+                                            paddingBottom: isMobile ? '1rem' : '0'
+                                        }}
+                                        className="scrollbar-hide"
+                                    >
+                                        {heads.map((member, i) => (
+                                            <div key={member.id} style={{ scrollSnapAlign: 'center', flexShrink: 0, minWidth: isMobile ? '75vw' : 'auto' }}>
+                                                <HomeTeamCard
+                                                    member={{ ...member, color: '#ff0055' }}
+                                                    index={i}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {isMobile && (
+                                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '1rem' }}>
+                                            {heads.map((_, i) => (
+                                                <div key={i} className={`h-2 rounded-full transition-all duration-300 ${i === headActiveIndex ? 'bg-[#ff0055] w-4' : 'bg-gray-600 w-2'}`} />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        )}
+                            );
+                        })()}
                     </div>
                 )}
 
