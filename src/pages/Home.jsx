@@ -11,7 +11,6 @@ import HomeEvents from '../components/HomeEvents';
 import HomeTeam from '../components/HomeTeam';
 import HomeAbout from '../components/HomeAbout';
 import HomeContact from '../components/HomeContact';
-import ThreeBackground from '../components/ThreeBackground';
 
 const Home = () => {
 
@@ -50,8 +49,6 @@ const Home = () => {
           position: 'relative',
           background: 'radial-gradient(circle at 30% center, rgba(0, 243, 255, 0.08), transparent 50%)'
         }}>
-          <ThreeBackground />
-
           <div className="container" style={{ position: 'relative', zIndex: 1, paddingTop: '4rem', paddingBottom: '4rem' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center' }} className="hero-grid">
 

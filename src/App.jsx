@@ -9,6 +9,7 @@ import Events from './pages/Events';
 import EventDetails from './pages/EventDetails';
 import Join from './pages/Join';
 import Chatbot from './components/Chatbot';
+import ThreeBackground from './components/ThreeBackground';
 
 // Admin Imports
 import AdminLayout from './layouts/AdminLayout';
@@ -27,10 +28,12 @@ import AdminMessages from './pages/admin/AdminMessages';
 
 import AdminEvents from './pages/admin/AdminEvents';
 
-// Layout for public pages that includes Navbar and Footer
+// Layout for public pages that includes Navbar, Footer, and the global 3D background
 const PublicLayout = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen bg-[var(--bg-dark)] text-[var(--text-main)] font-[var(--font-main)]">
+      {/* Global 3D background — fixed, renders behind all public pages */}
+      <ThreeBackground variant="home" />
       <Navbar />
       <main className="flex-grow">
         {children}
