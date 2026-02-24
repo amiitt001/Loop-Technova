@@ -34,8 +34,32 @@ const PublicLayout = ({ children }) => {
     <div className="flex flex-col min-h-screen bg-[var(--bg-dark)] text-[var(--text-main)] font-[var(--font-main)]">
       {/* Global 3D background — fixed, renders behind all public pages */}
       <ThreeBackground variant="home" />
+
+      {/* Global radial gradient atmosphere — matches home hero */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'radial-gradient(circle at 30% center, rgba(0, 243, 255, 0.08), transparent 50%)',
+        pointerEvents: 'none',
+        zIndex: 0
+      }} />
+
+      {/* Global ambient glow — matches home hero */}
+      <div style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '600px',
+        height: '600px',
+        background: 'radial-gradient(circle, rgba(0, 243, 255, 0.12) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+        pointerEvents: 'none',
+        zIndex: 0
+      }} />
+
       <Navbar />
-      <main className="flex-grow">
+      <main className="flex-grow" style={{ position: 'relative', zIndex: 1 }}>
         {children}
       </main>
       <Chatbot />
