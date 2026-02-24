@@ -3,7 +3,7 @@ import { Github, Linkedin, Twitter, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
-import ThreeBackground from '../components/ThreeBackground';
+
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -234,7 +234,7 @@ const Team = () => {
 
   return (
     <div className="container" style={{ padding: '8rem 0 4rem' }}>
-      <ThreeBackground variant="team" />
+
       <div style={{ textAlign: 'center', marginBottom: '4rem' }} className="animate-fade-in">
         <h1 className="text-accent" style={{ fontSize: '3rem', marginBottom: '1rem' }}>MEET THE SQUAD</h1>
         <p style={{ color: 'var(--text-dim)' }}>The minds behind the machines.</p>

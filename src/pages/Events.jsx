@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, MapPin, RefreshCw, ArrowRight } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
-import ThreeBackground from '../components/ThreeBackground';
+
 
 const Events = () => {
   const [upcomingEvents, setUpcomingEvents] = useState([]);
@@ -106,7 +106,7 @@ const Events = () => {
   return (
     <div className="container" style={{ padding: '8rem 0 4rem' }}>
       {/* SEO & Structured Data */}
-      <ThreeBackground variant="events" />
+
       <Helmet>
         <title>Upcoming Tech Events & Workshops | LOOP Tech Club</title>
         <meta name="description" content="Discover upcoming hackathons, coding workshops, and tech seminars at Galgotias College. Join LOOP, the premier tech club for developers and innovators." />
