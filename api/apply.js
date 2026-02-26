@@ -26,6 +26,7 @@ function validateInput(data) {
         name: { maxLength: 100 },
         email: { maxLength: 100 },
         admissionNumber: { maxLength: 20 },
+        phone: { maxLength: 20 },
         branch: { maxLength: 50 },
         year: { maxLength: 20 },
         college: { maxLength: 100 },
@@ -54,9 +55,9 @@ export default safeHandler(async function handler(req, res) {
         throw new ValidationError('Method Not Allowed'); // Technically 405, but simplified for now
     }
 
-    const { name, admissionNumber, email, domain, reason, branch, year, college, github, linkedin } = req.body;
+    const { name, admissionNumber, email, phone, domain, reason, branch, year, college, github, linkedin } = req.body;
 
-    if (!email || !name || !admissionNumber) {
+    if (!email || !name || !admissionNumber || !phone || !github) {
         throw new ValidationError('Missing required fields');
     }
 
@@ -85,6 +86,7 @@ export default safeHandler(async function handler(req, res) {
         name,
         admissionNumber,
         email,
+        phone,
         domain,
         reason,
         branch,
@@ -122,6 +124,7 @@ export default safeHandler(async function handler(req, res) {
                 name,
                 admissionNumber,
                 email,
+                phone,
                 domain,
                 reason,
                 branch,
@@ -169,6 +172,7 @@ export default safeHandler(async function handler(req, res) {
             formParams.append('name', sanitizeForSheets(name));
             formParams.append('admissionNumber', sanitizeForSheets(admissionNumber));
             formParams.append('email', email); // Validated to be safe
+            formParams.append('phone', sanitizeForSheets(phone));
             formParams.append('branch', sanitizeForSheets(branch));
             formParams.append('year', sanitizeForSheets(year));
             formParams.append('college', sanitizeForSheets(college));

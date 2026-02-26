@@ -73,6 +73,7 @@ describe('api/apply.js', () => {
             body: {
                 name: 'John Doe',
                 admissionNumber: '12345',
+                phone: '9876543210',
                 email: 'john.doe@college.edu',
                 domain: 'Full Stack Development',
                 reason: 'I want to learn.',
@@ -119,6 +120,20 @@ describe('api/apply.js', () => {
 
     it('should reject missing required fields', async () => {
         delete req.body.email;
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: 'Missing required fields' }));
+    });
+
+    it('should reject missing phone', async () => {
+        delete req.body.phone;
+        await handler(req, res);
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: 'Missing required fields' }));
+    });
+
+    it('should reject missing github', async () => {
+        delete req.body.github;
         await handler(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ error: 'Missing required fields' }));

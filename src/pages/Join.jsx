@@ -8,6 +8,7 @@ const Join = () => {
     const [formData, setFormData] = useState({
         name: '',
         admissionNumber: '',
+        phone: '',
         email: '',
         github: '',
         branch: '',
@@ -117,7 +118,7 @@ const Join = () => {
 
         const finalDomain = formData.domain === 'Others' ? formData.customDomain : formData.domain;
 
-        if (!formData.name || !formData.email || !formData.admissionNumber || !formData.reason || !formData.branch || !formData.college) {
+        if (!formData.name || !formData.email || !formData.admissionNumber || !formData.phone || !formData.github || !formData.reason || !formData.branch || !formData.college) {
             alert("Please fill in all required fields.");
             return;
         }
@@ -128,6 +129,8 @@ const Join = () => {
             email: formData.email.trim().toLowerCase(),
             name: formData.name.trim(),
             admissionNumber: formData.admissionNumber.trim(),
+            phone: formData.phone.trim(),
+            github: formData.github.trim(),
             domain: finalDomain
         };
 
@@ -161,6 +164,7 @@ const Join = () => {
             setFormData({
                 name: '',
                 admissionNumber: '',
+                phone: '',
                 email: '',
                 github: '',
                 branch: '',
@@ -255,6 +259,18 @@ const Join = () => {
                             />
                         </div>
                         <div>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>Phone Number *</label>
+                            <input
+                                type="tel"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                className="input-field"
+                                placeholder="+91 98765 43210"
+                                required
+                            />
+                        </div>
+                        <div>
                             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>College Email *</label>
                             <input
                                 type="email"
@@ -312,7 +328,7 @@ const Join = () => {
 
                     <div style={{ marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>GitHub Profile (Optional)</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-dim)', fontSize: '0.9rem' }}>GitHub Profile *</label>
                             <input
                                 type="url"
                                 name="github"
@@ -320,6 +336,7 @@ const Join = () => {
                                 onChange={handleChange}
                                 className="input-field"
                                 placeholder="https://github.com/username"
+                                required
                             />
                         </div>
                         <div>
