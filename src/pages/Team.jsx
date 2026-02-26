@@ -243,8 +243,8 @@ const Team = () => {
           {teamGroups.map((group, gIdx) => (
             <div key={group.title} style={{ marginBottom: '4rem' }}>
               <h2 style={{
-                textAlign: 'left',
-                paddingLeft: '1.5rem',
+                textAlign: isMobile ? 'center' : 'left',
+                paddingLeft: isMobile ? '0' : '1.5rem',
                 marginBottom: '1.5rem',
                 color: 'var(--accent)',
                 fontSize: '1.5rem',
@@ -254,11 +254,14 @@ const Team = () => {
                 {group.title}
               </h2>
               <div
-                className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-6 pb-4"
+                className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4"
+                style={{
+                  padding: isMobile ? '0 12.5vw' : '0 1.5rem'
+                }}
                 onScroll={(e) => handleGroupScroll(group.title, e.currentTarget)}
               >
                 {group.members.map((member, mIdx) => (
-                  <div key={member.id} className="snap-start min-w-[75vw] flex-shrink-0">
+                  <div key={member.id} className="snap-center min-w-[75vw] flex-shrink-0">
                     <TeamCard member={member} width="100%" />
                   </div>
                 ))}
@@ -268,8 +271,8 @@ const Team = () => {
                   <div
                     key={i}
                     className={`h-1.5 rounded-full transition-all duration-300 ${i === (activeIndices[group.title] || 0)
-                        ? 'bg-cyan-400 w-4'
-                        : 'bg-gray-700 w-1.5'
+                      ? 'bg-cyan-400 w-4'
+                      : 'bg-gray-700 w-1.5'
                       }`}
                   />
                 ))}

@@ -326,8 +326,15 @@ const HomeTeam = () => {
                             if (mentors.length === 0) return null;
                             return (
                                 <div style={{ marginBottom: '4rem' }}>
-                                    <h3 style={{ fontSize: '1.5rem', color: 'var(--accent)', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
-                                        Our Mentors
+                                    <h3 style={{
+                                        fontSize: '1.5rem',
+                                        color: 'var(--accent)',
+                                        marginBottom: '2rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '2px',
+                                        textAlign: isMobile ? 'center' : 'left'
+                                    }}>
+                                        Mentors
                                     </h3>
                                     <div
                                         ref={mentorScrollRef}
@@ -337,6 +344,7 @@ const HomeTeam = () => {
                                             justifyContent: isMobile ? 'flex-start' : 'center',
                                             flexWrap: isMobile ? 'nowrap' : 'wrap',
                                             gap: '1.5rem',
+                                            padding: isMobile ? '0 12.5vw' : '0',
                                             overflowX: isMobile ? 'auto' : 'visible',
                                             scrollSnapType: isMobile ? 'x mandatory' : 'none',
                                             paddingBottom: isMobile ? '1rem' : '0'
@@ -369,7 +377,14 @@ const HomeTeam = () => {
                             if (heads.length === 0) return null;
                             return (
                                 <div>
-                                    <h3 style={{ fontSize: '1.5rem', color: '#ff0055', marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '2px' }}>
+                                    <h3 style={{
+                                        fontSize: '1.5rem',
+                                        color: '#ff0055',
+                                        marginBottom: '2rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '2px',
+                                        textAlign: isMobile ? 'center' : 'left'
+                                    }}>
                                         Heads & Leads
                                     </h3>
                                     <div
@@ -380,6 +395,7 @@ const HomeTeam = () => {
                                             justifyContent: isMobile ? 'flex-start' : 'center',
                                             flexWrap: isMobile ? 'nowrap' : 'wrap',
                                             gap: '1.5rem',
+                                            padding: isMobile ? '0 12.5vw' : '0',
                                             overflowX: isMobile ? 'auto' : 'visible',
                                             scrollSnapType: isMobile ? 'x mandatory' : 'none',
                                             paddingBottom: isMobile ? '1rem' : '0'
