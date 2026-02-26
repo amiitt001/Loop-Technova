@@ -91,8 +91,8 @@ const HomeTeamCard = ({ member, index }) => {
                 )}
             </motion.div>
 
-            <motion.h3 layout="position" style={{ fontSize: '1.4rem', marginBottom: '0.2rem', color: '#fff' }}>{member.name}</motion.h3>
-            <motion.p layout="position" style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: isExpanded ? '1.5rem' : '0' }}>{member.role}</motion.p>
+            <motion.h3 layout="position" style={{ fontSize: '1.4rem', marginBottom: '0.2rem', color: '#fff', textAlign: 'center' }}>{member.name}</motion.h3>
+            <motion.p layout="position" style={{ fontSize: '0.9rem', color: 'var(--text-dim)', marginBottom: isExpanded ? '1.5rem' : '0', textAlign: 'center' }}>{member.role}</motion.p>
 
             {!isExpanded && (
                 <motion.div
@@ -332,7 +332,7 @@ const HomeTeam = () => {
                                         marginBottom: '2rem',
                                         textTransform: 'uppercase',
                                         letterSpacing: '2px',
-                                        textAlign: isMobile ? 'center' : 'left'
+                                        textAlign: 'center'
                                     }}>
                                         Mentors
                                     </h3>
@@ -383,7 +383,7 @@ const HomeTeam = () => {
                                         marginBottom: '2rem',
                                         textTransform: 'uppercase',
                                         letterSpacing: '2px',
-                                        textAlign: isMobile ? 'center' : 'left'
+                                        textAlign: 'center'
                                     }}>
                                         Heads & Leads
                                     </h3>

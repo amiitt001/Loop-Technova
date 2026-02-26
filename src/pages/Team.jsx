@@ -387,8 +387,8 @@ const TeamCard = ({ member, width }) => {
           )}
         </motion.div>
 
-        <motion.h3 layout="position" style={{ fontSize: isExpanded ? '1.4rem' : '1.2rem', marginTop: isExpanded ? '0.5rem' : '1rem' }}>{member.name}</motion.h3>
-        <motion.p layout="position" style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: isExpanded ? '1.5rem' : '0' }}>
+        <motion.h3 layout="position" style={{ fontSize: isExpanded ? '1.4rem' : '1.2rem', marginTop: isExpanded ? '0.5rem' : '1rem', textAlign: 'center' }}>{member.name}</motion.h3>
+        <motion.p layout="position" style={{ color: 'var(--text-dim)', fontSize: '0.9rem', marginBottom: isExpanded ? '1.5rem' : '0', textAlign: 'center' }}>
           {member.role === 'Head' ? 'Lead' : member.role}
         </motion.p>
 
