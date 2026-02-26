@@ -1,7 +1,7 @@
 var sheetName = 'Applications';
 var scriptProp = PropertiesService.getScriptProperties();
 
-function intialSetup() {
+function initialSetup() {
     var activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     scriptProp.setProperty('key', activeSpreadsheet.getId());
 }
@@ -22,18 +22,50 @@ function doPost(e) {
         }
 
         if (!doc) {
-            throw new Error('Could not open spreadsheet. If this is a standalone script, please run "intialSetup" first.');
+            throw new Error('Could not open spreadsheet. If this is a standalone script, please run "initialSetup" first.');
         }
 
         var sheet = doc.getSheetByName(sheetName);
         if (!sheet) {
             sheet = doc.insertSheet(sheetName);
-            // Added 'Status' to default headers
-            sheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Branch', 'Year', 'College', 'Domain', 'Github', 'Reason', 'Status']);
+            // Default headers for a fresh sheet
+            sheet.appendRow(['Timestamp', 'Name', 'Email', 'Phone', 'Branch', 'Year', 'College', 'Domain', 'Github', 'Status']);
         }
 
         var data = sheet.getDataRange().getValues();
         var headers = data[0];
+
+        // --- DYNAMIC HEADER HANDLING ---
+        // Check if all keys in the incoming request exist as headers
+        var updatedHeaders = false;
+        var incomingKeys = Object.keys(e.parameter);
+
+        // Exclude 'action' which is a control parameter
+        var keysToKeep = incomingKeys.filter(function (k) {
+            return k !== 'action' && k !== 'email' && k !== 'status';
+        });
+
+        incomingKeys.forEach(function (key) {
+            if (key === 'action') return;
+
+            // Check if key (case-insensitive) exists in headers
+            var exists = headers.some(function (h) {
+                return h.toString().toLowerCase() === key.toLowerCase();
+            });
+
+            if (!exists) {
+                // Add new header
+                var newHeaderName = key.charAt(0).toUpperCase() + key.slice(1);
+                sheet.getRange(1, headers.length + 1).setValue(newHeaderName);
+                headers.push(newHeaderName); // Update local headers array
+                updatedHeaders = true;
+            }
+        });
+
+        // Refresh data if headers were updated
+        if (updatedHeaders) {
+            data = sheet.getDataRange().getValues();
+        }
 
         // Helper to find column index case-insensitively
         function getColIndex(name) {
@@ -56,7 +88,6 @@ function doPost(e) {
 
             var rowsDeleted = 0;
             for (var i = data.length - 1; i >= 1; i--) {
-                // Check case-insensitive email match? Or exact? exact is safer.
                 if (data[i][emailIndex] == emailToDelete) {
                     sheet.deleteRow(i + 1);
                     rowsDeleted++;
@@ -78,15 +109,11 @@ function doPost(e) {
             if (statusIndex === -1) {
                 statusIndex = headers.length;
                 sheet.getRange(1, statusIndex + 1).setValue('Status');
-                // Refresh headers? No need if we just write to known index
             }
 
             var rowsUpdated = 0;
             for (var i = 1; i < data.length; i++) {
                 if (data[i][emailIndex] == emailToUpdate) {
-                    // Note: statusIndex is 0-based from headers array, but getRange is 1-based. 
-                    // Also data array is 0-based.
-                    // If statusIndex was existing, it matches data structure.
                     sheet.getRange(i + 1, statusIndex + 1).setValue(newStatus);
                     rowsUpdated++;
                 }
@@ -98,24 +125,25 @@ function doPost(e) {
         }
 
         // --- DEFAULT: ADD NEW APPLICATION ---
-
-        // Mapping Logic: Frontend sends lowercase keys (name, email), Sheet has Title Case (Name, Email)
         var nextRow = sheet.getLastRow() + 1;
         var newRow = headers.map(function (header) {
             if (header === 'Timestamp') {
                 return new Date();
             }
-            if (header === 'Status') {
+            if (header === 'Status' && !e.parameter.status) {
                 return 'Pending';
             }
 
-            // Try exact match first
+            // Try exact match first, then lowercase
             var val = e.parameter[header];
-            // If not found, try lowercase version (Name -> name)
             if (val === undefined || val === null) {
                 val = e.parameter[header.toLowerCase()];
             }
-            // Special case: Github vs github (already handled by lowercase logic, but just in case)
+
+            // Handle some common variations
+            if (val === undefined || val === null) {
+                if (header === 'Admission Number') val = e.parameter['admissionNumber'];
+            }
 
             return val || "";
         });
