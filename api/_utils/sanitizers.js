@@ -14,11 +14,14 @@ export function sanitizeForSheets(value) {
     // dangerous payloads even in non-string types (like arrays).
     const stringValue = String(value);
 
-    // Prevent Formula Injection:
-    // If the value starts with =, +, -, @, Tab (\t), or Carriage Return (\r),
-    // prepend a single quote so it's treated as text.
+    // Prevent Formula Injection (CSV Injection):
+    // 1. Starts with =, +, -, @, Tab (\t), Carriage Return (\r), or Newline (\n)
+    // 2. Starts with whitespace/control characters followed by =, +, -, @
+    // This regex checks if the string starts with optional whitespace/control chars
+    // followed by any of the dangerous characters.
+    //
     // Reference: https://owasp.org/www-community/attacks/CSV_Injection
-    if (/^[=+\-@\t\r]/.test(stringValue)) {
+    if (/^[\s]*[=+\-@\t\r\n]/.test(stringValue)) {
         return "'" + stringValue;
     }
 
