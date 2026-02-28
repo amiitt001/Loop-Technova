@@ -34,4 +34,12 @@ describe('sanitizeForSheets', () => {
         expect(sanitizeForSheets(null)).toBe(null);
         expect(sanitizeForSheets(undefined)).toBe(undefined);
     });
+
+    it('sanitizes strings starting with whitespace followed by dangerous characters', () => {
+        expect(sanitizeForSheets('  =cmd')).toBe("'  =cmd");
+        expect(sanitizeForSheets('\n=cmd')).toBe("'\n=cmd");
+        expect(sanitizeForSheets('\t@cmd')).toBe("'\t@cmd");
+        expect(sanitizeForSheets('\r+cmd')).toBe("'\r+cmd");
+        expect(sanitizeForSheets(' \t-cmd')).toBe("' \t-cmd");
+    });
 });
