@@ -243,8 +243,8 @@ const Team = () => {
           {teamGroups.map((group, gIdx) => (
             <div key={group.title} style={{ marginBottom: '4rem' }}>
               <h2 style={{
-                textAlign: isMobile ? 'center' : 'left',
-                paddingLeft: isMobile ? '0' : '1.5rem',
+                textAlign: 'center',
+                paddingLeft: '0',
                 marginBottom: '1.5rem',
                 color: 'var(--accent)',
                 fontSize: '1.5rem',
