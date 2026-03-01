@@ -96,10 +96,43 @@ describe('api/admin/applications.js', () => {
 
     it('should handle missing application ID', async () => {
         req.query.id = null;
+        expect.assertions(1);
         try {
             await handler(req, res);
         } catch (e) {
             expect(e.message).toBe('Missing Application ID');
+        }
+    });
+
+    it('should reject non-string application ID', async () => {
+        req.query.id = ['array', 'id'];
+        expect.assertions(1);
+        try {
+            await handler(req, res);
+        } catch (e) {
+            expect(e.message).toBe('Application ID must be a string');
+        }
+    });
+
+    it('should reject non-string status', async () => {
+        req.method = 'PATCH';
+        req.body.status = ['Approved'];
+        expect.assertions(1);
+        try {
+            await handler(req, res);
+        } catch (e) {
+            expect(e.message).toBe('Status must be a string');
+        }
+    });
+
+    it('should reject invalid status value', async () => {
+        req.method = 'PATCH';
+        req.body.status = 'SuperAdmin';
+        expect.assertions(1);
+        try {
+            await handler(req, res);
+        } catch (e) {
+            expect(e.message).toBe('Invalid status value');
         }
     });
 });
