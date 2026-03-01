@@ -120,4 +120,9 @@ describe('Admin Contestants API - Validation', () => {
         };
         await expect(handler(mockReq, mockRes)).rejects.toThrow('contestName exceeds maximum length');
     });
+
+    it('should reject non-string ID', async () => {
+        mockReq.query.id = ['array', 'id'];
+        await expect(handler(mockReq, mockRes)).rejects.toThrow('Contestant ID must be a string');
+    });
 });

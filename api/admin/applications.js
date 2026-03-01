@@ -18,6 +18,9 @@ export default safeHandler(async function handler(req, res) {
     if (!id) {
         throw new CustomValidationError('Missing Application ID');
     }
+    if (typeof id !== 'string') {
+        throw new CustomValidationError('Application ID must be a string');
+    }
 
     const appsRef = db.collection('applications').doc(id);
     const docSnap = await appsRef.get();
@@ -75,6 +78,15 @@ export default safeHandler(async function handler(req, res) {
 
         if (!status) {
             throw new CustomValidationError('Missing status field');
+        }
+
+        if (typeof status !== 'string') {
+            throw new CustomValidationError('Status must be a string');
+        }
+
+        const allowedStatuses = ['Pending', 'Approved', 'Rejected'];
+        if (!allowedStatuses.includes(status)) {
+            throw new CustomValidationError('Invalid status value');
         }
 
         // validate status allowed values if needed
