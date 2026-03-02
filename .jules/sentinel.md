@@ -27,3 +27,8 @@
 **Vulnerability:** `api/register.js` validated field lengths but failed to validate field types. An attacker could bypass sanitization (which expects strings) by sending an array (e.g., `["=cmd"]`), leading to formula injection in Google Sheets.
 **Learning:** Relying on "truthiness" or loose checks (`if (data[key])`) allows unexpected types to pass through. Sanitization functions often assume specific input types and fail silently or return raw input when types mismatch.
 **Prevention:** Strictly enforce input types (e.g., `typeof value === 'string'`) before performing length checks or passing data to sanitization functions.
+
+## 2025-03-02 - Type Confusion Vulnerability in Firestore Queries
+**Vulnerability:** API endpoints taking `req.query.id` were passing the parameter directly to Firestore's `db.collection('...').doc(id)` without validating its type.
+**Learning:** In Node.js server frameworks, `req.query.id` can be parsed as an array (e.g., `?id=foo&id=bar`). Passing an array to `.doc()` where a string is expected can cause unhandled exceptions or unintended query behavior (type confusion).
+**Prevention:** Always strictly validate `req.query` and `req.body` parameters expected to be used as database keys to ensure they are the correct type (e.g., `typeof id === 'string'`) before executing the query.

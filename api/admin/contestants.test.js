@@ -153,6 +153,12 @@ describe('Admin Contestants API', () => {
             await expect(handler(mockReq, mockRes)).rejects.toThrow('Missing Contestant ID');
         });
 
+        it('should handle non-string contestant ID', async () => {
+            mockReq.query = { id: ['contestant123'] };
+
+            await expect(handler(mockReq, mockRes)).rejects.toThrow('Contestant ID must be a string');
+        });
+
         it('should handle non-existent contestant', async () => {
             mockDoc.exists = false;
 
@@ -194,6 +200,12 @@ describe('Admin Contestants API', () => {
             mockReq.query = {};
 
             await expect(handler(mockReq, mockRes)).rejects.toThrow('Missing Contestant ID');
+        });
+
+        it('should handle non-string contestant ID', async () => {
+            mockReq.query = { id: ['contestant123'] };
+
+            await expect(handler(mockReq, mockRes)).rejects.toThrow('Contestant ID must be a string');
         });
 
         it('should handle non-existent contestant', async () => {
