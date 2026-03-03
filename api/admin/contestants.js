@@ -17,6 +17,9 @@ export default safeHandler(async function handler(req, res) {
     if (!id) {
         throw new CustomValidationError('Missing Contestant ID');
     }
+    if (typeof id !== 'string') {
+        throw new CustomValidationError('Contestant ID must be a string');
+    }
 
     const contestantRef = db.collection('contestants').doc(id);
     const docSnap = await contestantRef.get();

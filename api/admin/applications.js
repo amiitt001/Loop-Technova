@@ -18,6 +18,9 @@ export default safeHandler(async function handler(req, res) {
     if (!id) {
         throw new CustomValidationError('Missing Application ID');
     }
+    if (typeof id !== 'string') {
+        throw new CustomValidationError('Application ID must be a string');
+    }
 
     const appsRef = db.collection('applications').doc(id);
     const docSnap = await appsRef.get();
