@@ -102,4 +102,13 @@ describe('api/admin/applications.js', () => {
             expect(e.message).toBe('Missing Application ID');
         }
     });
+
+    it('should reject non-string application ID', async () => {
+        req.query.id = ['app-123'];
+        try {
+            await handler(req, res);
+        } catch (e) {
+            expect(e.message).toBe('Application ID must be a string');
+        }
+    });
 });

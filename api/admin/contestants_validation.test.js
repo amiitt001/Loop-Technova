@@ -65,6 +65,11 @@ describe('Admin Contestants API - Validation', () => {
         };
     });
 
+    it('should reject non-string contestant ID', async () => {
+        mockReq.query.id = ['contestant123']; // Invalid type
+        await expect(handler(mockReq, mockRes)).rejects.toThrow('Contestant ID must be a string');
+    });
+
     it('should reject non-string name', async () => {
         mockReq.body = {
             name: 12345, // Invalid type
