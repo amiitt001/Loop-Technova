@@ -102,4 +102,15 @@ describe('api/admin/applications.js', () => {
             expect(e.message).toBe('Missing Application ID');
         }
     });
+
+    it('should handle non-string application ID', async () => {
+        req.query.id = ['app-123'];
+        await expect(handler(req, res)).rejects.toThrow('Application ID must be a string');
+    });
+
+    it('should reject invalid status value', async () => {
+        req.method = 'PATCH';
+        req.body.status = 'InvalidStatus';
+        await expect(handler(req, res)).rejects.toThrow('Invalid status value');
+    });
 });
