@@ -318,13 +318,31 @@ const Events = () => {
                 <div className="past-event-card cursor-pointer group h-full">
                   {/* Event thumbnail or styled placeholder */}
                   {event.thumbnailUrl ? (
-                    <div style={{ width: '100%', height: '120px', marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden' }}>
+                    <div style={{ width: '100%', height: '120px', marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
                       <img
                         src={event.thumbnailUrl}
                         alt={event.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => { e.currentTarget.parentElement.innerHTML = '<div style="width:100%;height:100%;background:linear-gradient(135deg,#0a0a0a,#111);display:flex;align-items:center;justify-content:center;border-radius:8px"><span style=\"color:#00f3ff;font-size:0.7rem;font-family:monospace;letter-spacing:2px;opacity:0.6\">PHOTO COMING SOON</span></div>'; }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'relative', zIndex: 1 }}
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          if (e.currentTarget.nextElementSibling) {
+                            e.currentTarget.nextElementSibling.style.display = 'flex';
+                          }
+                        }}
                       />
+                      <div style={{
+                        display: 'none',
+                        position: 'absolute',
+                        top: 0, left: 0, width: '100%', height: '100%',
+                        background: 'linear-gradient(135deg, #0a0a0a, #111)',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '8px'
+                      }}>
+                        <span style={{ color: '#00f3ff', fontSize: '0.7rem', fontFamily: 'monospace', letterSpacing: '2px', opacity: 0.6 }}>
+                          PHOTO COMING SOON
+                        </span>
+                      </div>
                     </div>
                   ) : (
                     <div style={{

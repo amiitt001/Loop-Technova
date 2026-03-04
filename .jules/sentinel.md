@@ -32,3 +32,8 @@
 **Vulnerability:** API endpoints taking `req.query.id` were passing the parameter directly to Firestore's `db.collection('...').doc(id)` without validating its type.
 **Learning:** In Node.js server frameworks, `req.query.id` can be parsed as an array (e.g., `?id=foo&id=bar`). Passing an array to `.doc()` where a string is expected can cause unhandled exceptions or unintended query behavior (type confusion).
 **Prevention:** Always strictly validate `req.query` and `req.body` parameters expected to be used as database keys to ensure they are the correct type (e.g., `typeof id === 'string'`) before executing the query.
+
+## 2024-03-04 - [XSS via Image Fallbacks in React]
+**Vulnerability:** XSS vulnerability through dynamic string concatenation and assignment to `innerHTML` in React `onError` handlers (e.g. for img tags). This bypasses React's automatic escaping.
+**Learning:** Even simple fallback placeholders injected via `innerHTML` can become vectors if they interpolate user-provided data directly, as string-based injection completely subverts the framework's native DOM protections.
+**Prevention:** Avoid `innerHTML` and `dangerouslySetInnerHTML`. Use React state (`useState`) to toggle fallback components, or DOM properties like `style.display` accompanied by hidden sibling elements initialized via standard JSX.
