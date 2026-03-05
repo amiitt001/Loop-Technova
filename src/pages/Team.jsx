@@ -45,13 +45,25 @@ const MobileTeamCard = ({ member, idx, activeIndex, onDotClick }) => {
       onClick={() => setIsExpanded(!isExpanded)}
     >
       <div className="stack-card" style={{ borderColor: member.color || 'var(--accent)' }}>
-        <div className="stack-avatar" style={{ borderColor: member.color || 'var(--accent)' }}>
+        <div className="stack-avatar" style={{ borderColor: member.color || 'var(--accent)', position: 'relative' }}>
           {member.img ? (
-            <img
-              src={member.img}
-              alt={member.name}
-              onError={(e) => { e.currentTarget.parentElement.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;background:linear-gradient(135deg, #0a0a0a, #1a1a1a);padding:5px"><span style=\"font-size:1.2rem;margin-bottom:4px\">' + member.name.charAt(0) + '</span><span style=\"font-size:0.4rem;font-family:monospace;color:#00f3ff;opacity:0.7;line-height:1;text-align:center\">PHOTO COMING SOON</span></div>'; }}
-            />
+            <>
+              <img
+                src={member.img}
+                alt={member.name}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  if (e.currentTarget.nextElementSibling) {
+                    e.currentTarget.nextElementSibling.style.display = 'flex';
+                  }
+                }}
+              />
+              <div style={{ display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', background: 'linear-gradient(135deg, #0a0a0a, #1a1a1a)', padding: '5px', position: 'absolute', top: 0, left: 0 }}>
+                <span style={{ fontSize: '1.2rem', marginBottom: '4px' }}>{member.name.charAt(0)}</span>
+                <span style={{ fontSize: '0.4rem', fontFamily: 'monospace', color: '#00f3ff', opacity: 0.7, lineHeight: 1, textAlign: 'center' }}>PHOTO COMING SOON</span>
+              </div>
+            </>
           ) : (
             <div style={{
               display: 'flex',
