@@ -30,6 +30,7 @@ const itemVariants = {
 
 const MobileTeamCard = ({ member, idx, activeIndex, onDotClick }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const stars = [];
   const rating = member.rating || 5;
   for (let i = 0; i < 5; i++) {
@@ -46,11 +47,11 @@ const MobileTeamCard = ({ member, idx, activeIndex, onDotClick }) => {
     >
       <div className="stack-card" style={{ borderColor: member.color || 'var(--accent)' }}>
         <div className="stack-avatar" style={{ borderColor: member.color || 'var(--accent)' }}>
-          {member.img ? (
+          {member.img && !imgError ? (
             <img
               src={member.img}
               alt={member.name}
-              onError={(e) => { e.currentTarget.parentElement.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%;background:linear-gradient(135deg, #0a0a0a, #1a1a1a);padding:5px"><span style=\"font-size:1.2rem;margin-bottom:4px\">' + member.name.charAt(0) + '</span><span style=\"font-size:0.4rem;font-family:monospace;color:#00f3ff;opacity:0.7;line-height:1;text-align:center\">PHOTO COMING SOON</span></div>'; }}
+              onError={() => setImgError(true)}
             />
           ) : (
             <div style={{

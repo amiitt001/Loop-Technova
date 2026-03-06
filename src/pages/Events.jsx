@@ -15,6 +15,7 @@ const Events = () => {
   const navigate = useNavigate();
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [imageErrors, setImageErrors] = useState({});
   const scrollRef = useRef(null);
 
   const handleScroll = () => {
@@ -317,13 +318,13 @@ const Events = () => {
               >
                 <div className="past-event-card cursor-pointer group h-full">
                   {/* Event thumbnail or styled placeholder */}
-                  {event.thumbnailUrl ? (
+                  {event.thumbnailUrl && !imageErrors[event.id] ? (
                     <div style={{ width: '100%', height: '120px', marginBottom: '1rem', borderRadius: '8px', overflow: 'hidden' }}>
                       <img
                         src={event.thumbnailUrl}
                         alt={event.title}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => { e.currentTarget.parentElement.innerHTML = '<div style="width:100%;height:100%;background:linear-gradient(135deg,#0a0a0a,#111);display:flex;align-items:center;justify-content:center;border-radius:8px"><span style=\"color:#00f3ff;font-size:0.7rem;font-family:monospace;letter-spacing:2px;opacity:0.6\">PHOTO COMING SOON</span></div>'; }}
+                        onError={() => setImageErrors(prev => ({ ...prev, [event.id]: true }))}
                       />
                     </div>
                   ) : (
