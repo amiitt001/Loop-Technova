@@ -32,3 +32,8 @@
 **Vulnerability:** API endpoints taking `req.query.id` were passing the parameter directly to Firestore's `db.collection('...').doc(id)` without validating its type.
 **Learning:** In Node.js server frameworks, `req.query.id` can be parsed as an array (e.g., `?id=foo&id=bar`). Passing an array to `.doc()` where a string is expected can cause unhandled exceptions or unintended query behavior (type confusion).
 **Prevention:** Always strictly validate `req.query` and `req.body` parameters expected to be used as database keys to ensure they are the correct type (e.g., `typeof id === 'string'`) before executing the query.
+
+## $(date +%Y-%m-%d) - [XSS] Removed dynamic innerHTML usage in React components
+**Vulnerability:** XSS vulnerability found in `src/pages/Events.jsx` and `src/pages/Team.jsx` where image `onError` handlers were directly assigning string HTML to `e.currentTarget.parentElement.innerHTML`.
+**Learning:** Even for "safe" placeholder content, dynamically injecting strings via `innerHTML` bypasses React's virtual DOM, can lead to state inconsistencies, and serves as a dangerous pattern that can be exploited if the codebase evolves to include user-supplied inputs in those templates.
+**Prevention:** Avoid `innerHTML` whenever possible in React applications. Instead, track the error state locally (e.g. `const [imageError, setImageError] = useState(false)`) and conditionally render fallback JSX.
