@@ -37,3 +37,8 @@
 **Vulnerability:** XSS vulnerability found in `src/pages/Events.jsx` and `src/pages/Team.jsx` where image `onError` handlers were directly assigning string HTML to `e.currentTarget.parentElement.innerHTML`.
 **Learning:** Even for "safe" placeholder content, dynamically injecting strings via `innerHTML` bypasses React's virtual DOM, can lead to state inconsistencies, and serves as a dangerous pattern that can be exploited if the codebase evolves to include user-supplied inputs in those templates.
 **Prevention:** Avoid `innerHTML` whenever possible in React applications. Instead, track the error state locally (e.g. `const [imageError, setImageError] = useState(false)`) and conditionally render fallback JSX.
+
+## $(date +%Y-%m-%d) - [CSV Injection] Unsanitized client-side CSV exports
+**Vulnerability:** The client-side CSV export function in `AdminRegistrationsModal.jsx` concatenated user-provided registration fields directly into a CSV file. An attacker could craft a payload starting with characters like `=`, `+`, `-`, or `@` which would be interpreted as an executable formula when the exported file is opened in a spreadsheet application.
+**Learning:** Sanitization for CSV Injection needs to happen at the exact point of export or integration, whether it's on the server pushing to Google Sheets or the client generating a downloadable `.csv` file.
+**Prevention:** Always escape untrusted data that begins with `=, +, -, @` or potentially dangerous control characters when generating CSV contents or interfacing with spreadsheet applications, by prefixing the value with a single quote (`'`).

@@ -52,13 +52,24 @@ const AdminRegistrationsModal = ({ event, onClose }) => {
     const handleDownload = () => {
         // Simple CSV Export
         const headers = ["Name", "Email", "Enrollment ID", "Department", "Team Name", "Registered At"];
+
+        // Prevent CSV/Formula Injection
+        const sanitizeCSV = (value) => {
+            if (value === null || value === undefined) return "";
+            const strVal = String(value);
+            if (/^[\s]*[=+\-@\t\r\n]/.test(strVal)) {
+                return "'" + strVal;
+            }
+            return strVal;
+        };
+
         const rows = filtered.map(r => [
-            r.name,
-            r.email,
-            r.enrollmentId,
-            r.department,
-            r.teamName || "-",
-            r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : "N/A"
+            sanitizeCSV(r.name),
+            sanitizeCSV(r.email),
+            sanitizeCSV(r.enrollmentId),
+            sanitizeCSV(r.department),
+            sanitizeCSV(r.teamName || "-"),
+            sanitizeCSV(r.createdAt?.toDate ? r.createdAt.toDate().toLocaleString() : "N/A")
         ]);
 
         const csvContent = [
