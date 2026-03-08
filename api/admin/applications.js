@@ -42,7 +42,7 @@ export default safeHandler(async function handler(req, res) {
 
         try {
             const formParams = new URLSearchParams();
-            formParams.append('email', appData.email);
+            formParams.append('email', sanitizeForSheets(appData.email));
             for (const [key, value] of Object.entries(params)) {
                 formParams.append(key, sanitizeForSheets(value));
             }

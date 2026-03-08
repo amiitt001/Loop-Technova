@@ -173,7 +173,7 @@ export default safeHandler(async function handler(req, res) {
             const formParams = new URLSearchParams();
             formParams.append('name', sanitizeForSheets(name));
             formParams.append('admissionNumber', sanitizeForSheets(admissionNumber));
-            formParams.append('email', email); // Validated to be safe
+            formParams.append('email', sanitizeForSheets(email)); // Validated to be safe, but still needs sanitization
             formParams.append('phone', sanitizeForSheets(phone));
             formParams.append('branch', sanitizeForSheets(branch));
             formParams.append('year', sanitizeForSheets(year));
