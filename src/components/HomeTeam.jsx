@@ -4,6 +4,7 @@ import { Github, Linkedin, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { safeHref } from '../utils/security.js';
 // FeaturedCarousel removed for mobile stacked scroller implementation
 
 const HomeTeamCard = ({ member, index }) => {
@@ -153,12 +154,12 @@ const HomeTeamCard = ({ member, index }) => {
                     {/* Socials */}
                     <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', width: '100%', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
                         {member.social?.github && (
-                            <a href={member.social.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                            <a href={safeHref(member.social.github)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                 <Github size={20} color="var(--text-dim)" className="hover:text-white transition-colors" />
                             </a>
                         )}
                         {member.social?.linkedin && (
-                            <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                            <a href={safeHref(member.social.linkedin)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                                 <Linkedin size={20} color="var(--text-dim)" className="hover:text-white transition-colors" />
                             </a>
                         )}
