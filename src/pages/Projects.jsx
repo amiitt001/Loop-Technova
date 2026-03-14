@@ -1,6 +1,7 @@
 import React from 'react';
 import { Github, ExternalLink, Code, Layers, Database, Cpu } from 'lucide-react';
 import ThreeBackground from '../components/ThreeBackground';
+import { safeHref } from '../utils/security';
 
 const PROJECTS = [
     {
@@ -99,10 +100,10 @@ const ProjectCard = ({ project, index }) => {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 'auto' }}>
-                <a href={project.link} className="project-link">
+                <a href={safeHref(project.link)} className="project-link">
                     <Github size={18} /> Source
                 </a>
-                <a href={project.link} className="project-link">
+                <a href={safeHref(project.link)} className="project-link">
                     <ExternalLink size={18} /> Demo
                 </a>
             </div>
