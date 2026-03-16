@@ -46,3 +46,8 @@
 **Vulnerability:** Google Sheets injection vulnerability via unsanitized email fields
 **Learning:** Even structured/validated data like email addresses can be used for CSV/Formula Injection if they happen to start with dangerous characters (`=`, `+`, `-`, `@`) and aren't properly sanitized before being passed to a spreadsheet system. The app uses `sanitizeForSheets` everywhere except for email fields because emails are deemed "validated". However, validateEmail function only validates the email format and doesn't explicitly restrict starting characters like `+`, `-`, or `@` which are technically valid in some email formats (or at least could bypass simplistic validations if manipulated).
 **Prevention:** All inputs passed to CSV or Spreadsheet syncs, regardless of prior validation or expected format, must be strictly run through `sanitizeForSheets()` or similar output encoding/sanitization functions to prevent injection.
+
+## 2024-05-20 - [XSS via Javascript URI in Dynamic Hrefs]
+**Vulnerability:** React components (`Projects.jsx`, `Team.jsx`, `EventDetails.jsx`, `HomeTeam.jsx`) were rendering user-supplied URLs directly into `href` attributes of `<a>` tags (e.g., `href={project.link}`). An attacker could input a URL starting with `javascript:` to execute arbitrary JavaScript in the context of the user's browser when clicked.
+**Learning:** Even though React prevents XSS in text content by escaping, it does not sanitize `href` attributes. Dynamic URLs must always be validated or sanitized before being placed into `href`.
+**Prevention:** Use a sanitization function like `safeHref` to validate that URLs use safe protocols (e.g., `http:`, `https:`, `mailto:`) and do not start with `javascript:`, `data:`, or `vbscript:`.
