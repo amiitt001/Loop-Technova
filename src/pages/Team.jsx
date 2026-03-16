@@ -3,7 +3,7 @@ import { Github, Linkedin, Twitter, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
-
+import { safeHref } from '../utils/security';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -129,17 +129,17 @@ const MobileTeamCard = ({ member, idx, activeIndex, onDotClick }) => {
 
         <div className="stack-links">
           {member.social?.github && (
-            <a href={member.social.github} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+            <a href={safeHref(member.social.github)} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
               <Github size={18} color="var(--text-dim)" />
             </a>
           )}
           {member.social?.linkedin && (
-            <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+            <a href={safeHref(member.social.linkedin)} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
               <Linkedin size={18} color="var(--text-dim)" />
             </a>
           )}
           {member.social?.twitter && (
-            <a href={member.social.twitter} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
+            <a href={safeHref(member.social.twitter)} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>
               <Twitter size={18} color="var(--text-dim)" />
             </a>
           )}
@@ -450,17 +450,17 @@ const TeamCard = ({ member, width }) => {
               borderTop: '1px solid rgba(255,255,255,0.1)'
             }}>
               {member.social?.github && (
-                <a href={member.social.github} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                <a href={safeHref(member.social.github)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                   <Github size={18} className="social-icon" />
                 </a>
               )}
               {member.social?.linkedin && (
-                <a href={member.social.linkedin} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                <a href={safeHref(member.social.linkedin)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                   <Linkedin size={18} className="social-icon" />
                 </a>
               )}
               {member.social?.twitter && (
-                <a href={member.social.twitter} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                <a href={safeHref(member.social.twitter)} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
                   <Twitter size={18} className="social-icon" />
                 </a>
               )}
