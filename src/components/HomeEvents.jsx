@@ -127,22 +127,24 @@ const HomeEvents = () => {
                                         {featuredEvent.time || featuredEvent.location || 'TBD'}
                                     </div>
                                 </div>
-                                <Link to="/events">
+                                <Link to={featuredEvent.registrationOpen ? "/events" : (featuredEvent.registrationSoon ? "#" : "/events")}>
                                     <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
+                                        whileHover={featuredEvent.registrationOpen ? { scale: 1.02 } : {}}
+                                        whileTap={featuredEvent.registrationOpen ? { scale: 0.98 } : {}}
+                                        disabled={!featuredEvent.registrationOpen}
                                         style={{
                                             width: '100%',
                                             padding: '1rem',
-                                            background: 'var(--accent)',
-                                            color: '#000',
-                                            border: 'none',
+                                            background: featuredEvent.registrationOpen ? 'var(--accent)' : (featuredEvent.registrationSoon ? 'transparent' : 'rgba(255,255,255,0.05)'),
+                                            color: featuredEvent.registrationOpen ? '#000' : '#fff',
+                                            border: featuredEvent.registrationSoon ? '1px solid var(--accent)' : 'none',
                                             borderRadius: '8px',
                                             fontWeight: 'bold',
-                                            cursor: 'pointer'
+                                            cursor: featuredEvent.registrationOpen ? 'pointer' : 'default',
+                                            textTransform: 'uppercase'
                                         }}
                                     >
-                                        REGISTER NOW
+                                        {featuredEvent.registrationOpen ? 'REGISTER NOW' : (featuredEvent.registrationSoon ? 'REGISTRATION OPENING SOON' : 'REGISTRATION CLOSED')}
                                     </motion.button>
                                 </Link>
                             </motion.div>
@@ -188,6 +190,16 @@ const HomeEvents = () => {
                                             <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
                                                 {evt.type || 'Event'} • {evt.dateObj.toLocaleDateString()}
                                             </span>
+                                            {evt.registrationSoon && !evt.registrationOpen && (
+                                                <div style={{
+                                                    marginTop: '0.4rem',
+                                                    color: 'var(--accent)',
+                                                    fontSize: '0.7rem',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    • REGISTRATION OPENING SOON
+                                                </div>
+                                            )}
                                         </div>
                                         <ArrowRight size={20} color="var(--border-dim)" />
                                     </motion.div>
