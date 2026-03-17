@@ -237,17 +237,18 @@ const Events = () => {
                 gap: '0.5rem'
               }}>
                 {/* Event Type Badge */}
-                {/* Status Badge */}
+                {/* Status Badge - Triple Condition */}
                 <div style={{
-                  background: 'var(--accent)',
-                  color: '#000',
-                  padding: '0.2rem 0.8rem',
+                  background: event.registrationOpen ? 'var(--accent)' : (event.registrationSoon ? '#3b82f6' : '#ef4444'),
+                  color: event.registrationOpen ? '#000' : '#fff',
+                  padding: '0.2rem 1rem',
                   borderRadius: '12px',
-                  fontSize: '0.7rem',
+                  fontSize: '0.75rem',
                   fontWeight: 'bold',
-                  textTransform: 'uppercase'
+                  textTransform: 'uppercase',
+                  boxShadow: '0 0 15px ' + (event.registrationOpen ? 'rgba(0, 243, 255, 0.2)' : (event.registrationSoon ? 'rgba(59, 130, 246, 0.2)' : 'rgba(239, 68, 68, 0.1)'))
                 }}>
-                  {event.status}
+                  {event.registrationOpen ? 'Registration Open' : (event.registrationSoon ? 'Opening Soon. Stay tuned.' : 'Registration Closed')}
                 </div>
               </div>
 
