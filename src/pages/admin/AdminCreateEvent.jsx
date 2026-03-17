@@ -20,7 +20,8 @@ const AdminCreateEvent = () => {
         status: 'Upcoming',
         eventType: 'Minor',
         dateSoon: false,
-        locationSoon: false
+        locationSoon: false,
+        registrationSoon: false
     });
 
     const handleChange = (e) => {
@@ -39,6 +40,7 @@ const AdminCreateEvent = () => {
             const eventData = {
                 ...formData,
                 registrationOpen: formData.status === 'Upcoming',
+                registrationSoon: formData.registrationSoon,
                 questions: questions, // Save dynamic questions
                 createdAt: new Date()
             };
@@ -192,6 +194,21 @@ const AdminCreateEvent = () => {
                             <option value="Major">Major Event (🔴)</option>
                         </select>
                     </div>
+                </div>
+
+                {/* Registration Soon Toggle */}
+                <div className="flex items-center gap-2 bg-zinc-950/50 border border-zinc-800 rounded-lg p-3">
+                    <input
+                        type="checkbox"
+                        name="registrationSoon"
+                        id="registrationSoon"
+                        checked={formData.registrationSoon}
+                        onChange={handleChange}
+                        className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-[var(--accent)] focus:ring-[var(--accent)]"
+                    />
+                    <label htmlFor="registrationSoon" className="text-zinc-300 text-sm cursor-pointer select-none">
+                        Registration Opening Soon (Show "Open Soon" instead of "Closed")
+                    </label>
                 </div>
 
                 {/* Speaker */}

@@ -131,8 +131,8 @@ const AdminEvents = () => {
                             <div className="flex items-center gap-2">
                                 <Clock size={16} /> {event.location || 'TBD'}
                             </div>
-                            <div className={`flex items-center gap-2 text-xs font-medium ${event.registrationOpen ? 'text-green-500' : 'text-red-500'}`}>
-                                {event.registrationOpen ? "• Registration Open" : "• Registration Closed"}
+                            <div className={`flex items-center gap-2 text-xs font-medium ${event.registrationOpen ? 'text-green-500' : (event.registrationSoon ? 'text-[var(--accent)]' : 'text-red-500')}`}>
+                                {event.registrationOpen ? "• Registration Open" : (event.registrationSoon ? "• Registration Open Soon" : "• Registration Closed")}
                             </div>
                         </div>
 
