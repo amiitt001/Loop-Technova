@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, MapPin, RefreshCw, ArrowRight } from 'lucide-react';
 import { db } from '../firebase';
@@ -13,6 +13,7 @@ const Events = () => {
   const [stats, setStats] = useState({ total: 0, major: 0, minor: 0 });
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [imageErrors, setImageErrors] = useState({});
@@ -39,6 +40,13 @@ const Events = () => {
       navigate(`/events/${eventIdToOpen}`);
     }
   }, [searchParams, navigate]);
+
+  useEffect(() => {
+    if (location.state?.scrollToTop) {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.pathname, location.state, navigate]);
 
   useEffect(() => {
     const q = query(collection(db, "events"));

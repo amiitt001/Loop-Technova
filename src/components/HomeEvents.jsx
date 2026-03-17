@@ -126,7 +126,7 @@ const HomeEvents = () => {
                                         </div>
                                     </div>
 
-                                    <Link to="/events">
+                                    <Link to="/events" state={{ scrollToTop: true }}>
                                         <motion.button
                                             whileHover={{ scale: 1.02, boxShadow: '0 0 15px rgba(0, 243, 255, 0.3)' }}
                                             whileTap={{ scale: 0.98 }}
