@@ -9,7 +9,6 @@ import CredibilityStrip from '../components/CredibilityStrip';
 
 import HomeEvents from '../components/HomeEvents';
 import HomeTeam from '../components/HomeTeam';
-import HomeAlumni from '../components/HomeAlumni';
 import HomeAbout from '../components/HomeAbout';
 import HomeContact from '../components/HomeContact';
 
@@ -194,13 +193,10 @@ const Home = () => {
         {/* SECTION 7: TEAM PREVIEW */}
         < HomeTeam />
 
-        {/* SECTION 8: ALUMNI */}
-        <HomeAlumni />
-
-        {/* SECTION 9: CONTACT */}
+        {/* SECTION 8: CONTACT */}
         < HomeContact />
 
-        {/* SECTION 10: FINAL CTA */}
+        {/* SECTION 9: FINAL CTA */}
         < div style={{ padding: '8rem 0', textAlign: 'center', background: 'transparent' }
         }>
           <div className="container">
