@@ -248,7 +248,7 @@ const Events = () => {
                   textTransform: 'uppercase',
                   boxShadow: '0 0 15px ' + (event.registrationOpen ? 'rgba(0, 243, 255, 0.2)' : (event.registrationSoon ? 'rgba(59, 130, 246, 0.2)' : 'rgba(239, 68, 68, 0.1)'))
                 }}>
-                  {event.registrationOpen ? 'Registration Open' : (event.registrationSoon ? 'Opening Soon. Stay tuned.' : 'Registration Closed')}
+                  {event.registrationOpen ? 'Registration Open' : (event.registrationSoon ? 'Upcoming' : 'Registration Closed')}
                 </div>
               </div>
 
