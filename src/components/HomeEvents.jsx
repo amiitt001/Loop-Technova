@@ -18,17 +18,29 @@ const HomeEvents = () => {
         const q = query(collection(db, "events"));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const allEvents = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                dateObj: doc.data().date?.toDate ? doc.data().date.toDate() : new Date(doc.data().date)
-            }));
+            const allEvents = snapshot.docs.map(doc => {
+                const data = doc.data();
+                const d = data.date?.toDate ? data.date.toDate() : data.date;
+                return {
+                    id: doc.id,
+                    ...data,
+                    dateObj: d,
+                    dateDisplay: data.date?.toDate ? data.date.toDate().toLocaleDateString() : (data.date || 'TBD')
+                };
+            });
 
-            // Filter for upcoming (not past status, and date in future ideally, but rely on status for now)
+            // Filter for upcoming (not past status)
             const upcoming = allEvents.filter(e => e.status !== 'Past');
 
             // Sort by Date Ascending (Nearest first)
-            upcoming.sort((a, b) => a.dateObj - b.dateObj);
+            upcoming.sort((a, b) => {
+                const getSortDate = (e) => {
+                    if (e.date?.toDate) return e.date.toDate();
+                    if (e.date === "Announcing soon") return new Date(8640000000000000); // Max date
+                    return new Date(e.date || 0);
+                };
+                return getSortDate(a) - getSortDate(b);
+            });
 
             setEvents(upcoming);
             setLoading(false);
@@ -85,34 +97,6 @@ const HomeEvents = () => {
                                     position: 'relative'
                                 }}
                             >
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '20px',
-                                    right: '20px',
-                                    background: getTypeColor(featuredEvent.eventType || 'Minor'),
-                                    color: '#000',
-                                    padding: '0.2rem 0.8rem',
-                                    borderRadius: '12px',
-                                    fontSize: '0.7rem',
-                                    fontWeight: 'bold',
-                                    textTransform: 'uppercase'
-                                }}>
-                                    {featuredEvent.eventType || 'Minor'}
-                                </div>
-
-                                <div style={{
-                                    display: 'inline-block',
-                                    background: 'var(--accent)',
-                                    color: '#000',
-                                    fontWeight: 'bold',
-                                    padding: '0.2rem 0.8rem',
-                                    borderRadius: '20px',
-                                    fontSize: '0.7rem',
-                                    marginBottom: '1rem',
-                                    width: 'fit-content'
-                                }}>
-                                    FEATURED
-                                </div>
                                 <h3 style={{ fontSize: '2rem', marginBottom: '1rem', textShadow: '0 0 20px rgba(0, 243, 255,0.3)' }}>{featuredEvent.title}</h3>
                                 <p style={{ color: 'var(--text-dim)', marginBottom: '2rem', flex: 1 }}>
                                     {featuredEvent.description ? featuredEvent.description.substring(0, 150) + (featuredEvent.description.length > 150 ? '...' : '') : 'No description available.'}
@@ -120,7 +104,7 @@ const HomeEvents = () => {
                                 <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '2rem', color: '#fff', fontSize: '0.9rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <Calendar size={16} color="var(--accent)" />
-                                        {featuredEvent.dateObj.toLocaleDateString()}
+                                        {featuredEvent.dateDisplay}
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <Clock size={16} color="var(--accent)" />
@@ -167,28 +151,22 @@ const HomeEvents = () => {
                                             padding: '1.5rem',
                                             display: 'flex',
                                             justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            flex: 1,
-                                            position: 'relative'
+                                            alignItems: 'center'
                                         }}
                                     >
-                                        <div>
-                                            <div style={{
-                                                display: 'inline-block',
-                                                marginBottom: '0.5rem',
-                                                background: getTypeColor(evt.eventType || 'Minor'),
-                                                color: '#000',
-                                                padding: '0.1rem 0.5rem',
-                                                borderRadius: '8px',
-                                                fontSize: '0.6rem',
-                                                fontWeight: 'bold',
-                                                textTransform: 'uppercase'
-                                            }}>
-                                                {evt.eventType || 'Minor'}
-                                            </div>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                flex: 1,
+                                                position: 'relative'
+                                            }}
+                                        >
                                             <h4 style={{ fontSize: '1.1rem', marginBottom: '0.3rem' }}>{evt.title}</h4>
                                             <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-                                                {evt.type || 'Event'} • {evt.dateObj.toLocaleDateString()}
+                                                {evt.type || 'Event'} • {evt.dateDisplay}
                                             </span>
                                             {evt.registrationSoon && !evt.registrationOpen && (
                                                 <div style={{
