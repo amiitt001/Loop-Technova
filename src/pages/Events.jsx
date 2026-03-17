@@ -237,17 +237,6 @@ const Events = () => {
                 gap: '0.5rem'
               }}>
                 {/* Event Type Badge */}
-                <div style={{
-                  background: getTypeColor(event.eventType || 'Minor'),
-                  color: '#000',
-                  padding: '0.2rem 0.8rem',
-                  borderRadius: '12px',
-                  fontSize: '0.7rem',
-                  fontWeight: 'bold',
-                  textTransform: 'uppercase'
-                }}>
-                  {event.eventType || 'Minor'}
-                </div>
                 {/* Status Badge */}
                 <div style={{
                   background: 'var(--accent)',
@@ -260,20 +249,6 @@ const Events = () => {
                 }}>
                   {event.status}
                 </div>
-                {/* Registration Soon Badge */}
-                {event.registrationSoon && !event.registrationOpen && (
-                  <div style={{
-                    background: '#3b82f6',
-                    color: '#fff',
-                    padding: '0.2rem 0.8rem',
-                    borderRadius: '12px',
-                    fontSize: '0.7rem',
-                    fontWeight: 'bold',
-                    textTransform: 'uppercase'
-                  }}>
-                    Open Soon. Stay tuned.
-                  </div>
-                )}
               </div>
 
               <h2 style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}>{event.title}</h2>
