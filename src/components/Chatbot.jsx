@@ -230,8 +230,7 @@ const Chatbot = () => {
                                 display: 'flex',
                                 flexDirection: 'column',
                                 overflow: 'hidden',
-                                zIndex: 10000,
-                                position: 'fixed'
+                                zIndex: 10000
                             } : {
                                 width: '350px',
                                 height: '500px',
