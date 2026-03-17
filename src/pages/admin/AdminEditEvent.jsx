@@ -20,7 +20,9 @@ const AdminEditEvent = () => {
         description: '',
         registrationLink: '',
         status: 'Upcoming',
-        eventType: 'Minor'
+        eventType: 'Minor',
+        dateSoon: false,
+        locationSoon: false
     });
 
     // Fetch Event Data
@@ -42,6 +44,7 @@ const AdminEditEvent = () => {
                         dateStr = data.date.split('T')[0];
                     }
 
+                    const isDateSoon = data.date === "Announcing soon";
                     setFormData({
                         title: data.title || '',
                         date: dateStr,
@@ -51,7 +54,9 @@ const AdminEditEvent = () => {
                         description: data.description || '',
                         registrationLink: data.registrationLink || '',
                         status: data.status || 'Upcoming',
-                        eventType: data.eventType || 'Minor'
+                        eventType: data.eventType || 'Minor',
+                        dateSoon: isDateSoon,
+                        locationSoon: data.location === "soon" || data.location === "Announcing soon"
                     });
                     setQuestions(data.questions || []);
                 } else {
@@ -70,7 +75,11 @@ const AdminEditEvent = () => {
     }, [id, navigate]);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value, type, checked } = e.target;
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -78,34 +87,27 @@ const AdminEditEvent = () => {
         setSaving(true);
 
         try {
-            const docRef = doc(db, "events", id);
-            await updateDoc(docRef, {
+            const eventData = {
                 ...formData,
-                date: new Date(formData.date),
-                registrationOpen: formData.status === 'Upcoming', // Auto-toggle based on status, or keep manual? 
-                // Suggestion: Keep manual toggle logic consistent or update strictly. 
-                // Previous logic in CreateEvent was: registrationOpen: formData.status === 'Upcoming'
-                // But AdminEvents uses a manual toggle. 
-                // Safer to update registrationOpen only if explicit, or implicit from status.
-                // For now, let's stick to the Create logic but maybe we should preserve existing 'registrationOpen' if not intending to change it?
-                // Actually, let's keep it consistent: status 'Active' or 'Upcoming' implies open? 
-                // Let's rely on standard logic: if updated to Past, close it. Else, keep as is?
-                // The prompt logic in AdminEvents updated registrationOpen separately. 
-                // Let's NOT force registrationOpen to change just because we edit details, unless status becomes Past.
-                // But to allow enabling, we might want to respect status.
-                // Let's stick to: if status is Past -> registrationOpen = false. Otherwise, don't auto-change it?
-                // Or follow CreateEvent pattern completely: reset it based on status.
-                // Let's update `registrationOpen` to be true if Upcoming/Active, unless manually closed?
-                // Simplest approach for "Edit": Just update the fields getting edited.
-                // The CreateEvent logic was: registrationOpen: formData.status === 'Upcoming'
-
-                // Let's explicitly allow registrationOpen to be respected if passed, but since handleManage relies on it...
-                // Ideally, we shouldn't touch registrationOpen here unless we add a checkbox for it.
-                // But since we are replacing "CreateEvent" logic which sets it... 
-                // Let's just update the fields we have form inputs for.
+                registrationOpen: formData.status === 'Upcoming',
                 questions: questions,
                 updatedAt: new Date()
-            });
+            };
+
+            // Handle "Announce soon" for date
+            if (formData.dateSoon) {
+                eventData.date = "Announcing soon";
+            } else {
+                eventData.date = new Date(formData.date);
+            }
+
+            // Handle "Soon" for location
+            if (formData.locationSoon) {
+                eventData.location = "Announcing soon";
+            }
+
+            const docRef = doc(db, "events", id);
+            await updateDoc(docRef, eventData);
             alert("Event Updated Successfully!");
             navigate('/admin/events');
         } catch (error) {
@@ -150,16 +152,28 @@ const AdminEditEvent = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Date */}
                     <div className="flex flex-col gap-2">
-                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
-                            <Calendar size={14} /> Date
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                                <Calendar size={14} /> Date
+                            </label>
+                            <label className="flex items-center gap-2 text-zinc-500 text-xs cursor-pointer hover:text-main">
+                                <input
+                                    type="checkbox"
+                                    name="dateSoon"
+                                    checked={formData.dateSoon}
+                                    onChange={handleChange}
+                                />
+                                Announce soon
+                            </label>
+                        </div>
                         <input
                             type="date"
                             name="date"
                             value={formData.date}
                             onChange={handleChange}
-                            required
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                            required={!formData.dateSoon}
+                            disabled={formData.dateSoon}
+                            className={`w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors ${formData.dateSoon ? 'opacity-50 grayscale' : ''}`}
                         />
                     </div>
 
@@ -180,17 +194,29 @@ const AdminEditEvent = () => {
 
                     {/* Location */}
                     <div className="flex flex-col gap-2">
-                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
-                            <MapPin size={14} /> Venue / Location
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                                <MapPin size={14} /> Venue / Location
+                            </label>
+                            <label className="flex items-center gap-2 text-zinc-500 text-xs cursor-pointer hover:text-main">
+                                <input
+                                    type="checkbox"
+                                    name="locationSoon"
+                                    checked={formData.locationSoon}
+                                    onChange={handleChange}
+                                />
+                                Soon
+                            </label>
+                        </div>
                         <input
                             type="text"
                             name="location"
-                            value={formData.location}
+                            value={formData.locationSoon ? 'soon' : formData.location}
                             onChange={handleChange}
-                            required
+                            required={!formData.locationSoon}
+                            disabled={formData.locationSoon}
                             placeholder="e.g. Main Auditorium"
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                            className={`w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors ${formData.locationSoon ? 'opacity-50 grayscale' : ''}`}
                         />
                     </div>
 

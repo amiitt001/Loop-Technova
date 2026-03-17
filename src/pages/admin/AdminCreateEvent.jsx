@@ -18,11 +18,17 @@ const AdminCreateEvent = () => {
         description: '',
         registrationLink: '',
         status: 'Upcoming',
-        eventType: 'Minor'
+        eventType: 'Minor',
+        dateSoon: false,
+        locationSoon: false
     });
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value, type, checked } = e.target;
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value
+        });
     };
 
     const handleSubmit = async (e) => {
@@ -30,13 +36,26 @@ const AdminCreateEvent = () => {
         setLoading(true);
 
         try {
-            await addDoc(collection(db, "events"), {
+            const eventData = {
                 ...formData,
-                date: new Date(formData.date),
                 registrationOpen: formData.status === 'Upcoming',
                 questions: questions, // Save dynamic questions
                 createdAt: new Date()
-            });
+            };
+
+            // Handle "Announce soon" for date
+            if (formData.dateSoon) {
+                eventData.date = "Announcing soon";
+            } else {
+                eventData.date = new Date(formData.date);
+            }
+
+            // Handle "Soon" for location
+            if (formData.locationSoon) {
+                eventData.location = "Announcing soon";
+            }
+
+            await addDoc(collection(db, "events"), eventData);
             alert("Event Created Successfully!");
             navigate('/admin/events');
         } catch (error) {
@@ -77,16 +96,28 @@ const AdminCreateEvent = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Date */}
                     <div className="flex flex-col gap-2">
-                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
-                            <Calendar size={14} /> Date
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                                <Calendar size={14} /> Date
+                            </label>
+                            <label className="flex items-center gap-2 text-zinc-500 text-xs cursor-pointer hover:text-main">
+                                <input
+                                    type="checkbox"
+                                    name="dateSoon"
+                                    checked={formData.dateSoon}
+                                    onChange={handleChange}
+                                />
+                                Announce soon
+                            </label>
+                        </div>
                         <input
                             type="date"
                             name="date"
                             value={formData.date}
                             onChange={handleChange}
-                            required
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                            required={!formData.dateSoon}
+                            disabled={formData.dateSoon}
+                            className={`w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors ${formData.dateSoon ? 'opacity-50 grayscale' : ''}`}
                         />
                     </div>
 
@@ -107,17 +138,29 @@ const AdminCreateEvent = () => {
 
                     {/* Location */}
                     <div className="flex flex-col gap-2">
-                        <label className="flex items-center gap-2 text-zinc-400 text-sm">
-                            <MapPin size={14} /> Venue / Location
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-2 text-zinc-400 text-sm">
+                                <MapPin size={14} /> Venue / Location
+                            </label>
+                            <label className="flex items-center gap-2 text-zinc-500 text-xs cursor-pointer hover:text-main">
+                                <input
+                                    type="checkbox"
+                                    name="locationSoon"
+                                    checked={formData.locationSoon}
+                                    onChange={handleChange}
+                                />
+                                Soon
+                            </label>
+                        </div>
                         <input
                             type="text"
                             name="location"
-                            value={formData.location}
+                            value={formData.locationSoon ? 'soon' : formData.location}
                             onChange={handleChange}
-                            required
+                            required={!formData.locationSoon}
+                            disabled={formData.locationSoon}
                             placeholder="e.g. Main Auditorium"
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors"
+                            className={`w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-main outline-none focus:border-[var(--accent)] transition-colors ${formData.locationSoon ? 'opacity-50 grayscale' : ''}`}
                         />
                     </div>
 

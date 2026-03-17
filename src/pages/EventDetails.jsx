@@ -63,7 +63,7 @@ const EventDetails = () => {
         }
     };
 
-    const dateDisplay = event.date?.toDate ? event.date.toDate().toLocaleDateString() : event.date;
+    const dateDisplay = event.date?.toDate ? event.date.toDate().toLocaleDateString() : (event.date || 'TBD');
 
     return (
         <div className="min-h-screen bg-[var(--bg-dark)] pt-32 pb-20 px-4">

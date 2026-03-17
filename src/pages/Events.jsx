@@ -55,7 +55,7 @@ const Events = () => {
         return {
           id: doc.id,
           ...data,
-          dateDisplay,
+          dateDisplay: dateDisplay || 'TBD',
           normalizedStatus,
           type: normalizedStatus // Restoration for CSS classes
         };
@@ -74,8 +74,13 @@ const Events = () => {
           return priority[a.normalizedStatus] - priority[b.normalizedStatus];
         }
         // Secondary: Date Ascending
-        const dateA = a.date?.toDate ? a.date.toDate() : new Date(a.date);
-        const dateB = b.date?.toDate ? b.date.toDate() : new Date(b.date);
+        const getSortDate = (e) => {
+          if (e.date?.toDate) return e.date.toDate();
+          if (e.date === "Announcing soon") return new Date(8640000000000000); // Max date for far future
+          return new Date(e.date || 0);
+        };
+        const dateA = getSortDate(a);
+        const dateB = getSortDate(b);
         return dateA - dateB;
       });
 
@@ -89,6 +94,7 @@ const Events = () => {
       // Calculate Stats for Current Year
       const currentYear = new Date().getFullYear();
       const thisYearEvents = allEvents.filter(e => {
+        if (e.date === "Announcing soon") return true; // Include "Soon" events in current year stats? Or skip? Let's include.
         const d = e.date?.toDate ? e.date.toDate() : new Date(e.date);
         return d.getFullYear() === currentYear;
       });
@@ -131,8 +137,8 @@ const Events = () => {
               "item": {
                 "@type": "Event",
                 "name": event.title,
-                "startDate": event.date?.toDate ? event.date.toDate().toISOString() : new Date(event.date).toISOString(),
-                "endDate": event.date?.toDate ? new Date(event.date.toDate().getTime() + 7200000).toISOString() : new Date(new Date(event.date).getTime() + 7200000).toISOString(), // Approx 2 hours later
+                "startDate": event.date?.toDate ? event.date.toDate().toISOString() : (event.date === "Announcing soon" ? new Date().toISOString() : new Date(event.date || Date.now()).toISOString()),
+                "endDate": event.date?.toDate ? new Date(event.date.toDate().getTime() + 7200000).toISOString() : (event.date === "Announcing soon" ? new Date(Date.now() + 7200000).toISOString() : new Date(new Date(event.date || Date.now()).getTime() + 7200000).toISOString()), // Approx 2 hours later
                 "eventStatus": "https://schema.org/EventScheduled",
                 "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
                 "location": {
