@@ -144,7 +144,7 @@ const HomeEvents = () => {
                                             textTransform: 'uppercase'
                                         }}
                                     >
-                                        {featuredEvent.registrationOpen ? 'REGISTER NOW' : (featuredEvent.registrationSoon ? 'REGISTRATION OPENING SOON' : 'REGISTRATION CLOSED')}
+                                        {featuredEvent.registrationOpen ? 'REGISTER NOW' : (featuredEvent.registrationSoon ? 'REGISTRATION OPENING SOON. STAY TUNED.' : 'REGISTRATION CLOSED')}
                                     </motion.button>
                                 </Link>
                             </motion.div>
@@ -197,7 +197,7 @@ const HomeEvents = () => {
                                                     fontSize: '0.7rem',
                                                     fontWeight: 'bold'
                                                 }}>
-                                                    • REGISTRATION OPENING SOON
+                                                    • REGISTRATION OPENING SOON. STAY TUNED.
                                                 </div>
                                             )}
                                         </div>

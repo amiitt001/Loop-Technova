@@ -271,7 +271,7 @@ const Events = () => {
                     fontWeight: 'bold',
                     textTransform: 'uppercase'
                   }}>
-                    Open Soon
+                    Open Soon. Stay tuned.
                   </div>
                 )}
               </div>

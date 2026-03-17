@@ -132,7 +132,7 @@ const AdminEvents = () => {
                                 <Clock size={16} /> {event.location || 'TBD'}
                             </div>
                             <div className={`flex items-center gap-2 text-xs font-medium ${event.registrationOpen ? 'text-green-500' : (event.registrationSoon ? 'text-[var(--accent)]' : 'text-red-500')}`}>
-                                {event.registrationOpen ? "• Registration Open" : (event.registrationSoon ? "• Registration Open Soon" : "• Registration Closed")}
+                                {event.registrationOpen ? "• Registration Open" : (event.registrationSoon ? "• Registration Opening Soon. Stay tuned." : "• Registration Closed")}
                             </div>
                         </div>
 

@@ -120,7 +120,7 @@ const EventDetails = () => {
                         <div className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-6 md:p-8">
                             <h3 className="text-xl font-bold text-main mb-4">About Event</h3>
                              <div className={`flex items-center gap-2 text-xs font-medium ${event.registrationOpen ? 'text-green-500' : (event.registrationSoon ? 'text-[var(--accent)]' : 'text-red-500')}`}>
-                                {event.registrationOpen ? "• Registration Open" : (event.registrationSoon ? "• Registration Open Soon" : "• Registration Closed")}
+                                {event.registrationOpen ? "• Registration Open" : (event.registrationSoon ? "• Registration Opening Soon. Stay tuned." : "• Registration Closed")}
                             </div>
                             <div className="prose prose-invert max-w-none text-zinc-400 leading-relaxed whitespace-pre-wrap">
                                 {event.description || "No detailed description available."}
@@ -158,7 +158,7 @@ const EventDetails = () => {
                                     // Opening Soon
                                     <div className="text-center py-8">
                                         <p className="text-zinc-400 mb-2">Registration is</p>
-                                        <span className="text-xl font-bold text-[var(--accent)]">OPENING SOON</span>
+                                        <span className="text-xl font-bold text-[var(--accent)]">OPENING SOON. STAY TUNED.</span>
                                     </div>
                                 ) : (
                                     // Closed

@@ -207,7 +207,7 @@ const AdminCreateEvent = () => {
                         className="w-4 h-4 rounded border-zinc-700 bg-zinc-900 text-[var(--accent)] focus:ring-[var(--accent)]"
                     />
                     <label htmlFor="registrationSoon" className="text-zinc-300 text-sm cursor-pointer select-none">
-                        Registration Opening Soon (Show "Open Soon" instead of "Closed")
+                        Registration Opening Soon. Stay tuned. (Show "Open Soon" instead of "Closed")
                     </label>
                 </div>
 
