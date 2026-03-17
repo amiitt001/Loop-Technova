@@ -4,6 +4,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Calendar, Clock, MapPin, User, ArrowLeft, Globe } from 'lucide-react';
 import RegistrationForm from '../components/RegistrationForm';
+import { safeHref } from '../utils/security';
 
 
 const EventDetails = () => {
@@ -139,7 +140,7 @@ const EventDetails = () => {
                                             Registration for this event is hosted on an external platform.
                                         </p>
                                         <a
-                                            href={event.registrationLink}
+                                            href={safeHref(event.registrationLink)}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center justify-center gap-2 w-full bg-[var(--accent)] text-black font-bold py-3 px-6 rounded-lg hover:shadow-[0_0_15px_rgba(0, 243, 255,0.4)] transition-all"
