@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { collection, onSnapshot, deleteDoc, doc, updateDoc, orderBy, query } from 'firebase/firestore';
 import { Trash2, Mail, MailOpen, AlertCircle, Search } from 'lucide-react';
+import { safeRender, safeHref } from '../../utils/security';
 
 const AdminMessages = () => {
     const [messages, setMessages] = useState([]);
@@ -100,9 +101,9 @@ const AdminMessages = () => {
                                         {msg.read ? <MailOpen size={20} /> : <Mail size={20} />}
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-lg text-main">{msg.name}</h3>
-                                        <a href={`mailto:${msg.email}`} className="text-[var(--accent)] hover:underline text-sm">
-                                            {msg.email}
+                                        <h3 className="font-bold text-lg text-main">{safeRender(msg.name)}</h3>
+                                        <a href={safeHref(`mailto:${msg.email}`)} className="text-[var(--accent)] hover:underline text-sm">
+                                            {safeRender(msg.email)}
                                         </a>
                                         <div className="text-xs text-zinc-500 mt-1">
                                             {formatDate(msg.createdAt)}
@@ -127,7 +128,7 @@ const AdminMessages = () => {
                                 </div>
                             </div>
                             <div className={`p-4 rounded-lg bg-main/40 border border-zinc-800/50 text-zinc-300 whitespace-pre-wrap ${!msg.read && 'text-zinc-100'}`}>
-                                {msg.message}
+                                {safeRender(msg.message, "Invalid message content")}
                             </div>
                         </div>
                     ))}
