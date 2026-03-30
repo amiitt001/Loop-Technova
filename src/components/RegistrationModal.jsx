@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, AlertCircle, Instagram, ExternalLink, User, Mail, Hash, Building2, Users } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection } from 'firebase/firestore';
 
 const RegistrationModal = ({ event, onClose }) => {
     const [formData, setFormData] = useState({
@@ -77,7 +77,7 @@ const RegistrationModal = ({ event, onClose }) => {
                 eventTitle: event.title,
                 name: formData.name,
                 email: formData.email,
-                createdAt: new Date(),
+                // Server generates createdAt, no need to send it
                 // Save legacy fields if they exist, else N/A
                 enrollmentId: formData.enrollmentId || 'N/A',
                 department: formData.department || 'N/A',
@@ -89,12 +89,31 @@ const RegistrationModal = ({ event, onClose }) => {
                 })) : []
             };
 
-            await addDoc(collection(db, "registrations"), registrationData);
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(registrationData)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 409) {
+                    alert(result.error || "You have already registered for this event with this email.");
+                } else {
+                    throw new Error(result.error || 'Registration failed');
+                }
+                setIsSubmitting(false);
+                return;
+            }
+
             setIsSubmitting(false);
             setIsSuccess(true);
         } catch (error) {
             console.error("Error registering: ", error);
-            alert("Registration failed. Please try again.");
+            alert(error.message || "Registration failed. Please try again.");
             setIsSubmitting(false);
         }
     };
