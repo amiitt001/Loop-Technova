@@ -51,3 +51,7 @@
 **Vulnerability:** External social links (like GitHub, LinkedIn, Twitter) stored in Firestore were directly rendered into `href` attributes in `src/components/HomeTeam.jsx` and `src/pages/Team.jsx` without any sanitization or validation. This allowed for Cross-Site Scripting (XSS) via `javascript:` URI injection.
 **Learning:** Even structured data like `member.social.github` that seems innocuous needs strict sanitization on the frontend before being rendered into sensitive DOM attributes like `href`. Assuming database values are safe is dangerous.
 **Prevention:** Always use `safeHref` from `src/utils/security.js` or a similar URL validation function when rendering any URL originating from a database, user input, or configuration file to guarantee it begins with an allowed scheme (e.g., `http:`, `https:`, `mailto:`).
+## 2024-05-19 - Strict Schema Validation on Public Collections
+**Vulnerability:** The Firestore `messages` collection allowed unauthenticated creation with basic field validation (`isValidString`), but failed to enforce the overall schema shape.
+**Learning:** Checking individual fields (`name`, `email`, `message`) in Firestore rules is insufficient if the document schema itself is unbounded. Attackers could inject arbitrary extra fields to cause data pollution, bypass internal logic downstream, or inflate database storage costs (DoS).
+**Prevention:** Always combine field-level validation with a strict schema check using `request.resource.data.keys().hasOnly(['field1', 'field2'])` on collections that allow public writes.
