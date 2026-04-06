@@ -55,3 +55,8 @@
 **Vulnerability:** The Firestore `messages` collection allowed unauthenticated creation with basic field validation (`isValidString`), but failed to enforce the overall schema shape.
 **Learning:** Checking individual fields (`name`, `email`, `message`) in Firestore rules is insufficient if the document schema itself is unbounded. Attackers could inject arbitrary extra fields to cause data pollution, bypass internal logic downstream, or inflate database storage costs (DoS).
 **Prevention:** Always combine field-level validation with a strict schema check using `request.resource.data.keys().hasOnly(['field1', 'field2'])` on collections that allow public writes.
+## 2024-04-06 - [Fix] Insecure Firestore Timestamp Check
+
+**Vulnerability:** The Firestore security rule for `match /messages/{messageId}` verified keys but did not restrict the value of `createdAt`, allowing unauthenticated users to inject arbitrary data into the timestamp field, potentially causing a DoS or data corruption.
+**Learning:** `request.resource.data.keys().hasOnly(['...'])` restricts what keys can exist, but it doesn't enforce the types of the values assigned to those keys.
+**Prevention:** To prevent timestamp forgery and arbitrary data injection, use `request.resource.data.createdAt == request.time` to mandate that the client sets the timestamp using the server's generated time (`FieldValue.serverTimestamp()`).
