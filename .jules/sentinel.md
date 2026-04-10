@@ -55,3 +55,11 @@
 **Vulnerability:** The Firestore `messages` collection allowed unauthenticated creation with basic field validation (`isValidString`), but failed to enforce the overall schema shape.
 **Learning:** Checking individual fields (`name`, `email`, `message`) in Firestore rules is insufficient if the document schema itself is unbounded. Attackers could inject arbitrary extra fields to cause data pollution, bypass internal logic downstream, or inflate database storage costs (DoS).
 **Prevention:** Always combine field-level validation with a strict schema check using `request.resource.data.keys().hasOnly(['field1', 'field2'])` on collections that allow public writes.
+## 2025-02-14 - Target Blank Noopener Missing
+**Vulnerability:** Several links using target="_blank" do not have rel="noopener noreferrer".
+**Learning:** This leaves the application vulnerable to reverse tabnabbing (a form of phishing).
+**Prevention:** Always include rel="noopener noreferrer" when using target="_blank" on a tags.
+## 2025-02-14 - Arbitrary Timestamp Injection in Firestore Rules
+**Vulnerability:** The `messages` collection in `firestore.rules` allows public creation and restricts keys using `hasOnly`, but fails to validate the `createdAt` field. This allows an attacker to inject arbitrary data (like an object or string) into the `createdAt` field, potentially causing type-confusion or XSS when rendered on the admin panel, or allowing them to manipulate the order of messages.
+**Learning:** Firestore security rules must explicitly validate the type and value of all fields, even if the keys are restricted. For timestamps, `request.resource.data.createdAt == request.time` is the standard way to enforce server-side timestamps.
+**Prevention:** Always validate the `createdAt` field against `request.time` in Firestore rules to prevent arbitrary timestamp injection.
