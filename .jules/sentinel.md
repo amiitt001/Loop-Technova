@@ -33,12 +33,12 @@
 **Learning:** In Node.js server frameworks, `req.query.id` can be parsed as an array (e.g., `?id=foo&id=bar`). Passing an array to `.doc()` where a string is expected can cause unhandled exceptions or unintended query behavior (type confusion).
 **Prevention:** Always strictly validate `req.query` and `req.body` parameters expected to be used as database keys to ensure they are the correct type (e.g., `typeof id === 'string'`) before executing the query.
 
-## $(date +%Y-%m-%d) - [XSS] Removed dynamic innerHTML usage in React components
+## 2026-04-15 - [XSS] Removed dynamic innerHTML usage in React components
 **Vulnerability:** XSS vulnerability found in `src/pages/Events.jsx` and `src/pages/Team.jsx` where image `onError` handlers were directly assigning string HTML to `e.currentTarget.parentElement.innerHTML`.
 **Learning:** Even for "safe" placeholder content, dynamically injecting strings via `innerHTML` bypasses React's virtual DOM, can lead to state inconsistencies, and serves as a dangerous pattern that can be exploited if the codebase evolves to include user-supplied inputs in those templates.
 **Prevention:** Avoid `innerHTML` whenever possible in React applications. Instead, track the error state locally (e.g. `const [imageError, setImageError] = useState(false)`) and conditionally render fallback JSX.
 
-## $(date +%Y-%m-%d) - [CSV Injection] Unsanitized client-side CSV exports
+## 2026-04-15 - [CSV Injection] Unsanitized client-side CSV exports
 **Vulnerability:** The client-side CSV export function in `AdminRegistrationsModal.jsx` concatenated user-provided registration fields directly into a CSV file. An attacker could craft a payload starting with characters like `=`, `+`, `-`, or `@` which would be interpreted as an executable formula when the exported file is opened in a spreadsheet application.
 **Learning:** Sanitization for CSV Injection needs to happen at the exact point of export or integration, whether it's on the server pushing to Google Sheets or the client generating a downloadable `.csv` file.
 **Prevention:** Always escape untrusted data that begins with `=, +, -, @` or potentially dangerous control characters when generating CSV contents or interfacing with spreadsheet applications, by prefixing the value with a single quote (`'`).
@@ -55,3 +55,8 @@
 **Vulnerability:** The Firestore `messages` collection allowed unauthenticated creation with basic field validation (`isValidString`), but failed to enforce the overall schema shape.
 **Learning:** Checking individual fields (`name`, `email`, `message`) in Firestore rules is insufficient if the document schema itself is unbounded. Attackers could inject arbitrary extra fields to cause data pollution, bypass internal logic downstream, or inflate database storage costs (DoS).
 **Prevention:** Always combine field-level validation with a strict schema check using `request.resource.data.keys().hasOnly(['field1', 'field2'])` on collections that allow public writes.
+
+## 2026-04-15 - Enforce Server-Side Timestamps on Public Firestore Collections
+**Vulnerability:** The Firestore `messages` collection allowed unauthenticated creation and checked the schema, but did not validate the `createdAt` timestamp. An attacker could inject arbitrary data (like future/past dates or non-timestamp types) into this field, which might bypass sorting logic or cause application crashes when the admin dashboard attempts to format it.
+**Learning:** Even when using `request.resource.data.keys().hasOnly([...])` to enforce a schema on public collections, you must explicitly validate the *content* and *type* of every allowed field. For timestamps, `request.time` is the source of truth for the server.
+**Prevention:** Always enforce server-side timestamps for user-created documents on public endpoints by adding `request.resource.data.createdAt == request.time` to the Firestore rules.
