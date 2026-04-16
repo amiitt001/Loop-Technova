@@ -1,0 +1,4 @@
+This is a Brave Creators publisher verification file.
+
+Domain: loop-technova.vercel.app
+Token: 8a8b3a07eb2f8d7448ed1513e2ed231b8e421db4b109201fe765db79517869e3
